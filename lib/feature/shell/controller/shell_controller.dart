@@ -110,6 +110,11 @@ final class ShellController extends GetxController {
 
   void _syncMenuFromRoute() {
     final route = currentRoute.value.isEmpty ? Get.currentRoute : currentRoute.value;
+    if (route == AppRoutes.dashboard.value) {
+      selectedMenu.value = ShellMenuItem.dashboard;
+      return;
+    }
+
     if (route == AppRoutes.settings.value) {
       selectedMenu.value = ShellMenuItem.settings;
       return;
@@ -145,9 +150,9 @@ final class ShellController extends GetxController {
       return;
     }
 
-    if (route == AppRoutes.dashboard.value &&
-        selectedMenu.value == ShellMenuItem.settings) {
-      selectedMenu.value = ShellMenuItem.dashboard;
+    if (route.startsWith('/reminders')) {
+      selectedMenu.value = ShellMenuItem.reminders;
+      return;
     }
   }
 
@@ -172,6 +177,9 @@ final class ShellController extends GetxController {
     }
     if (item == ShellMenuItem.priceQuotes) {
       return AppRoutes.priceOffers.value;
+    }
+    if (item == ShellMenuItem.reminders) {
+      return AppRoutes.reminders.value;
     }
     return AppRoutes.dashboard.value;
   }

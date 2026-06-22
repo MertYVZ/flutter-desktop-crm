@@ -12,7 +12,10 @@ import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/utility/constants/due_record_messages.dart';
 import 'package:Ok/product/utility/constants/meeting_messages.dart';
 import 'package:Ok/product/utility/constants/note_messages.dart';
+import 'package:Ok/feature/reminders/models/reminder_period.dart';
+import 'package:Ok/feature/reminders/models/reminder_status.dart';
 import 'package:Ok/product/utility/constants/price_offer_messages.dart';
+import 'package:Ok/product/utility/constants/reminder_messages.dart';
 import 'package:Ok/product/utility/constants/scrap_quality_messages.dart';
 import 'package:Ok/product/utility/money_utils.dart';
 import 'package:Ok/product/utility/quantity_utils.dart';
@@ -237,6 +240,48 @@ abstract final class Validators {
 
     if (unit == ScrapQualityUnit.other && customUnitText.trim().isEmpty) {
       return ScrapQualityMessages.customUnitRequired;
+    }
+
+    return null;
+  }
+
+  static String? validateReminderForm({
+    required String? customerId,
+    required String title,
+    required ReminderPeriod? period,
+    required DateTime? startDate,
+    DateTime? nextReminderDate,
+    ReminderStatus? status,
+    bool requireNextReminderDate = false,
+    bool requireStatus = false,
+  }) {
+    if (customerId == null || customerId.isEmpty) {
+      return ReminderMessages.customerRequired;
+    }
+
+    final trimmedTitle = title.trim();
+    if (trimmedTitle.isEmpty) {
+      return ReminderMessages.titleRequired;
+    }
+
+    if (trimmedTitle.length < 2) {
+      return ReminderMessages.titleMinLength;
+    }
+
+    if (period == null) {
+      return ReminderMessages.periodRequired;
+    }
+
+    if (startDate == null) {
+      return ReminderMessages.startDateRequired;
+    }
+
+    if (requireNextReminderDate && nextReminderDate == null) {
+      return ReminderMessages.nextReminderDateRequired;
+    }
+
+    if (requireStatus && status == null) {
+      return ReminderMessages.statusRequired;
     }
 
     return null;

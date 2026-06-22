@@ -9,6 +9,7 @@ import 'package:Ok/product/database/daos/meeting_dao.dart';
 import 'package:Ok/product/database/daos/note_dao.dart';
 import 'package:Ok/product/database/daos/legal_text_template_dao.dart';
 import 'package:Ok/product/database/daos/price_offer_dao.dart';
+import 'package:Ok/product/database/daos/reminder_dao.dart';
 import 'package:Ok/product/database/daos/scrap_quality_dao.dart';
 import 'package:Ok/product/database/daos/user_dao.dart';
 import 'package:Ok/product/database/tables/app_settings_table.dart';
@@ -20,6 +21,7 @@ import 'package:Ok/product/database/tables/notes_table.dart';
 import 'package:Ok/product/database/tables/legal_text_templates_table.dart';
 import 'package:Ok/product/database/tables/price_offer_items_table.dart';
 import 'package:Ok/product/database/tables/price_offers_table.dart';
+import 'package:Ok/product/database/tables/reminders_table.dart';
 import 'package:Ok/product/database/tables/scrap_quality_records_table.dart';
 import 'package:Ok/product/database/tables/users_table.dart';
 
@@ -38,6 +40,7 @@ part 'app_database.g.dart';
     PriceOffers,
     PriceOfferItems,
     LegalTextTemplates,
+    Reminders,
   ],
   daos: [
     UserDao,
@@ -50,6 +53,7 @@ part 'app_database.g.dart';
     ScrapQualityDao,
     PriceOfferDao,
     LegalTextTemplateDao,
+    ReminderDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -58,7 +62,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +97,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 9) {
             await appSettingsDao.seedOfferPdfDefaultsIfMissing();
+          }
+          if (from < 10) {
+            await m.createTable(reminders);
           }
         },
       );

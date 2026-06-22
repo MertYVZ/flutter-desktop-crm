@@ -1,5 +1,6 @@
 import 'package:Ok/feature/auth/controllers/auth_controller.dart';
 import 'package:Ok/feature/customers/views/customer_create_page.dart';
+import 'package:Ok/feature/dashboard/views/dashboard_page.dart';
 import 'package:Ok/feature/customers/views/customer_detail_page.dart';
 import 'package:Ok/feature/customers/views/customer_edit_page.dart';
 import 'package:Ok/feature/customers/views/customers_list_page.dart';
@@ -18,6 +19,9 @@ import 'package:Ok/feature/price_offers/views/price_offer_create_page.dart';
 import 'package:Ok/feature/price_offers/views/price_offer_detail_page.dart';
 import 'package:Ok/feature/price_offers/views/price_offer_edit_page.dart';
 import 'package:Ok/feature/price_offers/views/price_offers_list_page.dart';
+import 'package:Ok/feature/reminders/views/reminder_create_page.dart';
+import 'package:Ok/feature/reminders/views/reminder_edit_page.dart';
+import 'package:Ok/feature/reminders/views/reminders_list_page.dart';
 import 'package:Ok/feature/scrap_quality/views/scrap_quality_create_page.dart';
 import 'package:Ok/feature/scrap_quality/views/scrap_quality_edit_page.dart';
 import 'package:Ok/feature/scrap_quality/views/scrap_quality_list_page.dart';
@@ -121,6 +125,17 @@ class _ContentPanel extends StatelessWidget {
       isCompact ? AppUiTokens.space16 : AppUiTokens.space32,
     );
 
+    if (menu == ShellMenuItem.dashboard ||
+        route == AppRoutes.dashboard.value) {
+      return ColoredBox(
+        color: AppUiTokens.surface,
+        child: Padding(
+          padding: padding,
+          child: const DashboardPage(),
+        ),
+      );
+    }
+
     if (menu == ShellMenuItem.settings) {
       return ColoredBox(
         color: AppUiTokens.surface,
@@ -190,6 +205,16 @@ class _ContentPanel extends StatelessWidget {
         child: Padding(
           padding: padding,
           child: _PriceOffersRouteContent(route: route),
+        ),
+      );
+    }
+
+    if (menu == ShellMenuItem.reminders || route.startsWith('/reminders')) {
+      return ColoredBox(
+        color: AppUiTokens.surface,
+        child: Padding(
+          padding: padding,
+          child: _RemindersRouteContent(route: route),
         ),
       );
     }
@@ -377,5 +402,24 @@ class _PriceOffersRouteContent extends StatelessWidget {
     }
 
     return const PriceOffersListPage();
+  }
+}
+
+class _RemindersRouteContent extends StatelessWidget {
+  const _RemindersRouteContent({required this.route});
+
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    if (route == AppRoutes.remindersNew.value) {
+      return const ReminderCreatePage();
+    }
+
+    if (route.endsWith('/edit') && route.startsWith('/reminders/')) {
+      return const ReminderEditPage();
+    }
+
+    return const RemindersListPage();
   }
 }

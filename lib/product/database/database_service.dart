@@ -7,6 +7,7 @@ import 'package:Ok/product/database/daos/legal_text_template_dao.dart';
 import 'package:Ok/product/database/daos/meeting_dao.dart';
 import 'package:Ok/product/database/daos/note_dao.dart';
 import 'package:Ok/product/database/daos/price_offer_dao.dart';
+import 'package:Ok/product/database/daos/reminder_dao.dart';
 import 'package:Ok/product/database/daos/scrap_quality_dao.dart';
 import 'package:Ok/product/database/daos/user_dao.dart';
 
@@ -33,6 +34,8 @@ final class DatabaseService {
   ScrapQualityDao get scrapQualityRecords => _database.scrapQualityDao;
 
   PriceOfferDao get priceOffers => _database.priceOfferDao;
+
+  ReminderDao get reminders => _database.reminderDao;
 
   LegalTextTemplateDao get legalTextTemplates => _database.legalTextTemplateDao;
 

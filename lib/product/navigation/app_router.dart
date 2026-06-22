@@ -202,5 +202,26 @@ final class AppScreens {
       middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
     ),
+    GetPage(
+      name: AppRoutes.remindersNew.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.remindersEdit.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.reminders.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
   ];
 }
