@@ -1,0 +1,120 @@
+{
+    "login": {
+        "title": "Giriş Yap",
+        "subtitle": "Kullanıcı bilgilerinle giriş yap",
+        "forgotPassword": "Şifremi Unuttum",
+        "registerQuestion": "Bir hesabın yok mu?",
+        "registerLink": "Kayıt Ol"
+    },
+    "register": {
+        "title": "Kayıt Ol",
+        "subtitle": "Kullanıcı bilgilerini girerek kaydol",
+        "registerLink": "Giriş Yap",
+        "registerQuestion": "Hesabın var mı?"
+    },
+    "onboarding": {
+        "title": "Profil Detayı",
+        "uploadPhoto": "Fotoğraf Yükle",
+        "uploadPhotoDescription": "Profil fotoğrafın için görsel\nyükleyebilirsin"
+    },
+    "home": {
+        "moreShow": "Daha Az Göster",
+        "readMore": "Devamını Oku"
+    },
+    "general": {
+        "button": {
+            "login": "Giriş Yap",
+            "register": "Kayıt Ol",
+            "logout": "Çıkış Yap",
+            "cancel": "İptal",
+            "save": "Kaydet",
+            "delete": "Sil",
+            "edit": "Düzenle",
+            "search": "Ara",
+            "add": "Ekle",
+            "close": "Kapat",
+            "continue": "Devam Et",
+            "skip": "Atla",
+            "retry": "Tekrar Dene",
+            "addPhoto": "Fotoğraf Ekle",
+            "viewAllJets": "Tüm Jetonları Gör",
+            "ok": "Tamam"
+        },
+        "label": {
+            "username": "Kullanıcı Adı",
+            "password": "Şifre",
+            "email": "E-Posta",
+            "name": "Ad",
+            "surname": "Soyad",
+            "nameSurname": "Ad Soyad",
+            "passwordConfirm": "Şifre Tekrar",
+            "userAgreementStart": "Kullanıcı sözleşmesini ",
+            "userAgreementAction": "Okudum ve Kabul ediyorum",
+            "userAgreementEnd": ". Bu sözleşmeyi okuyarak devam ediniz lütfen.",
+            "development": "Bu özellik şu anda geliştirilme aşamasındadır.",
+            "emailRequired": "E-posta adresi gerekli",
+            "invalidEmail": "Geçersiz e-posta adresi",
+            "passwordRequired": "Şifre gerekli",
+            "passwordMinLength": "Şifre en az 6 karakter olmalı",
+            "authTokenExpired": "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
+            "defaultError": "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin",
+            "invalidCredentials": "E-posta adresi veya şifre hatalı",
+            "accountDisabled": "Hesabınız devre dışı bırakılmış",
+            "userNotFound": "Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı",
+            "tooManyAttempts": "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin",
+            "networkError": "İnternet bağlantınızı kontrol edin",
+            "serverError": "Sunucu hatası. Lütfen daha sonra tekrar deneyin",
+            "uploadPhoto": "Lütfen devam etmek için bir fotoğraf yükleyiniz",
+            "uploadPhotoError": "Fotoğraf yüklenirken hata oluştu",
+            "userAgreement": "Kullanıcı Sözleşmesi",
+            "noLikedMovies": "Henüz beğendiğiniz film yok",
+            "startLikingMovies": "Filmleri beğenmeye başlayın!",
+            "likedMovies": "Beğendiklerim",
+            "limitedOffer": "Sınırlı Teklif",
+            "selectJetPackage": "Kilidi açmak için bir jeton paketi seçin",
+            "yourBonuses": "Alacağınız Bonuslar",
+            "premiumAccount": "Premium Hesap",
+            "moreMatch": "Daha Fazla Eşleşme",
+            "topPromotion": "Öne Çıkarma",
+            "moreLikes": "Daha Fazla Beğeni",
+            "selectJetPackageDescription": "Jeton paketin’ni seçerek bonus kazanın ve yeni bölümlerin kilidini açın!",
+            "weekly": "Başına haftalık",
+            "jeton": "Jeton",
+            "comingSoon": "Bu özellik şu anda geliştirilme aşamasındadır",
+            "comingSoonDescription": "Yakında Gelecek",
+            "googleLogin": "Google ile Giriş Yap",
+            "appleLogin": "Apple ile Giriş Yap",
+            "facebookLogin": "Facebook ile Giriş Yap"
+        },
+        "bottomNavigation": {
+            "home": "Anasayfa",
+            "profile": "Profil"
+        },
+        "development": "Bu özellik şu anda geliştirilme aşamasındadır.",
+        "loading": "Yükleniyor...",
+        "error": {
+            "invalidCredentials": "E-posta adresi veya şifre hatalı",
+            "accountDisabled": "Hesabınız devre dışı bırakılmış",
+            "userNotFound": "Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı",
+            "tooManyAttempts": "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin",
+            "networkError": "İnternet bağlantınızı kontrol edin",
+            "serverError": "Sunucu hatası. Lütfen daha sonra tekrar deneyin",
+            "defaultError": "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin",
+            "authTokenExpired": "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
+            "registerError": "Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin",
+            "userExists": "Bu e-posta adresi ile zaten kayıtlı bir hesap var",
+            "weakPassword": "Şifre çok zayıf, daha güçlü bir şifre seçin",
+            "invalidName": "Geçersiz ad soyad",
+            "invalidEmail": "Geçersiz e-posta adresi",
+            "nameSurnameRequired": "Ad soyad gerekli",
+            "nameSurnameMinLength": "Ad soyad en az 2 karakter olmalı",
+            "passwordConfirmRequired": "Şifre tekrarı gerekli",
+            "passwordConfirmNotMatch": "Şifreler eşleşmiyor",
+            "userAgreementRequired": "Kullanıcı sözleşmesini kabul etmelisiniz",
+            "userDataLoadError": "Kullanıcı bilgileri yüklenirken hata oluştu"
+        }
+    },
+    "product": {
+        "name": ""
+    }
+}

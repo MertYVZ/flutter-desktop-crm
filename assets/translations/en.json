@@ -1,0 +1,120 @@
+{
+    "login": {
+        "title": "Login",
+        "subtitle": "Login with your user information",
+        "forgotPassword": "Forgot Password",
+        "registerQuestion": "Don't have an account?",
+        "registerLink": "Sign Up"
+    },
+    "register": {
+        "title": "Sign Up",
+        "subtitle": "Sign up by entering your user information",
+        "registerLink": "Login",
+        "registerQuestion": "Already have an account?"
+    },
+    "onboarding": {
+        "title": "Profile Details",
+        "uploadPhoto": "Upload Photo",
+        "uploadPhotoDescription": "You can upload an image\nfor your profile photo"
+    },
+    "home": {
+        "moreShow": "Show Less",
+        "readMore": "Read More"
+    },
+    "general": {
+        "button": {
+            "login": "Login",
+            "register": "Sign Up",
+            "logout": "Logout",
+            "cancel": "Cancel",
+            "save": "Save",
+            "delete": "Delete",
+            "edit": "Edit",
+            "search": "Search",
+            "add": "Add",
+            "close": "Close",
+            "continue": "Continue",
+            "skip": "Skip",
+            "retry": "Retry",
+            "addPhoto": "Add Photo",
+            "viewAllJets": "View All Jets",
+            "ok": "Okay"
+        },
+        "label": {
+            "username": "Username",
+            "password": "Password",
+            "email": "Email",
+            "name": "Name",
+            "surname": "Surname",
+            "nameSurname": "Full Name",
+            "passwordConfirm": "Confirm Password",
+            "userAgreementStart": "I have read and accept the ",
+            "userAgreementAction": "User Agreement",
+            "userAgreementEnd": ". Please read this agreement to continue.",
+            "development": "This feature is currently under development.",
+            "emailRequired": "Email address is required",
+            "invalidEmail": "Invalid email address",
+            "passwordRequired": "Password is required",
+            "passwordMinLength": "Password must be at least 6 characters",
+            "authTokenExpired": "Your session has expired. Please login again.",
+            "defaultError": "An error occurred during login. Please try again",
+            "invalidCredentials": "Email address or password is incorrect",
+            "accountDisabled": "Your account has been disabled",
+            "userNotFound": "No user found with this email address",
+            "tooManyAttempts": "Too many failed attempts. Please try again later",
+            "networkError": "Check your internet connection",
+            "serverError": "Server error. Please try again later",
+            "uploadPhoto": "Please upload a photo to continue",
+            "uploadPhotoError": "Error occurred while uploading photo",
+            "userAgreement": "User Agreement",
+            "noLikedMovies": "No liked movies yet",
+            "startLikingMovies": "Start liking movies!",
+            "likedMovies": "My Likes",
+            "limitedOffer": "Limited Offer",
+            "selectJetPackage": "Select a jet package to unlock",
+            "yourBonuses": "Your Bonuses",
+            "premiumAccount": "Premium Account",
+            "moreMatch": "More Matches",
+            "topPromotion": "Top Promotion",
+            "moreLikes": "More Likes",
+            "selectJetPackageDescription": "Choose your jet package to earn bonuses and unlock new episodes!",
+            "weekly": "Per week",
+            "jeton": "Jet",
+            "comingSoon": "This feature is currently under development",
+            "comingSoonDescription": "Coming Soon",
+            "googleLogin": "Continue with Google",
+            "appleLogin": "Continue with Apple",
+            "facebookLogin": "Continue with Facebook"
+        },
+        "bottomNavigation": {
+            "home": "Home",
+            "profile": "Profile"
+        },
+        "development": "This feature is currently under development.",
+        "loading": "Loading...",
+        "error": {
+            "invalidCredentials": "Email address or password is incorrect",
+            "accountDisabled": "Your account has been disabled",
+            "userNotFound": "No user found with this email address",
+            "tooManyAttempts": "Too many failed attempts. Please try again later",
+            "networkError": "Check your internet connection",
+            "serverError": "Server error. Please try again later",
+            "defaultError": "An error occurred during login. Please try again",
+            "authTokenExpired": "Your session has expired. Please login again.",
+            "registerError": "An error occurred during registration. Please try again",
+            "userExists": "An account with this email address already exists",
+            "weakPassword": "Password is too weak, choose a stronger password",
+            "invalidName": "Invalid full name",
+            "invalidEmail": "Invalid email address",
+            "nameSurnameRequired": "Full name is required",
+            "nameSurnameMinLength": "Full name must be at least 2 characters",
+            "passwordConfirmRequired": "Password confirmation is required",
+            "passwordConfirmNotMatch": "Passwords do not match",
+            "userAgreementRequired": "You must accept the user agreement",
+            "userDataLoadError": "Error occurred while loading user data"
+        }
+    },
+    "product": {
+        "name": ""
+    }
+}

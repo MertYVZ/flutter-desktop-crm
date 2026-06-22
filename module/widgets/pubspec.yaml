@@ -1,0 +1,30 @@
+name: widgets
+description: "A new Flutter package project."
+version: 0.0.1
+homepage: "none"
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Responsive
+  responsive_framework: ^1.5.1
+  auto_size_text: ^3.0.0
+  
+  # Image Picker
+  image_picker: ^1.0.4
+
+  # Cache
+  cached_network_image: ^3.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^8.0.0
+
+
+flutter:

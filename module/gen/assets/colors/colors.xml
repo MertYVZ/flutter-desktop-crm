@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors -->
+    <color name="primary">#ED7C02</color>
+    <color name="primaryDark">#735301</color>
+    <color name="secondary">#5949E6</color>
+
+
+    <!-- White Tones -->
+    <color name="white90">#E6FFFFFF</color>  <!-- 90% opacity -->
+    <color name="white80">#CCFFFFFF</color>  <!-- 80% opacity -->
+    <color name="white70">#B3FFFFFF</color>  <!-- 70% opacity -->
+    <color name="white60">#99FFFFFF</color>  <!-- 60% opacity -->
+    <color name="white50">#80FFFFFF</color>  <!-- 50% opacity -->
+    <color name="white40">#66FFFFFF</color>  <!-- 40% opacity -->
+    <color name="white30">#4DFFFFFF</color>  <!-- 30% opacity -->
+    <color name="white20">#33FFFFFF</color>  <!-- 20% opacity -->
+    <color name="white10">#1AFFFFFF</color>  <!-- 10% opacity -->
+    <color name="white5">#0DFFFFFF</color>   <!-- 5% opacity -->
+
+    <!-- Alert & Status -->
+    <color name="success">#00CC42</color>
+    <color name="info">#0066CC</color>
+    <color name="warning">#FF9E36</color>
+    <color name="error">#FA5F5F</color>
+
+    <!-- Others -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+</resources>

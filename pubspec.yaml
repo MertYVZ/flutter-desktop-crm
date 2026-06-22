@@ -1,0 +1,107 @@
+name: Ok
+description: "“Ok"
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core
+  equatable: ^2.0.7
+
+  # State Management & Navigation
+  get: ^4.6.6
+
+  # Network
+  vexana: ^5.0.3
+  dio: ^5.9.0
+
+  # Config
+  google_fonts: ^6.3.1
+
+  # Utility
+  logger: ^2.6.1
+  kartal: ^4.2.0
+  excel:
+    git:
+      url: https://github.com/busslina/excel
+      ref: efd70f3086d12105dad0029f71663e6a4ed295f2
+  file_picker: ^8.1.7
+  pdf: ^3.11.3
+
+  # Localization
+  easy_localization: ^3.0.8
+
+  # Animations
+  animate_do: ^3.3.4
+
+  # Cache
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Database
+  drift: ^2.26.0
+  drift_flutter: ^0.2.4
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  sqlite3_flutter_libs: ^0.5.28
+
+  # Auth & Security
+  shared_preferences: ^2.5.3
+  uuid: ^4.5.1
+  intl: ^0.20.2
+  cryptography: ^2.7.0
+
+  #Firebase
+  firebase_core: ^2.24.2
+  firebase_analytics: ^10.7.4
+
+  # UX
+  vibration: ^3.1.3
+  file_selector: ^1.0.3
+
+  # Modules
+  core:
+    path: module/core/
+  common:
+    path: module/common/
+  widgets:
+    path: module/widgets/
+  gen:
+    path: module/gen/
+
+  cupertino_icons: ^1.0.8
+  responsive_framework: ^1.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^8.0.0
+  build_runner: ^2.4.14
+  drift_dev: ^2.26.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/translations/
+    - assets/fonts/
+    - assets/pdf/logo.png
+
+  fonts:
+    - family: Instrument Sans
+      fonts:
+        - asset: assets/fonts/InstrumentSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/InstrumentSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/InstrumentSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/InstrumentSans-Bold.ttf
+          weight: 700

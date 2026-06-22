@@ -1,0 +1,18 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "test/.test_coverage.dart"
+    - "bin/cache/**"
+    - "lib/generated_plugin_registrant.dart"
+    - test
+    - assets/translations
+
+linter:
+  rules:
+    public_member_api_docs: false
+    library_private_types_in_public_api: false
+    sort_pub_dependencies: false
