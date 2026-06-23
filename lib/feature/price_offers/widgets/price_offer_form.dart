@@ -27,7 +27,6 @@ class PriceOfferForm extends StatelessWidget {
     required this.onTypeChanged,
     required this.onDateChanged,
     required this.onLegalTextChanged,
-    required this.onItemsChanged,
     this.selectedStatus,
     this.onStatusChanged,
     this.showStatus = false,
@@ -47,7 +46,6 @@ class PriceOfferForm extends StatelessWidget {
   final ValueChanged<OfferType?> onTypeChanged;
   final ValueChanged<DateTime?> onDateChanged;
   final ValueChanged<String> onLegalTextChanged;
-  final VoidCallback onItemsChanged;
   final PriceOfferStatus? selectedStatus;
   final ValueChanged<PriceOfferStatus?>? onStatusChanged;
   final bool showStatus;
@@ -158,7 +156,6 @@ class PriceOfferForm extends StatelessWidget {
         const SizedBox(height: AppUiTokens.space16),
         PriceOfferItemsEditor(
           rows: itemRows,
-          onChanged: onItemsChanged,
         ),
         const SizedBox(height: AppUiTokens.space32),
         _SectionTitle(title: 'Yasal Metin', icon: Icons.gavel_outlined),

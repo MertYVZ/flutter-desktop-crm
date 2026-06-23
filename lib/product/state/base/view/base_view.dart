@@ -40,12 +40,20 @@ class _BaseViewState<T> extends State<BaseView<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final content = widget.onPageBuilder(context, widget.viewModel);
+    final platform = Theme.of(context).platform;
+    final isMobilePlatform = platform == TargetPlatform.iOS ||
+        platform == TargetPlatform.android;
+
+    // Desktop/web: global tap-to-unfocus breaks TextField focus and typing.
+    if (!isMobilePlatform) {
+      return content;
+    }
+
     return GestureDetector(
-      onTap: () {
-        // Klavyeyi kapat
-        FocusScope.of(context).unfocus();
-      },
-      child: widget.onPageBuilder(context, widget.viewModel),
+      behavior: HitTestBehavior.deferToChild,
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: content,
     );
   }
 }

@@ -256,7 +256,6 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
                         onLegalTextChanged: (_) {
                           _isLegalTextDirty = true;
                         },
-                        onItemsChanged: () => setState(() {}),
                       ),
                       const SizedBox(height: AppUiTokens.space24),
                       PriceOfferFormActions(

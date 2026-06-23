@@ -48,12 +48,10 @@ class PriceOfferItemFormRow {
 class PriceOfferItemsEditor extends StatefulWidget {
   const PriceOfferItemsEditor({
     required this.rows,
-    required this.onChanged,
     super.key,
   });
 
   final List<PriceOfferItemFormRow> rows;
-  final VoidCallback onChanged;
 
   @override
   State<PriceOfferItemsEditor> createState() => _PriceOfferItemsEditorState();
@@ -74,12 +72,12 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
               children: [
                 for (var i = 0; i < widget.rows.length; i++) ...[
                   _ItemRow(
+                    key: ValueKey(widget.rows[i].id),
                     index: i,
                     row: widget.rows[i],
                     isCompact: isCompact,
                     canRemove: widget.rows.length > 1,
                     onRemove: () => _removeRow(i),
-                    onChanged: widget.onChanged,
                   ),
                   if (i < widget.rows.length - 1)
                     const SizedBox(height: AppUiTokens.space16),
@@ -127,7 +125,6 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
 
   void _addRow() {
     widget.rows.add(PriceOfferItemFormRow());
-    widget.onChanged();
     setState(() {});
   }
 
@@ -138,20 +135,19 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
 
     widget.rows[index].dispose();
     widget.rows.removeAt(index);
-    widget.onChanged();
     setState(() {});
   }
 
 }
 
-class _ItemRow extends StatelessWidget {
+class _ItemRow extends StatefulWidget {
   const _ItemRow({
     required this.index,
     required this.row,
     required this.isCompact,
     required this.canRemove,
     required this.onRemove,
-    required this.onChanged,
+    super.key,
   });
 
   final int index;
@@ -159,10 +155,38 @@ class _ItemRow extends StatelessWidget {
   final bool isCompact;
   final bool canRemove;
   final VoidCallback onRemove;
-  final VoidCallback onChanged;
+
+  @override
+  State<_ItemRow> createState() => _ItemRowState();
+}
+
+class _ItemRowState extends State<_ItemRow> {
+  @override
+  void initState() {
+    super.initState();
+    widget.row.productNameController.addListener(_refreshRowTotal);
+    widget.row.quantityController.addListener(_refreshRowTotal);
+    widget.row.priceController.addListener(_refreshRowTotal);
+  }
+
+  @override
+  void dispose() {
+    widget.row.productNameController.removeListener(_refreshRowTotal);
+    widget.row.quantityController.removeListener(_refreshRowTotal);
+    widget.row.priceController.removeListener(_refreshRowTotal);
+    super.dispose();
+  }
+
+  void _refreshRowTotal() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    final row = widget.row;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppUiTokens.surfaceMuted,
@@ -177,17 +201,17 @@ class _ItemRow extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Ürün ${index + 1}',
+                  'Ürün ${widget.index + 1}',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: AppUiTokens.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
                 const Spacer(),
-                if (canRemove)
+                if (widget.canRemove)
                   IconButton(
                     tooltip: 'Satırı sil',
-                    onPressed: onRemove,
+                    onPressed: widget.onRemove,
                     mouseCursor: SystemMouseCursors.click,
                     icon: const Icon(
                       Icons.close_rounded,
@@ -204,14 +228,13 @@ class _ItemRow extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppUiTokens.space12),
-            if (isCompact)
+            if (widget.isCompact)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   PanelTextField(
                     controller: row.productNameController,
                     label: 'Ürün Adı',
-                    onChanged: (_) => onChanged(),
                   ),
                   const SizedBox(height: AppUiTokens.space12),
                   PanelDropdown<PriceOfferUnitType>(
@@ -222,7 +245,7 @@ class _ItemRow extends StatelessWidget {
                     itemLabel: (value) => value.label,
                     onChanged: (value) {
                       row.unitType = value;
-                      onChanged();
+                      setState(() {});
                     },
                   ),
                   const SizedBox(height: AppUiTokens.space12),
@@ -231,13 +254,11 @@ class _ItemRow extends StatelessWidget {
                     label: 'Miktar',
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (_) => onChanged(),
                   ),
                   const SizedBox(height: AppUiTokens.space12),
                   PanelAmountField(
                     controller: row.priceController,
                     label: 'Fiyat',
-                    onChanged: (_) => onChanged(),
                   ),
                   const SizedBox(height: AppUiTokens.space12),
                   PanelDropdown<PriceOfferCurrencyType>(
@@ -249,7 +270,7 @@ class _ItemRow extends StatelessWidget {
                     onChanged: (value) {
                       if (value != null) {
                         row.currency = value;
-                        onChanged();
+                        setState(() {});
                       }
                     },
                   ),
@@ -266,7 +287,6 @@ class _ItemRow extends StatelessWidget {
                     child: PanelTextField(
                       controller: row.productNameController,
                       label: 'Ürün Adı',
-                      onChanged: (_) => onChanged(),
                     ),
                   ),
                   const SizedBox(width: AppUiTokens.space12),
@@ -280,7 +300,7 @@ class _ItemRow extends StatelessWidget {
                       itemLabel: (value) => value.label,
                       onChanged: (value) {
                         row.unitType = value;
-                        onChanged();
+                        setState(() {});
                       },
                     ),
                   ),
@@ -292,7 +312,6 @@ class _ItemRow extends StatelessWidget {
                       label: 'Miktar',
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (_) => onChanged(),
                     ),
                   ),
                   const SizedBox(width: AppUiTokens.space12),
@@ -301,7 +320,6 @@ class _ItemRow extends StatelessWidget {
                     child: PanelAmountField(
                       controller: row.priceController,
                       label: 'Fiyat',
-                      onChanged: (_) => onChanged(),
                     ),
                   ),
                   const SizedBox(width: AppUiTokens.space12),
@@ -316,7 +334,7 @@ class _ItemRow extends StatelessWidget {
                       onChanged: (value) {
                         if (value != null) {
                           row.currency = value;
-                          onChanged();
+                          setState(() {});
                         }
                       },
                     ),

@@ -94,10 +94,6 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
     });
   }
 
-  void _handleItemsChanged() {
-    setState(() {});
-  }
-
   List<PriceOfferItemFormValidation> _buildItemValidations() {
     return _itemRows
         .map(
@@ -186,7 +182,6 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
                         onLegalTextChanged: (_) {
                           _isLegalTextDirty = true;
                         },
-                        onItemsChanged: _handleItemsChanged,
                       ),
                     ),
                     const SizedBox(height: AppUiTokens.space24),
