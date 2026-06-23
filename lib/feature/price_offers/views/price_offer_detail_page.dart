@@ -16,6 +16,7 @@ import 'package:Ok/product/utility/constants/price_offer_messages.dart';
 import 'package:Ok/product/utility/money_utils.dart';
 import 'package:Ok/product/utility/quantity_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
@@ -73,7 +74,7 @@ class _PriceOfferDetailPageState extends BaseState<PriceOfferDetailPage> {
 
           final dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'tr_TR');
 
-          return SingleChildScrollView(
+          return PanelFormScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

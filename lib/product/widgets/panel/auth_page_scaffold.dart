@@ -1,5 +1,6 @@
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/widgets/panel/auth_brand_panel.dart';
+import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
@@ -78,18 +79,20 @@ class _SplitAuthLayout extends StatelessWidget {
         Expanded(
           flex: 54,
           child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppUiTokens.space40,
-                vertical: AppUiTokens.space32,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: _AuthFormPanel(
-                  title: title,
-                  subtitle: subtitle,
-                  badge: badge,
-                  child: child,
+            child: PanelFormScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppUiTokens.space40,
+                  vertical: AppUiTokens.space32,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: _AuthFormPanel(
+                    title: title,
+                    subtitle: subtitle,
+                    badge: badge,
+                    child: child,
+                  ),
                 ),
               ),
             ),
@@ -118,26 +121,28 @@ class _CompactAuthLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppUiTokens.space24),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth + 80),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const AuthBrandHeader(),
-              const SizedBox(height: AppUiTokens.space24),
-              PanelSurface(
-                padding: const EdgeInsets.all(AppUiTokens.space32),
-                child: _AuthFormPanel(
-                  title: title,
-                  subtitle: subtitle,
-                  badge: badge,
-                  showDivider: false,
-                  child: child,
+      child: PanelFormScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(AppUiTokens.space24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth + 80),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const AuthBrandHeader(),
+                const SizedBox(height: AppUiTokens.space24),
+                PanelSurface(
+                  padding: const EdgeInsets.all(AppUiTokens.space32),
+                  child: _AuthFormPanel(
+                    title: title,
+                    subtitle: subtitle,
+                    badge: badge,
+                    showDivider: false,
+                    child: child,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

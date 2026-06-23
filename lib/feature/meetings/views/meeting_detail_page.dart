@@ -9,6 +9,7 @@ import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/constants/meeting_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
@@ -73,7 +74,7 @@ class _MeetingDetailPageState extends BaseState<MeetingDetailPage> {
 
           return Align(
             alignment: Alignment.topLeft,
-            child: SingleChildScrollView(
+            child: PanelFormScrollView(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: _detailMaxWidth),
                 child: Column(

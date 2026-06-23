@@ -4,6 +4,7 @@ import 'package:Ok/feature/dashboard/models/dashboard_calendar_event_type.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_event_list_item.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
+import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
@@ -60,7 +61,7 @@ final class DashboardDayDetailPanel extends StatelessWidget {
               message:
                   'Seçtiğiniz tarihte görüşme, teklif veya hatırlatma bulunmuyor.',
             )
-          : SingleChildScrollView(
+          : PanelFormScrollView(
               padding: const EdgeInsets.all(AppUiTokens.space16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

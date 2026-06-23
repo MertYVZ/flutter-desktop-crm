@@ -6,6 +6,7 @@ import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/auth_messages.dart';
+import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
 import 'package:Ok/product/widgets/panel/panel_password_field.dart';
 import 'package:Ok/product/widgets/panel/panel_primary_button.dart';
@@ -232,7 +233,7 @@ class _HesapTabContent extends StatelessWidget {
         );
         const aboutCard = _AboutCard(compact: true);
 
-        return SingleChildScrollView(
+        return PanelFormScrollView(
           child: useTwoColumn
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +264,7 @@ class _VeriTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return PanelFormScrollView(
       child: _DatabaseOperationsCard(controller: controller),
     );
   }
@@ -878,7 +879,7 @@ class _OfferPdfSettingsCardState extends State<_OfferPdfSettingsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return PanelFormScrollView(
       child: PanelSurface(
         padding: const EdgeInsets.all(AppUiTokens.space24),
         child: Column(
@@ -1133,7 +1134,7 @@ class _LegalTextTemplatesCardState extends State<_LegalTextTemplatesCard> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return PanelFormScrollView(
       child: PanelSurface(
         padding: const EdgeInsets.all(AppUiTokens.space24),
         child: Column(

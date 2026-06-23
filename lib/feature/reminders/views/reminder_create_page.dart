@@ -7,6 +7,7 @@ import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -49,7 +50,7 @@ class _ReminderCreatePageState extends BaseState<ReminderCreatePage> {
         controller.loadCustomersForDropdown();
       },
       onPageBuilder: (context, controller) {
-        return SingleChildScrollView(
+        return PanelFormScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
