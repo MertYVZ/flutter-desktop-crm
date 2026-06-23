@@ -100,6 +100,22 @@ class ReminderDao extends DatabaseAccessor<AppDatabase> with _$ReminderDaoMixin 
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<ReminderListItem>> getRemindersByCustomerId(
+    String customerId,
+  ) async {
+    final query = select(reminders).join([
+      innerJoin(customers, customers.id.equalsExp(reminders.customerId)),
+    ])
+      ..where(
+        reminders.deletedAt.isNull() &
+            reminders.customerId.equals(customerId),
+      )
+      ..orderBy([OrderingTerm.asc(reminders.nextReminderDate)]);
+
+    final rows = await query.get();
+    return rows.map(_mapRowToListItem).toList();
+  }
+
   Future<List<ReminderListItem>> getActiveRemindersForCalendar() async {
     final query = select(reminders).join([
       innerJoin(customers, customers.id.equalsExp(reminders.customerId)),

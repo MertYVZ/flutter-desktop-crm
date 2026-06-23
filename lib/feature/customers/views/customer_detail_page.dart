@@ -1,6 +1,6 @@
-import 'package:Ok/feature/customers/controllers/customers_controller.dart';
-import 'package:Ok/feature/customers/models/customer_status.dart';
-import 'package:Ok/feature/customers/models/customer_type.dart';
+import 'package:Ok/feature/customers/controllers/customer_detail_controller.dart';
+import 'package:Ok/feature/customers/widgets/customer_detail_sections.dart';
+import 'package:Ok/feature/customers/widgets/customer_info_card.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
@@ -9,11 +9,9 @@ import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
-import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 final class CustomerDetailPage extends StatefulWidget {
   const CustomerDetailPage({super.key});
@@ -27,17 +25,17 @@ class _CustomerDetailPageState extends BaseState<CustomerDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseView<CustomersController>(
-      viewModel: Get.find<CustomersController>(),
+    return BaseView<CustomerDetailController>(
+      viewModel: Get.find<CustomerDetailController>(),
       onModelReady: (controller) {
         controller
           ..clearMessages()
-          ..getCustomerById(_customerId);
+          ..loadCustomer(_customerId);
       },
       onPageBuilder: (context, controller) {
         return Obx(() {
-          if (controller.isDetailLoading.value &&
-              controller.selectedCustomer.value == null) {
+          if (controller.isLoadingCustomer.value &&
+              controller.customer.value == null) {
             return const Center(
               child: SizedBox(
                 width: 28,
@@ -47,7 +45,7 @@ class _CustomerDetailPageState extends BaseState<CustomerDetailPage> {
             );
           }
 
-          final customer = controller.selectedCustomer.value;
+          final customer = controller.customer.value;
           if (customer == null) {
             return Center(
               child: Text(
@@ -59,31 +57,26 @@ class _CustomerDetailPageState extends BaseState<CustomerDetailPage> {
             );
           }
 
-          final type = CustomerTypeX.fromValue(customer.type);
-          final status = CustomerStatusX.fromValue(customer.status);
-          final dateFormat = DateFormat('dd.MM.yyyy HH:mm', 'tr_TR');
-
           return PanelFormScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _PageHeader(
                   title: customer.name,
-                  subtitle: 'Müşteri kayıt detayları',
+                  subtitle: 'Müşteri 360° detay görünümü',
                   onBack: () => Get.offNamed<void>(AppRoutes.customers.value),
                   onEdit: () => Get.toNamed<void>(
                     AppRoutes.customersEdit.pathForId(customer.id),
                   ),
-                  onDelete: controller.isDeleting.value
+                  onDelete: controller.isDeletingCustomer.value
                       ? null
                       : () async {
-                          final deleted =
-                              await controller.deleteCustomer(customer.id);
+                          final deleted = await controller.deleteCustomer();
                           if (deleted) {
                             Get.offNamed<void>(AppRoutes.customers.value);
                           }
                         },
-                  isDeleting: controller.isDeleting.value,
+                  isDeleting: controller.isDeletingCustomer.value,
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 Obx(() {
@@ -108,72 +101,9 @@ class _CustomerDetailPageState extends BaseState<CustomerDetailPage> {
                     ],
                   );
                 }),
-                PanelSurface(
-                  padding: const EdgeInsets.all(AppUiTokens.space24),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isCompact = constraints.maxWidth < 800;
-
-                      final left = [
-                        _DetailRow(label: 'Müşteri adı', value: customer.name),
-                        _DetailRow(
-                          label: 'Müşteri tipi',
-                          value: type?.label ?? '-',
-                        ),
-                        _DetailRow(
-                          label: 'Telefon',
-                          value: customer.phone ?? '-',
-                        ),
-                        _DetailRow(
-                          label: 'E-posta',
-                          value: customer.email ?? '-',
-                        ),
-                      ];
-
-                      final right = [
-                        _DetailRow(label: 'Şehir', value: customer.city ?? '-'),
-                        _DetailRow(
-                          label: 'Ülke',
-                          value: customer.country ?? '-',
-                        ),
-                        _DetailRow(
-                          label: 'Adres',
-                          value: customer.address ?? '-',
-                        ),
-                        _DetailRow(
-                          label: 'Durum',
-                          value: status?.label ?? '-',
-                        ),
-                        _DetailRow(
-                          label: 'Oluşturulma tarihi',
-                          value: dateFormat.format(customer.createdAt),
-                        ),
-                        _DetailRow(
-                          label: 'Güncellenme tarihi',
-                          value: dateFormat.format(customer.updatedAt),
-                        ),
-                      ];
-
-                      if (isCompact) {
-                        return Column(
-                          children: [
-                            ...left,
-                            ...right,
-                          ],
-                        );
-                      }
-
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: Column(children: left)),
-                          const SizedBox(width: AppUiTokens.space24),
-                          Expanded(child: Column(children: right)),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                CustomerInfoCard(customer: customer),
+                const SizedBox(height: AppUiTokens.space24),
+                CustomerDetailSections(controller: controller),
               ],
             ),
           );
@@ -328,46 +258,6 @@ class _HeaderButton extends StatelessWidget {
           label,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppUiTokens.space16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 160,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppUiTokens.textSecondary,
-                  ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppUiTokens.textPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-          ),
-        ],
       ),
     );
   }

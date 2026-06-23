@@ -8,12 +8,15 @@ import 'package:Ok/feature/due_tracking/models/due_record_status.dart';
 import 'package:Ok/feature/meetings/models/meeting_method.dart';
 import 'package:Ok/feature/meetings/models/meeting_subject.dart';
 import 'package:Ok/product/utility/constants/auth_messages.dart';
+import 'package:Ok/product/utility/constants/customer_detail_messages.dart';
 import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/utility/constants/due_record_messages.dart';
 import 'package:Ok/product/utility/constants/meeting_messages.dart';
 import 'package:Ok/product/utility/constants/note_messages.dart';
 import 'package:Ok/feature/reminders/models/reminder_period.dart';
 import 'package:Ok/feature/reminders/models/reminder_status.dart';
+import 'package:Ok/feature/price_list/models/price_list_currency.dart';
+import 'package:Ok/product/utility/constants/price_list_messages.dart';
 import 'package:Ok/product/utility/constants/price_offer_messages.dart';
 import 'package:Ok/product/utility/constants/reminder_messages.dart';
 import 'package:Ok/product/utility/constants/scrap_quality_messages.dart';
@@ -107,6 +110,34 @@ abstract final class Validators {
     final trimmedPhone = phone.trim();
     if (trimmedPhone.isNotEmpty && trimmedPhone.length < 7) {
       return CustomerMessages.phoneTooShort;
+    }
+
+    return null;
+  }
+
+  static String? validateCustomerContactForm({
+    required String fullName,
+    required String email,
+    required String phone,
+  }) {
+    final trimmedName = fullName.trim();
+    if (trimmedName.isEmpty) {
+      return CustomerDetailMessages.contactFullNameRequired;
+    }
+
+    if (trimmedName.length < 2) {
+      return CustomerDetailMessages.contactFullNameTooShort;
+    }
+
+    final trimmedEmail = email.trim();
+    if (trimmedEmail.isNotEmpty &&
+        !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(trimmedEmail)) {
+      return CustomerDetailMessages.contactInvalidEmail;
+    }
+
+    final trimmedPhone = phone.trim();
+    if (trimmedPhone.isNotEmpty && trimmedPhone.length < 7) {
+      return CustomerDetailMessages.contactPhoneTooShort;
     }
 
     return null;
@@ -370,6 +401,70 @@ abstract final class Validators {
       if (item.currency == null) {
         return PriceOfferMessages.currencyRequired;
       }
+    }
+
+    return null;
+  }
+
+  static String? validatePriceListForm({
+    required String title,
+    required DateTime? effectiveDate,
+  }) {
+    if (title.trim().isEmpty) {
+      return PriceListMessages.titleRequired;
+    }
+
+    if (effectiveDate == null) {
+      return PriceListMessages.effectiveDateRequired;
+    }
+
+    return null;
+  }
+
+  static String? validatePriceListItemForm({
+    required String productName,
+    required PriceListCurrency? currency,
+    required String minPriceText,
+    required String maxPriceText,
+  }) {
+    if (productName.trim().isEmpty) {
+      return PriceListMessages.productNameRequired;
+    }
+
+    if (currency == null) {
+      return PriceListMessages.currencyRequired;
+    }
+
+    final trimmedMin = minPriceText.trim();
+    if (trimmedMin.isEmpty) {
+      return PriceListMessages.minPriceRequired;
+    }
+
+    final minMinor = MoneyUtils.parseAmountToMinor(trimmedMin);
+    if (minMinor == null) {
+      return PriceListMessages.minPriceInvalid;
+    }
+
+    if (minMinor <= 0) {
+      return PriceListMessages.minPricePositive;
+    }
+
+    final trimmedMax = maxPriceText.trim();
+    if (trimmedMax.isEmpty) {
+      return PriceListMessages.maxPriceRequired;
+    }
+
+    final maxMinor = MoneyUtils.parseAmountToMinor(trimmedMax);
+    if (maxMinor == null) {
+      return PriceListMessages.maxPriceInvalid;
+    }
+
+    if (maxMinor <= 0) {
+      return PriceListMessages.maxPricePositive;
+    }
+
+    if (maxMinor < minMinor) {
+      return PriceListMessages.maxPriceLessThanMin;
     }
 
     return null;

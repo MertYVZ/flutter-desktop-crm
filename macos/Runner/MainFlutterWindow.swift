@@ -16,7 +16,7 @@ class MainFlutterWindow: NSWindow {
     flutterViewController.view.layer?.backgroundColor = launchBackground.cgColor
 
     self.contentViewController = flutterViewController
-    self.setContentSize(NSSize(width: 1280, height: 720))
+    self.setContentSize(NSSize(width: 1920, height: 1080))
     self.minSize = NSSize(width: 1024, height: 640)
     self.center()
 

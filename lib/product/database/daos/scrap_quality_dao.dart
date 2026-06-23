@@ -63,6 +63,25 @@ class ScrapQualityDao extends DatabaseAccessor<AppDatabase>
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<ScrapQualityListItem>> getRecordsByCustomerId(
+    String customerId,
+  ) async {
+    final query = select(scrapQualityRecords).join([
+      innerJoin(
+        customers,
+        customers.id.equalsExp(scrapQualityRecords.customerId),
+      ),
+    ])
+      ..where(
+        scrapQualityRecords.deletedAt.isNull() &
+            scrapQualityRecords.customerId.equals(customerId),
+      )
+      ..orderBy([OrderingTerm.desc(scrapQualityRecords.recordDate)]);
+
+    final rows = await query.get();
+    return rows.map(_mapRowToListItem).toList();
+  }
+
   Future<ScrapQualityRecord?> getRecordById(String id) =>
       (select(scrapQualityRecords)
             ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))

@@ -79,6 +79,22 @@ class DueRecordDao extends DatabaseAccessor<AppDatabase>
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<DueRecordListItem>> getDueRecordsByCustomerId(
+    String customerId,
+  ) async {
+    final query = select(dueRecords).join([
+      innerJoin(customers, customers.id.equalsExp(dueRecords.customerId)),
+    ])
+      ..where(
+        dueRecords.deletedAt.isNull() &
+            dueRecords.customerId.equals(customerId),
+      )
+      ..orderBy([OrderingTerm.asc(dueRecords.dueDate)]);
+
+    final rows = await query.get();
+    return rows.map(_mapRowToListItem).toList();
+  }
+
   Future<DueRecord?> getDueRecordById(String id) => (select(dueRecords)
         ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
       .getSingleOrNull();

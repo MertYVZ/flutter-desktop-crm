@@ -15,6 +15,10 @@ import 'package:Ok/feature/notes/views/note_create_page.dart';
 import 'package:Ok/feature/notes/views/note_detail_page.dart';
 import 'package:Ok/feature/notes/views/note_edit_page.dart';
 import 'package:Ok/feature/notes/views/notes_list_page.dart';
+import 'package:Ok/feature/price_list/views/price_list_create_page.dart';
+import 'package:Ok/feature/price_list/views/price_list_detail_page.dart';
+import 'package:Ok/feature/price_list/views/price_list_edit_page.dart';
+import 'package:Ok/feature/price_list/views/price_list_page.dart';
 import 'package:Ok/feature/price_offers/views/price_offer_create_page.dart';
 import 'package:Ok/feature/price_offers/views/price_offer_detail_page.dart';
 import 'package:Ok/feature/price_offers/views/price_offer_edit_page.dart';
@@ -215,6 +219,16 @@ class _ContentPanel extends StatelessWidget {
         child: Padding(
           padding: padding,
           child: _RemindersRouteContent(route: route),
+        ),
+      );
+    }
+
+    if (menu == ShellMenuItem.priceList || route.startsWith('/price-list')) {
+      return ColoredBox(
+        color: AppUiTokens.surface,
+        child: Padding(
+          padding: padding,
+          child: _PriceListRouteContent(route: route),
         ),
       );
     }
@@ -421,5 +435,29 @@ class _RemindersRouteContent extends StatelessWidget {
     }
 
     return const RemindersListPage();
+  }
+}
+
+class _PriceListRouteContent extends StatelessWidget {
+  const _PriceListRouteContent({required this.route});
+
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    if (route == AppRoutes.priceListNew.value) {
+      return const PriceListCreatePage();
+    }
+
+    if (route.endsWith('/edit') && route.startsWith('/price-list/')) {
+      return const PriceListEditPage();
+    }
+
+    if (route.startsWith('/price-list/') &&
+        route != AppRoutes.priceListNew.value) {
+      return const PriceListDetailPage();
+    }
+
+    return const PriceListPage();
   }
 }

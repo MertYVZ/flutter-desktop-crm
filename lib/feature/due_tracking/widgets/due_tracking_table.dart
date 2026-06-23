@@ -7,6 +7,9 @@ import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/money_utils.dart';
+import 'package:Ok/product/widgets/app_empty_state.dart';
+import 'package:Ok/product/widgets/app_status_badge.dart';
+import 'package:Ok/product/widgets/status_badge_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
@@ -66,19 +69,11 @@ class DueTrackingTable extends StatelessWidget {
               ? 'Kriterlere uygun vade kaydı bulunamadı.'
               : 'Henüz vade kaydı bulunmuyor.';
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppUiTokens.space24,
-              vertical: AppUiTokens.space24,
-            ),
-            child: Center(
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppUiTokens.textSecondary,
-                    ),
-              ),
-            ),
+          return AppTableEmptyState(
+            message: message,
+            icon: controller.hasActiveFilters
+                ? Icons.search_off_outlined
+                : Icons.receipt_long_outlined,
           );
         }
 
@@ -158,7 +153,6 @@ class DueTrackingTable extends StatelessWidget {
   }) {
     final currency = record.currencyType ?? CurrencyType.try_;
     final displayStatus = record.displayStatus;
-    final statusStyle = _statusStyle(displayStatus);
 
     return DataRow(
       cells: [
@@ -197,9 +191,10 @@ class DueTrackingTable extends StatelessWidget {
           ),
         ),
         DataCell(
-          Text(
-            displayStatus.label,
-            style: statusStyle,
+          AppStatusBadge(
+            label: displayStatus.label,
+            style: displayStatus.badgeStyle,
+            compact: true,
           ),
         ),
         DataCell(
@@ -237,20 +232,6 @@ class DueTrackingTable extends StatelessWidget {
     );
   }
 
-  TextStyle _statusStyle(DueRecordDisplayStatus status) {
-    if (status == DueRecordDisplayStatus.overdue) {
-      return _dataStyle.copyWith(
-        color: ColorName.error,
-        fontWeight: FontWeight.w700,
-      );
-    }
-
-    if (status == DueRecordDisplayStatus.paid) {
-      return _dataStyle.copyWith(color: const Color(0xFF15803D));
-    }
-
-    return _dataStyle;
-  }
 }
 
 class _ActionIconButton extends StatelessWidget {

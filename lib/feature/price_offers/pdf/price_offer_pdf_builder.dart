@@ -55,31 +55,29 @@ final class PriceOfferPdfBuilder {
     final doc = pw.Document(
       title: 'Teklif Formu',
       theme: theme,
-    );
-
-    doc.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(_pageMargin),
-        header: (_) => _buildBrandStripe(),
-        footer: (context) => _buildPageFooter(context, regularFont),
-        build: (context) => [
-          _buildPageHeader(regularFont, boldFont, logoImage),
-          pw.SizedBox(height: 20),
-          _buildPartiesSection(regularFont, boldFont),
-          pw.SizedBox(height: 12),
-          ..._buildProductsTable(regularFont, boldFont),
-          pw.SizedBox(height: 16),
-          ..._buildCurrencyTotals(regularFont, boldFont),
-          pw.SizedBox(height: 24),
-          _buildLegalHeading(boldFont),
-          pw.SizedBox(height: 10),
-          ..._buildLegalBody(regularFont),
-          pw.SizedBox(height: 24),
-          ..._buildCompanyFooter(regularFont),
-        ],
-      ),
-    );
+    )..addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(_pageMargin),
+          header: (_) => _buildBrandStripe(),
+          footer: (context) => _buildPageFooter(context, regularFont),
+          build: (context) => [
+            _buildPageHeader(regularFont, boldFont, logoImage),
+            pw.SizedBox(height: 20),
+            _buildPartiesSection(regularFont, boldFont),
+            pw.SizedBox(height: 12),
+            ..._buildProductsTable(regularFont, boldFont),
+            pw.SizedBox(height: 16),
+            ..._buildCurrencyTotals(regularFont, boldFont),
+            pw.SizedBox(height: 24),
+            _buildLegalHeading(boldFont),
+            pw.SizedBox(height: 10),
+            ..._buildLegalBody(regularFont),
+            pw.SizedBox(height: 24),
+            ..._buildCompanyFooter(regularFont),
+          ],
+        ),
+      );
 
     return doc;
   }

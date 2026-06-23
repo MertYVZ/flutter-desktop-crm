@@ -154,6 +154,11 @@ final class ShellController extends GetxController {
       selectedMenu.value = ShellMenuItem.reminders;
       return;
     }
+
+    if (route.startsWith('/price-list')) {
+      selectedMenu.value = ShellMenuItem.priceList;
+      return;
+    }
   }
 
   String _routeForMenu(ShellMenuItem item) {
@@ -180,6 +185,9 @@ final class ShellController extends GetxController {
     }
     if (item == ShellMenuItem.reminders) {
       return AppRoutes.reminders.value;
+    }
+    if (item == ShellMenuItem.priceList) {
+      return AppRoutes.priceList.value;
     }
     return AppRoutes.dashboard.value;
   }

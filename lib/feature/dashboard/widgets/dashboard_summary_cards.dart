@@ -12,53 +12,46 @@ final class DashboardSummaryCards extends StatelessWidget {
 
   final DashboardController controller;
 
+  static const _cardCount = 6;
+  static const _spacing = AppUiTokens.space12;
+  static const _fixedCardWidth = 292.0;
+  static const _singleRowBreakpoint = 1400.0;
+
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.isLoadingSummary.value &&
-          controller.summary.value == null) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount =
-                _crossAxisCountForWidth(constraints.maxWidth);
-            return GridView.count(
-              crossAxisCount: crossAxisCount,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: AppUiTokens.space12,
-              crossAxisSpacing: AppUiTokens.space12,
-              childAspectRatio: _aspectRatioForCount(crossAxisCount),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useSingleRow = constraints.maxWidth >= _singleRowBreakpoint;
+
+        return Obx(() {
+          if (controller.isLoadingSummary.value &&
+              controller.summary.value == null) {
+            return _SummaryCardsLayout(
+              useSingleRow: useSingleRow,
               children: List.generate(
-                6,
-                (_) => Container(
-                  decoration: BoxDecoration(
-                    color: AppUiTokens.surfaceMuted,
-                    borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
-                    border: Border.all(color: AppUiTokens.border),
+                _cardCount,
+                (_) => SizedBox(
+                  height: 112,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppUiTokens.surfaceMuted,
+                      borderRadius:
+                          BorderRadius.circular(AppUiTokens.radiusSm),
+                      border: Border.all(color: AppUiTokens.border),
+                    ),
                   ),
                 ),
               ),
             );
-          },
-        );
-      }
+          }
 
-      final summary = controller.summary.value;
-      if (summary == null) {
-        return const SizedBox.shrink();
-      }
+          final summary = controller.summary.value;
+          if (summary == null) {
+            return const SizedBox.shrink();
+          }
 
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final crossAxisCount = _crossAxisCountForWidth(constraints.maxWidth);
-
-          return GridView.count(
-            crossAxisCount: crossAxisCount,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: AppUiTokens.space12,
-            crossAxisSpacing: AppUiTokens.space12,
-            childAspectRatio: _aspectRatioForCount(crossAxisCount),
+          return _SummaryCardsLayout(
+            useSingleRow: useSingleRow,
             children: [
               _SummaryCard(
                 label: 'Toplam Müşteri',
@@ -109,30 +102,48 @@ final class DashboardSummaryCards extends StatelessWidget {
               ),
             ],
           );
-        },
+        });
+      },
+    );
+  }
+}
+
+class _SummaryCardsLayout extends StatelessWidget {
+  const _SummaryCardsLayout({
+    required this.useSingleRow,
+    required this.children,
+  });
+
+  final bool useSingleRow;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (useSingleRow) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(width: DashboardSummaryCards._spacing),
+            Expanded(child: children[i]),
+          ],
+        ],
       );
-    });
-  }
+    }
 
-  int _crossAxisCountForWidth(double width) {
-    if (width >= 1180) {
-      return 6;
-    }
-    if (width >= 760) {
-      return 3;
-    }
-    return 2;
-  }
-
-  double _aspectRatioForCount(int crossAxisCount) {
-    switch (crossAxisCount) {
-      case 6:
-        return 2.35;
-      case 3:
-        return 2.75;
-      default:
-        return 2.1;
-    }
+    return Wrap(
+      spacing: DashboardSummaryCards._spacing,
+      runSpacing: DashboardSummaryCards._spacing,
+      alignment: WrapAlignment.start,
+      children: children
+          .map(
+            (child) => SizedBox(
+              width: DashboardSummaryCards._fixedCardWidth,
+              child: child,
+            ),
+          )
+          .toList(),
+    );
   }
 }
 
@@ -171,21 +182,21 @@ class _SummaryCardState extends State<_SummaryCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
         child: InkWell(
           onTap: widget.onTap,
           mouseCursor: SystemMouseCursors.click,
-          borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
+          borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
           hoverColor: color.withValues(alpha: 0.04),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(
-              horizontal: AppUiTokens.space12,
-              vertical: AppUiTokens.space8,
+              horizontal: AppUiTokens.space24,
+              vertical: AppUiTokens.space16,
             ),
             decoration: BoxDecoration(
               color: AppUiTokens.surface,
-              borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
+              borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
               border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
@@ -207,29 +218,31 @@ class _SummaryCardState extends State<_SummaryCard> {
                         widget.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppUiTokens.textSecondary,
                               fontWeight: FontWeight.w700,
                               height: 1.2,
                             ),
                       ),
-                      const SizedBox(height: AppUiTokens.space4),
+                      const SizedBox(height: AppUiTokens.space8),
                       Text(
                         '${widget.value}',
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: AppUiTokens.textPrimary,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.8,
-                                  height: 1,
-                                ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                              color: AppUiTokens.textPrimary,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -1,
+                              height: 1,
+                            ),
                       ),
-                      const SizedBox(height: AppUiTokens.space4),
+                      const SizedBox(height: AppUiTokens.space8),
                       Text(
                         widget.helper,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppUiTokens.textMuted,
                               height: 1.2,
                             ),
@@ -237,18 +250,18 @@ class _SummaryCardState extends State<_SummaryCard> {
                     ],
                   ),
                 ),
-                const SizedBox(width: AppUiTokens.space8),
+                const SizedBox(width: AppUiTokens.space16),
                 Container(
-                  width: 34,
-                  height: 34,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
+                    borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
                     border: Border.all(color: color.withValues(alpha: 0.14)),
                   ),
                   child: Icon(
                     widget.icon,
-                    size: 18,
+                    size: 22,
                     color: color,
                   ),
                 ),

@@ -50,9 +50,7 @@ END
 // Icon
 //
 
-// Add an application icon here when windows/runner/resources/app_icon.ico
-// exists in the repository.
-
+IDI_APP_ICON ICON "resources\\app_icon.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

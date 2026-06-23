@@ -4,7 +4,7 @@ import 'package:Ok/feature/dashboard/models/dashboard_calendar_event_type.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_event_list_item.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
-import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
+import 'package:Ok/product/widgets/app_empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
@@ -13,11 +13,15 @@ final class DashboardDayDetailPanel extends StatelessWidget {
   const DashboardDayDetailPanel({
     required this.controller,
     this.fullWidth = false,
+    this.showLeftBorder = false,
+    this.embeddedInSplitView = false,
     super.key,
   });
 
   final DashboardController controller;
   final bool fullWidth;
+  final bool showLeftBorder;
+  final bool embeddedInSplitView;
 
   static const _panelWidth = 392.0;
 
@@ -26,21 +30,28 @@ final class DashboardDayDetailPanel extends StatelessWidget {
     return Obx(() {
       final selectedDate = controller.selectedDate.value;
       if (selectedDate == null) {
-        return Container(
-          width: fullWidth ? double.infinity : _panelWidth,
-          decoration: BoxDecoration(
-            color: AppUiTokens.surface,
-            border: Border(
-              left: fullWidth
-                  ? BorderSide.none
-                  : const BorderSide(color: AppUiTokens.border),
-            ),
-          ),
-          child: const _EmptyState(
-            title: 'Seçilen Gün',
-            message:
-                'Takvimden bir gün seçerek o güne ait kayıtları görüntüleyin.',
-          ),
+        return _buildPanelShell(
+          showLeftBorder: showLeftBorder,
+          child: embeddedInSplitView
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: const [
+                    Expanded(
+                      child: AppEmptyState(
+                        title: 'Seçilen Gün',
+                        message:
+                            'Takvimden bir gün seçerek o güne ait kayıtları görüntüleyin.',
+                        icon: Icons.event_busy_outlined,
+                      ),
+                    ),
+                  ],
+                )
+              : const AppEmptyState(
+                  title: 'Seçilen Gün',
+                  message:
+                      'Takvimden bir gün seçerek o güne ait kayıtları görüntüleyin.',
+                  icon: Icons.event_busy_outlined,
+                ),
         );
       }
 
@@ -55,73 +66,136 @@ final class DashboardDayDetailPanel extends StatelessWidget {
           .where((event) => event.type == DashboardCalendarEventType.reminder)
           .toList();
 
-      final content = events.isEmpty
-          ? const _EmptyState(
-              title: 'Bu gün için kayıt yok',
-              message:
-                  'Seçtiğiniz tarihte görüşme, teklif veya hatırlatma bulunmuyor.',
-            )
-          : PanelFormScrollView(
-              padding: const EdgeInsets.all(AppUiTokens.space16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _EventGroup(
-                    title: 'Görüşmeler',
-                    type: DashboardCalendarEventType.meeting,
-                    emptyMessage: 'Görüşme kaydı yok.',
-                    events: meetings,
-                    onEventTap: controller.navigateToEvent,
-                  ),
-                  const SizedBox(height: AppUiTokens.space12),
-                  _EventGroup(
-                    title: 'Fiyat Teklifleri',
-                    type: DashboardCalendarEventType.priceOffer,
-                    emptyMessage: 'Fiyat teklifi yok.',
-                    events: priceOffers,
-                    onEventTap: controller.navigateToEvent,
-                  ),
-                  const SizedBox(height: AppUiTokens.space12),
-                  _EventGroup(
-                    title: 'Hatırlatmalar',
-                    type: DashboardCalendarEventType.reminder,
-                    emptyMessage: 'Hatırlatma yok.',
-                    events: reminders,
-                    onEventTap: controller.navigateToEvent,
-                  ),
-                ],
-              ),
-            );
-
-      return Container(
-        width: fullWidth ? double.infinity : _panelWidth,
-        decoration: BoxDecoration(
-          color: AppUiTokens.surface,
-          border: Border(
-            left: fullWidth
-                ? BorderSide.none
-                : const BorderSide(color: AppUiTokens.border),
-          ),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isHeightBounded = constraints.maxHeight.isFinite;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _PanelHeader(
-                  title: AppDateUtils.formatDate(selectedDate),
-                  weekday: _weekdayLabel(selectedDate),
-                  eventCount: events.length,
-                  onClose: controller.closeDayPanel,
-                ),
-                if (isHeightBounded) Expanded(child: content) else content,
-              ],
-            );
-          },
+      return _buildPanelShell(
+        showLeftBorder: showLeftBorder,
+        child: _buildPanelBody(
+          context: context,
+          selectedDate: selectedDate,
+          events: events,
+          meetings: meetings,
+          priceOffers: priceOffers,
+          reminders: reminders,
         ),
       );
     });
+  }
+
+  Widget _buildPanelShell({
+    required bool showLeftBorder,
+    required Widget child,
+  }) {
+    return Container(
+      width: fullWidth ? double.infinity : _panelWidth,
+      decoration: BoxDecoration(
+        color: AppUiTokens.surfaceMuted,
+        border: showLeftBorder
+            ? const Border(
+                left: BorderSide(color: AppUiTokens.border),
+              )
+            : null,
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildPanelBody({
+    required BuildContext context,
+    required DateTime selectedDate,
+    required List<DashboardCalendarEvent> events,
+    required List<DashboardCalendarEvent> meetings,
+    required List<DashboardCalendarEvent> priceOffers,
+    required List<DashboardCalendarEvent> reminders,
+  }) {
+    final eventGroups = _buildEventGroups(
+      meetings: meetings,
+      priceOffers: priceOffers,
+      reminders: reminders,
+    );
+
+    final contentPadding = const EdgeInsets.fromLTRB(
+      AppUiTokens.space16,
+      AppUiTokens.space12,
+      AppUiTokens.space16,
+      AppUiTokens.space16,
+    );
+
+    final content = events.isEmpty
+        ? const AppEmptyState(
+            title: 'Bu gün için kayıt yok',
+            message:
+                'Seçtiğiniz tarihte görüşme, teklif veya hatırlatma bulunmuyor.',
+            icon: Icons.event_busy_outlined,
+          )
+        : embeddedInSplitView
+            ? SingleChildScrollView(
+                padding: contentPadding,
+                physics: const ClampingScrollPhysics(),
+                child: eventGroups,
+              )
+            : Padding(
+                padding: contentPadding,
+                child: eventGroups,
+              );
+
+    final header = _PanelHeader(
+      selectedDate: selectedDate,
+      weekday: _weekdayLabel(selectedDate),
+      eventCount: events.length,
+      onClose: controller.closeDayPanel,
+    );
+
+    if (embeddedInSplitView) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          Expanded(child: content),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        header,
+        content,
+      ],
+    );
+  }
+
+  Widget _buildEventGroups({
+    required List<DashboardCalendarEvent> meetings,
+    required List<DashboardCalendarEvent> priceOffers,
+    required List<DashboardCalendarEvent> reminders,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _EventGroup(
+          title: 'Görüşmeler',
+          type: DashboardCalendarEventType.meeting,
+          emptyMessage: 'Görüşme kaydı yok.',
+          events: meetings,
+          onEventTap: controller.navigateToEvent,
+        ),
+        const SizedBox(height: AppUiTokens.space12),
+        _EventGroup(
+          title: 'Fiyat Teklifleri',
+          type: DashboardCalendarEventType.priceOffer,
+          emptyMessage: 'Fiyat teklifi yok.',
+          events: priceOffers,
+          onEventTap: controller.navigateToEvent,
+        ),
+        const SizedBox(height: AppUiTokens.space12),
+        _EventGroup(
+          title: 'Hatırlatmalar',
+          type: DashboardCalendarEventType.reminder,
+          emptyMessage: 'Hatırlatma yok.',
+          events: reminders,
+          onEventTap: controller.navigateToEvent,
+        ),
+      ],
+    );
   }
 
   String _weekdayLabel(DateTime date) {
@@ -140,19 +214,21 @@ final class DashboardDayDetailPanel extends StatelessWidget {
 
 class _PanelHeader extends StatelessWidget {
   const _PanelHeader({
-    required this.title,
+    required this.selectedDate,
     required this.weekday,
     required this.eventCount,
     required this.onClose,
   });
 
-  final String title;
+  final DateTime selectedDate;
   final String weekday;
   final int eventCount;
   final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
+    final monthLabel = AppDateUtils.turkishMonths[selectedDate.month - 1];
+
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppUiTokens.space16,
@@ -160,26 +236,63 @@ class _PanelHeader extends StatelessWidget {
         AppUiTokens.space8,
         AppUiTokens.space16,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppUiTokens.surface,
-        border: Border(
+        border: const Border(
           bottom: BorderSide(color: AppUiTokens.border),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 58,
+            height: 58,
             decoration: BoxDecoration(
-              color: AppUiTokens.accentSoft,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  ColorName.primary.withValues(alpha: 0.14),
+                  ColorName.primary.withValues(alpha: 0.06),
+                ],
+              ),
               borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
-              border: Border.all(color: ColorName.primary),
+              border: Border.all(
+                color: ColorName.primary.withValues(alpha: 0.22),
+              ),
             ),
-            child: const Icon(
-              Icons.event_note_outlined,
-              size: 21,
-              color: ColorName.primary,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${selectedDate.day}',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: ColorName.primary,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                        letterSpacing: -0.5,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  monthLabel.substring(0, 3).toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: ColorName.primary.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 9,
+                        letterSpacing: 0.6,
+                        height: 1,
+                      ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppUiTokens.space12),
@@ -191,17 +304,18 @@ class _PanelHeader extends StatelessWidget {
                   weekday,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: AppUiTokens.textSecondary,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
                       ),
                 ),
                 const SizedBox(height: AppUiTokens.space4),
                 Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  AppDateUtils.formatDate(selectedDate),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: AppUiTokens.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                        height: 1.15,
                       ),
                 ),
                 const SizedBox(height: AppUiTokens.space8),
@@ -211,14 +325,22 @@ class _PanelHeader extends StatelessWidget {
                     vertical: AppUiTokens.space4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppUiTokens.surfaceMuted,
+                    color: eventCount > 0
+                        ? ColorName.primary.withValues(alpha: 0.1)
+                        : AppUiTokens.surfaceMuted,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: AppUiTokens.border),
+                    border: Border.all(
+                      color: eventCount > 0
+                          ? ColorName.primary.withValues(alpha: 0.2)
+                          : AppUiTokens.border,
+                    ),
                   ),
                   child: Text(
                     eventCount == 0 ? 'Kayıt yok' : '$eventCount kayıt',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppUiTokens.textSecondary,
+                          color: eventCount > 0
+                              ? ColorName.primary
+                              : AppUiTokens.textSecondary,
                           fontWeight: FontWeight.w700,
                         ),
                   ),
@@ -229,7 +351,13 @@ class _PanelHeader extends StatelessWidget {
           IconButton(
             onPressed: onClose,
             mouseCursor: SystemMouseCursors.click,
-            icon: const Icon(Icons.close, size: 18),
+            style: IconButton.styleFrom(
+              backgroundColor: AppUiTokens.surfaceMuted,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+              ),
+            ),
+            icon: const Icon(Icons.close_rounded, size: 18),
             color: AppUiTokens.textMuted,
             tooltip: 'Kapat',
             visualDensity: VisualDensity.compact,
@@ -257,72 +385,127 @@ class _EventGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
+    final accentColor = _colorForType(type);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppUiTokens.surface,
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
+        border: Border.all(color: AppUiTokens.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: _colorForType(type).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
-              ),
-              child: Icon(
-                _iconForType(type),
-                size: 16,
-                color: _colorForType(type),
-              ),
+              height: 3,
+              color: accentColor,
             ),
-            const SizedBox(width: AppUiTokens.space12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppUiTokens.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppUiTokens.space8,
-                vertical: AppUiTokens.space4,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppUiTokens.space12,
+                AppUiTokens.space12,
+                AppUiTokens.space12,
+                AppUiTokens.space8,
               ),
-              decoration: BoxDecoration(
-                color: AppUiTokens.surfaceMuted,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppUiTokens.border),
-              ),
-              child: Text(
-                '${events.length}',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppUiTokens.textSecondary,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppUiTokens.radiusSm),
                     ),
+                    child: Icon(
+                      _iconForType(type),
+                      size: 17,
+                      color: accentColor,
+                    ),
+                  ),
+                  const SizedBox(width: AppUiTokens.space12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: AppUiTokens.textPrimary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                    ),
+                  ),
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 26),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppUiTokens.space8,
+                      vertical: AppUiTokens.space4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${events.length}',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: accentColor,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
+                          ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            if (events.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppUiTokens.space12,
+                  0,
+                  AppUiTokens.space12,
+                  AppUiTokens.space12,
+                ),
+                child: AppEmptyState(
+                  compact: true,
+                  title: emptyMessage,
+                  message: '',
+                  icon: _iconForType(type),
+                  iconColor: accentColor,
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppUiTokens.space12,
+                  0,
+                  AppUiTokens.space12,
+                  AppUiTokens.space12,
+                ),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < events.length; i++) ...[
+                      DashboardEventListItem(
+                        event: events[i],
+                        onTap: () => onEventTap(events[i]),
+                      ),
+                      if (i < events.length - 1)
+                        const SizedBox(height: AppUiTokens.space8),
+                    ],
+                  ],
+                ),
+              ),
           ],
         ),
-        const SizedBox(height: AppUiTokens.space8),
-        if (events.isEmpty)
-          _EmptyState(
-            title: emptyMessage,
-            message: '',
-            compact: true,
-          )
-        else
-          ...events.map(
-            (event) => Padding(
-              padding: const EdgeInsets.only(bottom: AppUiTokens.space8),
-              child: DashboardEventListItem(
-                event: event,
-                onTap: () => onEventTap(event),
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 
@@ -346,85 +529,5 @@ class _EventGroup extends StatelessWidget {
       case DashboardCalendarEventType.reminder:
         return Icons.notifications_none_rounded;
     }
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.title,
-    required this.message,
-    this.compact = false,
-  });
-
-  final String title;
-  final String message;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    if (compact) {
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppUiTokens.space12,
-          vertical: AppUiTokens.space8,
-        ),
-        decoration: BoxDecoration(
-          color: AppUiTokens.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
-          border: Border.all(color: AppUiTokens.border),
-        ),
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppUiTokens.textMuted,
-                height: 1.35,
-              ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: AppUiTokens.space32,
-        horizontal: AppUiTokens.space24,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppUiTokens.surfaceMuted,
-              borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
-              border: Border.all(color: AppUiTokens.border),
-            ),
-            child: Icon(
-              Icons.event_busy_outlined,
-              size: 28,
-              color: AppUiTokens.textMuted.withValues(alpha: 0.7),
-            ),
-          ),
-          const SizedBox(height: AppUiTokens.space16),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: AppUiTokens.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: AppUiTokens.space8),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppUiTokens.textSecondary,
-                  height: 1.45,
-                ),
-          ),
-        ],
-      ),
-    );
   }
 }

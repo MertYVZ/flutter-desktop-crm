@@ -48,7 +48,8 @@ class _PanelFormScrollViewState extends State<PanelFormScrollView> {
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
+                minHeight:
+                    constraints.hasBoundedHeight ? constraints.maxHeight : 0,
               ),
               child: widget.child,
             ),

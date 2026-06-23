@@ -3,6 +3,7 @@ import 'package:Ok/feature/dashboard/bindings/dashboard_binding.dart';
 import 'package:Ok/feature/due_tracking/bindings/due_tracking_binding.dart';
 import 'package:Ok/feature/meetings/bindings/meetings_binding.dart';
 import 'package:Ok/feature/notes/bindings/notes_binding.dart';
+import 'package:Ok/feature/price_list/bindings/price_list_binding.dart';
 import 'package:Ok/feature/price_offers/bindings/price_offers_binding.dart';
 import 'package:Ok/feature/reminders/bindings/reminders_binding.dart';
 import 'package:Ok/feature/scrap_quality/bindings/scrap_quality_binding.dart';
@@ -23,6 +24,7 @@ final class ShellBinding extends Bindings {
     ScrapQualityBinding().dependencies();
     NotesBinding().dependencies();
     PriceOffersBinding().dependencies();
+    PriceListBinding().dependencies();
     RemindersBinding().dependencies();
   }
 }

@@ -1897,6 +1897,513 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   }
 }
 
+class $CustomerContactsTable extends CustomerContacts
+    with TableInfo<$CustomerContactsTable, CustomerContact> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomerContactsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _customerIdMeta =
+      const VerificationMeta('customerId');
+  @override
+  late final GeneratedColumn<String> customerId = GeneratedColumn<String>(
+      'customer_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _fullNameMeta =
+      const VerificationMeta('fullName');
+  @override
+  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
+      'full_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+      'email', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+      'phone', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isPrimaryMeta =
+      const VerificationMeta('isPrimary');
+  @override
+  late final GeneratedColumn<bool> isPrimary = GeneratedColumn<bool>(
+      'is_primary', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_primary" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        customerId,
+        fullName,
+        title,
+        email,
+        phone,
+        isPrimary,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'customer_contacts';
+  @override
+  VerificationContext validateIntegrity(Insertable<CustomerContact> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('customer_id')) {
+      context.handle(
+          _customerIdMeta,
+          customerId.isAcceptableOrUnknown(
+              data['customer_id']!, _customerIdMeta));
+    } else if (isInserting) {
+      context.missing(_customerIdMeta);
+    }
+    if (data.containsKey('full_name')) {
+      context.handle(_fullNameMeta,
+          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+    } else if (isInserting) {
+      context.missing(_fullNameMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+          _emailMeta, email.isAcceptableOrUnknown(data['email']!, _emailMeta));
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    }
+    if (data.containsKey('is_primary')) {
+      context.handle(_isPrimaryMeta,
+          isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CustomerContact map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CustomerContact(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      customerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
+      fullName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}full_name'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+      email: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}email']),
+      phone: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}phone']),
+      isPrimary: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_primary'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $CustomerContactsTable createAlias(String alias) {
+    return $CustomerContactsTable(attachedDatabase, alias);
+  }
+}
+
+class CustomerContact extends DataClass implements Insertable<CustomerContact> {
+  final String id;
+  final String customerId;
+  final String fullName;
+  final String? title;
+  final String? email;
+  final String? phone;
+  final bool isPrimary;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const CustomerContact(
+      {required this.id,
+      required this.customerId,
+      required this.fullName,
+      this.title,
+      this.email,
+      this.phone,
+      required this.isPrimary,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['customer_id'] = Variable<String>(customerId);
+    map['full_name'] = Variable<String>(fullName);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    map['is_primary'] = Variable<bool>(isPrimary);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  CustomerContactsCompanion toCompanion(bool nullToAbsent) {
+    return CustomerContactsCompanion(
+      id: Value(id),
+      customerId: Value(customerId),
+      fullName: Value(fullName),
+      title:
+          title == null && nullToAbsent ? const Value.absent() : Value(title),
+      email:
+          email == null && nullToAbsent ? const Value.absent() : Value(email),
+      phone:
+          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
+      isPrimary: Value(isPrimary),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory CustomerContact.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CustomerContact(
+      id: serializer.fromJson<String>(json['id']),
+      customerId: serializer.fromJson<String>(json['customerId']),
+      fullName: serializer.fromJson<String>(json['fullName']),
+      title: serializer.fromJson<String?>(json['title']),
+      email: serializer.fromJson<String?>(json['email']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      isPrimary: serializer.fromJson<bool>(json['isPrimary']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'customerId': serializer.toJson<String>(customerId),
+      'fullName': serializer.toJson<String>(fullName),
+      'title': serializer.toJson<String?>(title),
+      'email': serializer.toJson<String?>(email),
+      'phone': serializer.toJson<String?>(phone),
+      'isPrimary': serializer.toJson<bool>(isPrimary),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  CustomerContact copyWith(
+          {String? id,
+          String? customerId,
+          String? fullName,
+          Value<String?> title = const Value.absent(),
+          Value<String?> email = const Value.absent(),
+          Value<String?> phone = const Value.absent(),
+          bool? isPrimary,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      CustomerContact(
+        id: id ?? this.id,
+        customerId: customerId ?? this.customerId,
+        fullName: fullName ?? this.fullName,
+        title: title.present ? title.value : this.title,
+        email: email.present ? email.value : this.email,
+        phone: phone.present ? phone.value : this.phone,
+        isPrimary: isPrimary ?? this.isPrimary,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  CustomerContact copyWithCompanion(CustomerContactsCompanion data) {
+    return CustomerContact(
+      id: data.id.present ? data.id.value : this.id,
+      customerId:
+          data.customerId.present ? data.customerId.value : this.customerId,
+      fullName: data.fullName.present ? data.fullName.value : this.fullName,
+      title: data.title.present ? data.title.value : this.title,
+      email: data.email.present ? data.email.value : this.email,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomerContact(')
+          ..write('id: $id, ')
+          ..write('customerId: $customerId, ')
+          ..write('fullName: $fullName, ')
+          ..write('title: $title, ')
+          ..write('email: $email, ')
+          ..write('phone: $phone, ')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, customerId, fullName, title, email, phone,
+      isPrimary, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomerContact &&
+          other.id == this.id &&
+          other.customerId == this.customerId &&
+          other.fullName == this.fullName &&
+          other.title == this.title &&
+          other.email == this.email &&
+          other.phone == this.phone &&
+          other.isPrimary == this.isPrimary &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class CustomerContactsCompanion extends UpdateCompanion<CustomerContact> {
+  final Value<String> id;
+  final Value<String> customerId;
+  final Value<String> fullName;
+  final Value<String?> title;
+  final Value<String?> email;
+  final Value<String?> phone;
+  final Value<bool> isPrimary;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const CustomerContactsCompanion({
+    this.id = const Value.absent(),
+    this.customerId = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.title = const Value.absent(),
+    this.email = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isPrimary = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CustomerContactsCompanion.insert({
+    required String id,
+    required String customerId,
+    required String fullName,
+    this.title = const Value.absent(),
+    this.email = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isPrimary = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        customerId = Value(customerId),
+        fullName = Value(fullName),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<CustomerContact> custom({
+    Expression<String>? id,
+    Expression<String>? customerId,
+    Expression<String>? fullName,
+    Expression<String>? title,
+    Expression<String>? email,
+    Expression<String>? phone,
+    Expression<bool>? isPrimary,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (customerId != null) 'customer_id': customerId,
+      if (fullName != null) 'full_name': fullName,
+      if (title != null) 'title': title,
+      if (email != null) 'email': email,
+      if (phone != null) 'phone': phone,
+      if (isPrimary != null) 'is_primary': isPrimary,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CustomerContactsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? customerId,
+      Value<String>? fullName,
+      Value<String?>? title,
+      Value<String?>? email,
+      Value<String?>? phone,
+      Value<bool>? isPrimary,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return CustomerContactsCompanion(
+      id: id ?? this.id,
+      customerId: customerId ?? this.customerId,
+      fullName: fullName ?? this.fullName,
+      title: title ?? this.title,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      isPrimary: isPrimary ?? this.isPrimary,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (customerId.present) {
+      map['customer_id'] = Variable<String>(customerId.value);
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (isPrimary.present) {
+      map['is_primary'] = Variable<bool>(isPrimary.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomerContactsCompanion(')
+          ..write('id: $id, ')
+          ..write('customerId: $customerId, ')
+          ..write('fullName: $fullName, ')
+          ..write('title: $title, ')
+          ..write('email: $email, ')
+          ..write('phone: $phone, ')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DueRecordsTable extends DueRecords
     with TableInfo<$DueRecordsTable, DueRecord> {
   @override
@@ -5845,6 +6352,966 @@ class RemindersCompanion extends UpdateCompanion<Reminder> {
   }
 }
 
+class $PriceListsTable extends PriceLists
+    with TableInfo<$PriceListsTable, PriceList> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PriceListsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _effectiveDateMeta =
+      const VerificationMeta('effectiveDate');
+  @override
+  late final GeneratedColumn<DateTime> effectiveDate =
+      GeneratedColumn<DateTime>('effective_date', aliasedName, false,
+          type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _archivedAtMeta =
+      const VerificationMeta('archivedAt');
+  @override
+  late final GeneratedColumn<DateTime> archivedAt = GeneratedColumn<DateTime>(
+      'archived_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        description,
+        effectiveDate,
+        status,
+        createdAt,
+        updatedAt,
+        archivedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'price_lists';
+  @override
+  VerificationContext validateIntegrity(Insertable<PriceList> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('effective_date')) {
+      context.handle(
+          _effectiveDateMeta,
+          effectiveDate.isAcceptableOrUnknown(
+              data['effective_date']!, _effectiveDateMeta));
+    } else if (isInserting) {
+      context.missing(_effectiveDateMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+          _archivedAtMeta,
+          archivedAt.isAcceptableOrUnknown(
+              data['archived_at']!, _archivedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PriceList map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PriceList(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      effectiveDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}effective_date'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      archivedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}archived_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $PriceListsTable createAlias(String alias) {
+    return $PriceListsTable(attachedDatabase, alias);
+  }
+}
+
+class PriceList extends DataClass implements Insertable<PriceList> {
+  final String id;
+  final String title;
+  final String? description;
+  final DateTime effectiveDate;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? archivedAt;
+  final DateTime? deletedAt;
+  const PriceList(
+      {required this.id,
+      required this.title,
+      this.description,
+      required this.effectiveDate,
+      required this.status,
+      required this.createdAt,
+      required this.updatedAt,
+      this.archivedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['effective_date'] = Variable<DateTime>(effectiveDate);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<DateTime>(archivedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  PriceListsCompanion toCompanion(bool nullToAbsent) {
+    return PriceListsCompanion(
+      id: Value(id),
+      title: Value(title),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      effectiveDate: Value(effectiveDate),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory PriceList.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PriceList(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String?>(json['description']),
+      effectiveDate: serializer.fromJson<DateTime>(json['effectiveDate']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      archivedAt: serializer.fromJson<DateTime?>(json['archivedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String?>(description),
+      'effectiveDate': serializer.toJson<DateTime>(effectiveDate),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'archivedAt': serializer.toJson<DateTime?>(archivedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  PriceList copyWith(
+          {String? id,
+          String? title,
+          Value<String?> description = const Value.absent(),
+          DateTime? effectiveDate,
+          String? status,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> archivedAt = const Value.absent(),
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      PriceList(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        description: description.present ? description.value : this.description,
+        effectiveDate: effectiveDate ?? this.effectiveDate,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  PriceList copyWithCompanion(PriceListsCompanion data) {
+    return PriceList(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      description:
+          data.description.present ? data.description.value : this.description,
+      effectiveDate: data.effectiveDate.present
+          ? data.effectiveDate.value
+          : this.effectiveDate,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      archivedAt:
+          data.archivedAt.present ? data.archivedAt.value : this.archivedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceList(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('effectiveDate: $effectiveDate, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, title, description, effectiveDate, status,
+      createdAt, updatedAt, archivedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PriceList &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.description == this.description &&
+          other.effectiveDate == this.effectiveDate &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.archivedAt == this.archivedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class PriceListsCompanion extends UpdateCompanion<PriceList> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String?> description;
+  final Value<DateTime> effectiveDate;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> archivedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const PriceListsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
+    this.effectiveDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PriceListsCompanion.insert({
+    required String id,
+    required String title,
+    this.description = const Value.absent(),
+    required DateTime effectiveDate,
+    required String status,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.archivedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        title = Value(title),
+        effectiveDate = Value(effectiveDate),
+        status = Value(status),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<PriceList> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? description,
+    Expression<DateTime>? effectiveDate,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? archivedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (effectiveDate != null) 'effective_date': effectiveDate,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PriceListsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? title,
+      Value<String?>? description,
+      Value<DateTime>? effectiveDate,
+      Value<String>? status,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? archivedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return PriceListsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      effectiveDate: effectiveDate ?? this.effectiveDate,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (effectiveDate.present) {
+      map['effective_date'] = Variable<DateTime>(effectiveDate.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<DateTime>(archivedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceListsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('effectiveDate: $effectiveDate, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PriceListItemsTable extends PriceListItems
+    with TableInfo<$PriceListItemsTable, PriceListItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PriceListItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _priceListIdMeta =
+      const VerificationMeta('priceListId');
+  @override
+  late final GeneratedColumn<String> priceListId = GeneratedColumn<String>(
+      'price_list_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productNameMeta =
+      const VerificationMeta('productName');
+  @override
+  late final GeneratedColumn<String> productName = GeneratedColumn<String>(
+      'product_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _minPriceMinorMeta =
+      const VerificationMeta('minPriceMinor');
+  @override
+  late final GeneratedColumn<int> minPriceMinor = GeneratedColumn<int>(
+      'min_price_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _maxPriceMinorMeta =
+      const VerificationMeta('maxPriceMinor');
+  @override
+  late final GeneratedColumn<int> maxPriceMinor = GeneratedColumn<int>(
+      'max_price_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        priceListId,
+        productName,
+        currency,
+        minPriceMinor,
+        maxPriceMinor,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'price_list_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<PriceListItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('price_list_id')) {
+      context.handle(
+          _priceListIdMeta,
+          priceListId.isAcceptableOrUnknown(
+              data['price_list_id']!, _priceListIdMeta));
+    } else if (isInserting) {
+      context.missing(_priceListIdMeta);
+    }
+    if (data.containsKey('product_name')) {
+      context.handle(
+          _productNameMeta,
+          productName.isAcceptableOrUnknown(
+              data['product_name']!, _productNameMeta));
+    } else if (isInserting) {
+      context.missing(_productNameMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('min_price_minor')) {
+      context.handle(
+          _minPriceMinorMeta,
+          minPriceMinor.isAcceptableOrUnknown(
+              data['min_price_minor']!, _minPriceMinorMeta));
+    } else if (isInserting) {
+      context.missing(_minPriceMinorMeta);
+    }
+    if (data.containsKey('max_price_minor')) {
+      context.handle(
+          _maxPriceMinorMeta,
+          maxPriceMinor.isAcceptableOrUnknown(
+              data['max_price_minor']!, _maxPriceMinorMeta));
+    } else if (isInserting) {
+      context.missing(_maxPriceMinorMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PriceListItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PriceListItem(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      priceListId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}price_list_id'])!,
+      productName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+      minPriceMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}min_price_minor'])!,
+      maxPriceMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}max_price_minor'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $PriceListItemsTable createAlias(String alias) {
+    return $PriceListItemsTable(attachedDatabase, alias);
+  }
+}
+
+class PriceListItem extends DataClass implements Insertable<PriceListItem> {
+  final String id;
+  final String priceListId;
+  final String productName;
+  final String currency;
+  final int minPriceMinor;
+  final int maxPriceMinor;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const PriceListItem(
+      {required this.id,
+      required this.priceListId,
+      required this.productName,
+      required this.currency,
+      required this.minPriceMinor,
+      required this.maxPriceMinor,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['price_list_id'] = Variable<String>(priceListId);
+    map['product_name'] = Variable<String>(productName);
+    map['currency'] = Variable<String>(currency);
+    map['min_price_minor'] = Variable<int>(minPriceMinor);
+    map['max_price_minor'] = Variable<int>(maxPriceMinor);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  PriceListItemsCompanion toCompanion(bool nullToAbsent) {
+    return PriceListItemsCompanion(
+      id: Value(id),
+      priceListId: Value(priceListId),
+      productName: Value(productName),
+      currency: Value(currency),
+      minPriceMinor: Value(minPriceMinor),
+      maxPriceMinor: Value(maxPriceMinor),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory PriceListItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PriceListItem(
+      id: serializer.fromJson<String>(json['id']),
+      priceListId: serializer.fromJson<String>(json['priceListId']),
+      productName: serializer.fromJson<String>(json['productName']),
+      currency: serializer.fromJson<String>(json['currency']),
+      minPriceMinor: serializer.fromJson<int>(json['minPriceMinor']),
+      maxPriceMinor: serializer.fromJson<int>(json['maxPriceMinor']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'priceListId': serializer.toJson<String>(priceListId),
+      'productName': serializer.toJson<String>(productName),
+      'currency': serializer.toJson<String>(currency),
+      'minPriceMinor': serializer.toJson<int>(minPriceMinor),
+      'maxPriceMinor': serializer.toJson<int>(maxPriceMinor),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  PriceListItem copyWith(
+          {String? id,
+          String? priceListId,
+          String? productName,
+          String? currency,
+          int? minPriceMinor,
+          int? maxPriceMinor,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      PriceListItem(
+        id: id ?? this.id,
+        priceListId: priceListId ?? this.priceListId,
+        productName: productName ?? this.productName,
+        currency: currency ?? this.currency,
+        minPriceMinor: minPriceMinor ?? this.minPriceMinor,
+        maxPriceMinor: maxPriceMinor ?? this.maxPriceMinor,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  PriceListItem copyWithCompanion(PriceListItemsCompanion data) {
+    return PriceListItem(
+      id: data.id.present ? data.id.value : this.id,
+      priceListId:
+          data.priceListId.present ? data.priceListId.value : this.priceListId,
+      productName:
+          data.productName.present ? data.productName.value : this.productName,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      minPriceMinor: data.minPriceMinor.present
+          ? data.minPriceMinor.value
+          : this.minPriceMinor,
+      maxPriceMinor: data.maxPriceMinor.present
+          ? data.maxPriceMinor.value
+          : this.maxPriceMinor,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceListItem(')
+          ..write('id: $id, ')
+          ..write('priceListId: $priceListId, ')
+          ..write('productName: $productName, ')
+          ..write('currency: $currency, ')
+          ..write('minPriceMinor: $minPriceMinor, ')
+          ..write('maxPriceMinor: $maxPriceMinor, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, priceListId, productName, currency,
+      minPriceMinor, maxPriceMinor, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PriceListItem &&
+          other.id == this.id &&
+          other.priceListId == this.priceListId &&
+          other.productName == this.productName &&
+          other.currency == this.currency &&
+          other.minPriceMinor == this.minPriceMinor &&
+          other.maxPriceMinor == this.maxPriceMinor &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class PriceListItemsCompanion extends UpdateCompanion<PriceListItem> {
+  final Value<String> id;
+  final Value<String> priceListId;
+  final Value<String> productName;
+  final Value<String> currency;
+  final Value<int> minPriceMinor;
+  final Value<int> maxPriceMinor;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const PriceListItemsCompanion({
+    this.id = const Value.absent(),
+    this.priceListId = const Value.absent(),
+    this.productName = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.minPriceMinor = const Value.absent(),
+    this.maxPriceMinor = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PriceListItemsCompanion.insert({
+    required String id,
+    required String priceListId,
+    required String productName,
+    required String currency,
+    required int minPriceMinor,
+    required int maxPriceMinor,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        priceListId = Value(priceListId),
+        productName = Value(productName),
+        currency = Value(currency),
+        minPriceMinor = Value(minPriceMinor),
+        maxPriceMinor = Value(maxPriceMinor),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<PriceListItem> custom({
+    Expression<String>? id,
+    Expression<String>? priceListId,
+    Expression<String>? productName,
+    Expression<String>? currency,
+    Expression<int>? minPriceMinor,
+    Expression<int>? maxPriceMinor,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (priceListId != null) 'price_list_id': priceListId,
+      if (productName != null) 'product_name': productName,
+      if (currency != null) 'currency': currency,
+      if (minPriceMinor != null) 'min_price_minor': minPriceMinor,
+      if (maxPriceMinor != null) 'max_price_minor': maxPriceMinor,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PriceListItemsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? priceListId,
+      Value<String>? productName,
+      Value<String>? currency,
+      Value<int>? minPriceMinor,
+      Value<int>? maxPriceMinor,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return PriceListItemsCompanion(
+      id: id ?? this.id,
+      priceListId: priceListId ?? this.priceListId,
+      productName: productName ?? this.productName,
+      currency: currency ?? this.currency,
+      minPriceMinor: minPriceMinor ?? this.minPriceMinor,
+      maxPriceMinor: maxPriceMinor ?? this.maxPriceMinor,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (priceListId.present) {
+      map['price_list_id'] = Variable<String>(priceListId.value);
+    }
+    if (productName.present) {
+      map['product_name'] = Variable<String>(productName.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (minPriceMinor.present) {
+      map['min_price_minor'] = Variable<int>(minPriceMinor.value);
+    }
+    if (maxPriceMinor.present) {
+      map['max_price_minor'] = Variable<int>(maxPriceMinor.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceListItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('priceListId: $priceListId, ')
+          ..write('productName: $productName, ')
+          ..write('currency: $currency, ')
+          ..write('minPriceMinor: $minPriceMinor, ')
+          ..write('maxPriceMinor: $maxPriceMinor, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5852,6 +7319,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AuthSessionsTable authSessions = $AuthSessionsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $CustomersTable customers = $CustomersTable(this);
+  late final $CustomerContactsTable customerContacts =
+      $CustomerContactsTable(this);
   late final $DueRecordsTable dueRecords = $DueRecordsTable(this);
   late final $MeetingsTable meetings = $MeetingsTable(this);
   late final $NotesTable notes = $NotesTable(this);
@@ -5863,12 +7332,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LegalTextTemplatesTable legalTextTemplates =
       $LegalTextTemplatesTable(this);
   late final $RemindersTable reminders = $RemindersTable(this);
+  late final $PriceListsTable priceLists = $PriceListsTable(this);
+  late final $PriceListItemsTable priceListItems = $PriceListItemsTable(this);
   late final UserDao userDao = UserDao(this as AppDatabase);
   late final AuthSessionDao authSessionDao =
       AuthSessionDao(this as AppDatabase);
   late final AppSettingsDao appSettingsDao =
       AppSettingsDao(this as AppDatabase);
   late final CustomerDao customerDao = CustomerDao(this as AppDatabase);
+  late final CustomerContactDao customerContactDao =
+      CustomerContactDao(this as AppDatabase);
   late final DueRecordDao dueRecordDao = DueRecordDao(this as AppDatabase);
   late final MeetingDao meetingDao = MeetingDao(this as AppDatabase);
   late final NoteDao noteDao = NoteDao(this as AppDatabase);
@@ -5878,6 +7351,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final LegalTextTemplateDao legalTextTemplateDao =
       LegalTextTemplateDao(this as AppDatabase);
   late final ReminderDao reminderDao = ReminderDao(this as AppDatabase);
+  late final PriceListDao priceListDao = PriceListDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5887,6 +7361,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         authSessions,
         appSettings,
         customers,
+        customerContacts,
         dueRecords,
         meetings,
         notes,
@@ -5894,7 +7369,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         priceOffers,
         priceOfferItems,
         legalTextTemplates,
-        reminders
+        reminders,
+        priceLists,
+        priceListItems
       ];
 }
 
@@ -6999,6 +8476,255 @@ typedef $$CustomersTableProcessedTableManager = ProcessedTableManager<
     $$CustomersTableUpdateCompanionBuilder,
     (Customer, BaseReferences<_$AppDatabase, $CustomersTable, Customer>),
     Customer,
+    PrefetchHooks Function()>;
+typedef $$CustomerContactsTableCreateCompanionBuilder
+    = CustomerContactsCompanion Function({
+  required String id,
+  required String customerId,
+  required String fullName,
+  Value<String?> title,
+  Value<String?> email,
+  Value<String?> phone,
+  Value<bool> isPrimary,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$CustomerContactsTableUpdateCompanionBuilder
+    = CustomerContactsCompanion Function({
+  Value<String> id,
+  Value<String> customerId,
+  Value<String> fullName,
+  Value<String?> title,
+  Value<String?> email,
+  Value<String?> phone,
+  Value<bool> isPrimary,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$CustomerContactsTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomerContactsTable> {
+  $$CustomerContactsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customerId => $composableBuilder(
+      column: $table.customerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fullName => $composableBuilder(
+      column: $table.fullName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get email => $composableBuilder(
+      column: $table.email, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get phone => $composableBuilder(
+      column: $table.phone, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPrimary => $composableBuilder(
+      column: $table.isPrimary, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$CustomerContactsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomerContactsTable> {
+  $$CustomerContactsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get customerId => $composableBuilder(
+      column: $table.customerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fullName => $composableBuilder(
+      column: $table.fullName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get email => $composableBuilder(
+      column: $table.email, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+      column: $table.phone, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPrimary => $composableBuilder(
+      column: $table.isPrimary, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CustomerContactsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomerContactsTable> {
+  $$CustomerContactsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get customerId => $composableBuilder(
+      column: $table.customerId, builder: (column) => column);
+
+  GeneratedColumn<String> get fullName =>
+      $composableBuilder(column: $table.fullName, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPrimary =>
+      $composableBuilder(column: $table.isPrimary, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$CustomerContactsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $CustomerContactsTable,
+    CustomerContact,
+    $$CustomerContactsTableFilterComposer,
+    $$CustomerContactsTableOrderingComposer,
+    $$CustomerContactsTableAnnotationComposer,
+    $$CustomerContactsTableCreateCompanionBuilder,
+    $$CustomerContactsTableUpdateCompanionBuilder,
+    (
+      CustomerContact,
+      BaseReferences<_$AppDatabase, $CustomerContactsTable, CustomerContact>
+    ),
+    CustomerContact,
+    PrefetchHooks Function()> {
+  $$CustomerContactsTableTableManager(
+      _$AppDatabase db, $CustomerContactsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CustomerContactsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CustomerContactsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CustomerContactsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> customerId = const Value.absent(),
+            Value<String> fullName = const Value.absent(),
+            Value<String?> title = const Value.absent(),
+            Value<String?> email = const Value.absent(),
+            Value<String?> phone = const Value.absent(),
+            Value<bool> isPrimary = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CustomerContactsCompanion(
+            id: id,
+            customerId: customerId,
+            fullName: fullName,
+            title: title,
+            email: email,
+            phone: phone,
+            isPrimary: isPrimary,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String customerId,
+            required String fullName,
+            Value<String?> title = const Value.absent(),
+            Value<String?> email = const Value.absent(),
+            Value<String?> phone = const Value.absent(),
+            Value<bool> isPrimary = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CustomerContactsCompanion.insert(
+            id: id,
+            customerId: customerId,
+            fullName: fullName,
+            title: title,
+            email: email,
+            phone: phone,
+            isPrimary: isPrimary,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CustomerContactsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $CustomerContactsTable,
+    CustomerContact,
+    $$CustomerContactsTableFilterComposer,
+    $$CustomerContactsTableOrderingComposer,
+    $$CustomerContactsTableAnnotationComposer,
+    $$CustomerContactsTableCreateCompanionBuilder,
+    $$CustomerContactsTableUpdateCompanionBuilder,
+    (
+      CustomerContact,
+      BaseReferences<_$AppDatabase, $CustomerContactsTable, CustomerContact>
+    ),
+    CustomerContact,
     PrefetchHooks Function()>;
 typedef $$DueRecordsTableCreateCompanionBuilder = DueRecordsCompanion Function({
   required String id,
@@ -8900,6 +10626,468 @@ typedef $$RemindersTableProcessedTableManager = ProcessedTableManager<
     (Reminder, BaseReferences<_$AppDatabase, $RemindersTable, Reminder>),
     Reminder,
     PrefetchHooks Function()>;
+typedef $$PriceListsTableCreateCompanionBuilder = PriceListsCompanion Function({
+  required String id,
+  required String title,
+  Value<String?> description,
+  required DateTime effectiveDate,
+  required String status,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> archivedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$PriceListsTableUpdateCompanionBuilder = PriceListsCompanion Function({
+  Value<String> id,
+  Value<String> title,
+  Value<String?> description,
+  Value<DateTime> effectiveDate,
+  Value<String> status,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> archivedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$PriceListsTableFilterComposer
+    extends Composer<_$AppDatabase, $PriceListsTable> {
+  $$PriceListsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get effectiveDate => $composableBuilder(
+      column: $table.effectiveDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PriceListsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PriceListsTable> {
+  $$PriceListsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get effectiveDate => $composableBuilder(
+      column: $table.effectiveDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PriceListsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PriceListsTable> {
+  $$PriceListsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get effectiveDate => $composableBuilder(
+      column: $table.effectiveDate, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$PriceListsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PriceListsTable,
+    PriceList,
+    $$PriceListsTableFilterComposer,
+    $$PriceListsTableOrderingComposer,
+    $$PriceListsTableAnnotationComposer,
+    $$PriceListsTableCreateCompanionBuilder,
+    $$PriceListsTableUpdateCompanionBuilder,
+    (PriceList, BaseReferences<_$AppDatabase, $PriceListsTable, PriceList>),
+    PriceList,
+    PrefetchHooks Function()> {
+  $$PriceListsTableTableManager(_$AppDatabase db, $PriceListsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PriceListsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PriceListsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PriceListsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String?> description = const Value.absent(),
+            Value<DateTime> effectiveDate = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> archivedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PriceListsCompanion(
+            id: id,
+            title: title,
+            description: description,
+            effectiveDate: effectiveDate,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            archivedAt: archivedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String title,
+            Value<String?> description = const Value.absent(),
+            required DateTime effectiveDate,
+            required String status,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> archivedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PriceListsCompanion.insert(
+            id: id,
+            title: title,
+            description: description,
+            effectiveDate: effectiveDate,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            archivedAt: archivedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PriceListsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PriceListsTable,
+    PriceList,
+    $$PriceListsTableFilterComposer,
+    $$PriceListsTableOrderingComposer,
+    $$PriceListsTableAnnotationComposer,
+    $$PriceListsTableCreateCompanionBuilder,
+    $$PriceListsTableUpdateCompanionBuilder,
+    (PriceList, BaseReferences<_$AppDatabase, $PriceListsTable, PriceList>),
+    PriceList,
+    PrefetchHooks Function()>;
+typedef $$PriceListItemsTableCreateCompanionBuilder = PriceListItemsCompanion
+    Function({
+  required String id,
+  required String priceListId,
+  required String productName,
+  required String currency,
+  required int minPriceMinor,
+  required int maxPriceMinor,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$PriceListItemsTableUpdateCompanionBuilder = PriceListItemsCompanion
+    Function({
+  Value<String> id,
+  Value<String> priceListId,
+  Value<String> productName,
+  Value<String> currency,
+  Value<int> minPriceMinor,
+  Value<int> maxPriceMinor,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$PriceListItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $PriceListItemsTable> {
+  $$PriceListItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get priceListId => $composableBuilder(
+      column: $table.priceListId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get minPriceMinor => $composableBuilder(
+      column: $table.minPriceMinor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get maxPriceMinor => $composableBuilder(
+      column: $table.maxPriceMinor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PriceListItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PriceListItemsTable> {
+  $$PriceListItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get priceListId => $composableBuilder(
+      column: $table.priceListId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get minPriceMinor => $composableBuilder(
+      column: $table.minPriceMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get maxPriceMinor => $composableBuilder(
+      column: $table.maxPriceMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PriceListItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PriceListItemsTable> {
+  $$PriceListItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get priceListId => $composableBuilder(
+      column: $table.priceListId, builder: (column) => column);
+
+  GeneratedColumn<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<int> get minPriceMinor => $composableBuilder(
+      column: $table.minPriceMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get maxPriceMinor => $composableBuilder(
+      column: $table.maxPriceMinor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$PriceListItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PriceListItemsTable,
+    PriceListItem,
+    $$PriceListItemsTableFilterComposer,
+    $$PriceListItemsTableOrderingComposer,
+    $$PriceListItemsTableAnnotationComposer,
+    $$PriceListItemsTableCreateCompanionBuilder,
+    $$PriceListItemsTableUpdateCompanionBuilder,
+    (
+      PriceListItem,
+      BaseReferences<_$AppDatabase, $PriceListItemsTable, PriceListItem>
+    ),
+    PriceListItem,
+    PrefetchHooks Function()> {
+  $$PriceListItemsTableTableManager(
+      _$AppDatabase db, $PriceListItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PriceListItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PriceListItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PriceListItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> priceListId = const Value.absent(),
+            Value<String> productName = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<int> minPriceMinor = const Value.absent(),
+            Value<int> maxPriceMinor = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PriceListItemsCompanion(
+            id: id,
+            priceListId: priceListId,
+            productName: productName,
+            currency: currency,
+            minPriceMinor: minPriceMinor,
+            maxPriceMinor: maxPriceMinor,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String priceListId,
+            required String productName,
+            required String currency,
+            required int minPriceMinor,
+            required int maxPriceMinor,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PriceListItemsCompanion.insert(
+            id: id,
+            priceListId: priceListId,
+            productName: productName,
+            currency: currency,
+            minPriceMinor: minPriceMinor,
+            maxPriceMinor: maxPriceMinor,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PriceListItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PriceListItemsTable,
+    PriceListItem,
+    $$PriceListItemsTableFilterComposer,
+    $$PriceListItemsTableOrderingComposer,
+    $$PriceListItemsTableAnnotationComposer,
+    $$PriceListItemsTableCreateCompanionBuilder,
+    $$PriceListItemsTableUpdateCompanionBuilder,
+    (
+      PriceListItem,
+      BaseReferences<_$AppDatabase, $PriceListItemsTable, PriceListItem>
+    ),
+    PriceListItem,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8912,6 +11100,8 @@ class $AppDatabaseManager {
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$CustomersTableTableManager get customers =>
       $$CustomersTableTableManager(_db, _db.customers);
+  $$CustomerContactsTableTableManager get customerContacts =>
+      $$CustomerContactsTableTableManager(_db, _db.customerContacts);
   $$DueRecordsTableTableManager get dueRecords =>
       $$DueRecordsTableTableManager(_db, _db.dueRecords);
   $$MeetingsTableTableManager get meetings =>
@@ -8928,4 +11118,8 @@ class $AppDatabaseManager {
       $$LegalTextTemplatesTableTableManager(_db, _db.legalTextTemplates);
   $$RemindersTableTableManager get reminders =>
       $$RemindersTableTableManager(_db, _db.reminders);
+  $$PriceListsTableTableManager get priceLists =>
+      $$PriceListsTableTableManager(_db, _db.priceLists);
+  $$PriceListItemsTableTableManager get priceListItems =>
+      $$PriceListItemsTableTableManager(_db, _db.priceListItems);
 }

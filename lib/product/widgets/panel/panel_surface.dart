@@ -24,6 +24,7 @@ class PanelSurface extends StatelessWidget {
     final surface = Container(
       width: maxWidth,
       padding: padding,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppUiTokens.surface,
         borderRadius: radius,

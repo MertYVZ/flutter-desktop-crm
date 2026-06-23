@@ -10,11 +10,12 @@ import 'package:file_picker/file_picker.dart';
 final class DueTrackingExportService {
   Future<bool> exportDueRecordsToExcel(List<DueRecordListItem> records) async {
     final excel = Excel.createExcel();
-    final defaultSheet = excel.getDefaultSheet();
-    if (defaultSheet != null) {
-      excel.delete(defaultSheet);
+    const sheetTitle = 'Vade Takip';
+    final defaultSheetName = excel.sheets.keys.first;
+    if (defaultSheetName != sheetTitle) {
+      excel.rename(defaultSheetName, sheetTitle);
     }
-    final sheet = excel['Vade Takip'];
+    final sheet = excel[sheetTitle];
 
     sheet.appendRow([
       TextCellValue('Müşteri adı'),

@@ -10,11 +10,12 @@ import 'package:file_picker/file_picker.dart';
 final class MeetingsExportService {
   Future<bool> exportMeetingsToExcel(List<MeetingListItem> meetings) async {
     final excel = Excel.createExcel();
-    final defaultSheet = excel.getDefaultSheet();
-    if (defaultSheet != null) {
-      excel.delete(defaultSheet);
+    const sheetTitle = 'Görüşmeler';
+    final defaultSheetName = excel.sheets.keys.first;
+    if (defaultSheetName != sheetTitle) {
+      excel.rename(defaultSheetName, sheetTitle);
     }
-    final sheet = excel['Görüşmeler'];
+    final sheet = excel[sheetTitle];
 
     sheet.appendRow([
       TextCellValue('Müşteri adı'),

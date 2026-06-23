@@ -15,6 +15,7 @@ class AnchoredOverlayLayout extends StatelessWidget {
     required this.onDismiss,
     required this.child,
     this.gap = AppUiTokens.space4,
+    this.alignToAnchorEnd = false,
     super.key,
   });
 
@@ -26,6 +27,7 @@ class AnchoredOverlayLayout extends StatelessWidget {
   final VoidCallback onDismiss;
   final Widget child;
   final double gap;
+  final bool alignToAnchorEnd;
 
   bool get _openUpward {
     final spaceBelow =
@@ -41,10 +43,13 @@ class AnchoredOverlayLayout extends StatelessWidget {
         : anchorOffset.dy + anchorSize.height + gap;
 
     final maxLeft = screenSize.width - menuWidth - AppUiTokens.space8;
-    final left = anchorOffset.dx.clamp(
-      AppUiTokens.space8,
-      maxLeft < AppUiTokens.space8 ? AppUiTokens.space8 : maxLeft,
-    );
+    const minLeft = AppUiTokens.space8;
+    final clampedMaxLeft =
+        maxLeft < minLeft ? minLeft : maxLeft;
+    final rawLeft = alignToAnchorEnd
+        ? anchorOffset.dx + anchorSize.width - menuWidth
+        : anchorOffset.dx;
+    final left = rawLeft.clamp(minLeft, clampedMaxLeft);
 
     return Stack(
       children: [

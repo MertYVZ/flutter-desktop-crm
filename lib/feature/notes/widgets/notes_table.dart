@@ -5,6 +5,7 @@ import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/constants/note_messages.dart';
+import 'package:Ok/product/widgets/app_empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
@@ -65,19 +66,11 @@ class NotesTable extends StatelessWidget {
               ? NoteMessages.listFilteredEmpty
               : NoteMessages.listEmpty;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppUiTokens.space24,
-              vertical: AppUiTokens.space24,
-            ),
-            child: Center(
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppUiTokens.textSecondary,
-                    ),
-              ),
-            ),
+          return AppTableEmptyState(
+            message: message,
+            icon: controller.hasActiveFilters
+                ? Icons.search_off_outlined
+                : Icons.sticky_note_2_outlined,
           );
         }
 

@@ -29,6 +29,10 @@ enum AppRoutes {
   reminders,
   remindersNew,
   remindersEdit,
+  priceList,
+  priceListNew,
+  priceListDetail,
+  priceListEdit,
 }
 
 extension AppRoutesExtension on AppRoutes {
@@ -94,6 +98,14 @@ extension AppRoutesExtension on AppRoutes {
         return '/reminders/new';
       case AppRoutes.remindersEdit:
         return '/reminders/:id/edit';
+      case AppRoutes.priceList:
+        return '/price-list';
+      case AppRoutes.priceListNew:
+        return '/price-list/new';
+      case AppRoutes.priceListDetail:
+        return '/price-list/:id';
+      case AppRoutes.priceListEdit:
+        return '/price-list/:id/edit';
     }
   }
 
@@ -123,6 +135,10 @@ extension AppRoutesExtension on AppRoutes {
         return '/price-offers/$id/edit';
       case AppRoutes.remindersEdit:
         return '/reminders/$id/edit';
+      case AppRoutes.priceListDetail:
+        return '/price-list/$id';
+      case AppRoutes.priceListEdit:
+        return '/price-list/$id/edit';
       case AppRoutes.splash:
       case AppRoutes.login:
       case AppRoutes.changePassword:
@@ -142,6 +158,8 @@ extension AppRoutesExtension on AppRoutes {
       case AppRoutes.priceOffersNew:
       case AppRoutes.reminders:
       case AppRoutes.remindersNew:
+      case AppRoutes.priceList:
+      case AppRoutes.priceListNew:
         return value;
     }
   }

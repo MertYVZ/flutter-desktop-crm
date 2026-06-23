@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:Ok/feature/dashboard/controllers/dashboard_controller.dart';
+import 'package:Ok/feature/dashboard/widgets/dashboard_summary_cards.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_calendar.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_day_detail_panel.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -20,6 +21,28 @@ final class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends BaseState<DashboardPage> {
+  Size? _lastLoggedViewportSize;
+
+  void _logViewportSize(BuildContext context, BoxConstraints constraints) {
+    final viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
+    if (_lastLoggedViewportSize == viewportSize) {
+      return;
+    }
+    _lastLoggedViewportSize = viewportSize;
+
+    final mediaQuery = MediaQuery.sizeOf(context);
+    final windowSize = View.of(context).physicalSize / View.of(context).devicePixelRatio;
+
+    debugPrint(
+      '[Dashboard] Viewport: ${viewportSize.width.toStringAsFixed(0)} x '
+      '${viewportSize.height.toStringAsFixed(0)} | '
+      'MediaQuery: ${mediaQuery.width.toStringAsFixed(0)} x '
+      '${mediaQuery.height.toStringAsFixed(0)} | '
+      'Window: ${windowSize.width.toStringAsFixed(0)} x '
+      '${windowSize.height.toStringAsFixed(0)}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseView<DashboardController>(
@@ -31,55 +54,83 @@ class _DashboardPageState extends BaseState<DashboardPage> {
 
           return LayoutBuilder(
             builder: (context, constraints) {
+              _logViewportSize(context, constraints);
               final isCompact = constraints.maxWidth < 960;
-              final boardHeight = _boardHeight(constraints);
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (error != null) ...[
-                    PanelMessage(message: error),
+              return PanelFormScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (error != null) ...[
+                      PanelMessage(message: error),
+                      const SizedBox(height: AppUiTokens.space16),
+                    ],
+                    DashboardSummaryCards(controller: controller),
                     const SizedBox(height: AppUiTokens.space16),
-                  ],
-                  if (isCompact)
-                    _CompactDashboardBoard(
-                      controller: controller,
-                    )
-                  else
-                    PanelSurface(
-                      padding: EdgeInsets.zero,
-                      borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
-                      child: SizedBox(
-                        height: boardHeight,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: DashboardCalendar(
-                                controller: controller,
-                                expanded: true,
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 1,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: AppUiTokens.border,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 330,
-                              child: DashboardDayDetailPanel(
-                                controller: controller,
-                                fullWidth: true,
-                              ),
-                            ),
-                          ],
+                    if (isCompact) ...[
+                      PanelSurface(
+                        padding: EdgeInsets.zero,
+                        borderRadius:
+                            BorderRadius.circular(AppUiTokens.radiusLg),
+                        child: DashboardCalendar(controller: controller),
+                      ),
+                      const SizedBox(height: AppUiTokens.space16),
+                      PanelSurface(
+                        padding: EdgeInsets.zero,
+                        borderRadius:
+                            BorderRadius.circular(AppUiTokens.radiusLg),
+                        child: DashboardDayDetailPanel(
+                          controller: controller,
+                          fullWidth: true,
                         ),
                       ),
-                    ),
-                ],
+                    ] else
+                      Obx(() {
+                        final month = controller.selectedMonth.value;
+                        const sidebarWidth = 360.0;
+
+                        return PanelSurface(
+                          padding: EdgeInsets.zero,
+                          borderRadius:
+                              BorderRadius.circular(AppUiTokens.radiusLg),
+                          child: LayoutBuilder(
+                            builder: (context, panelConstraints) {
+                              final calendarWidth =
+                                  panelConstraints.maxWidth - sidebarWidth;
+                              final splitHeight =
+                                  DashboardCalendar.estimatedHeight(
+                                width: calendarWidth,
+                                month: month,
+                              );
+
+                              return SizedBox(
+                                height: splitHeight,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: DashboardCalendar(
+                                        controller: controller,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: sidebarWidth,
+                                      child: DashboardDayDetailPanel(
+                                        controller: controller,
+                                        showLeftBorder: true,
+                                        embeddedInSplitView: true,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }),
+                  ],
+                ),
               );
             },
           );
@@ -93,50 +144,5 @@ class _DashboardPageState extends BaseState<DashboardPage> {
     if (controller.selectedDate.value == null) {
       controller.selectDate(DateTime.now());
     }
-  }
-
-  double _boardHeight(BoxConstraints constraints) {
-    if (!constraints.maxHeight.isFinite) {
-      return 720;
-    }
-
-    if (constraints.maxHeight < 620) {
-      return 620;
-    }
-
-    return constraints.maxHeight;
-  }
-}
-
-class _CompactDashboardBoard extends StatelessWidget {
-  const _CompactDashboardBoard({
-    required this.controller,
-  });
-
-  final DashboardController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return PanelFormScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PanelSurface(
-            padding: EdgeInsets.zero,
-            borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
-            child: DashboardCalendar(controller: controller),
-          ),
-          const SizedBox(height: AppUiTokens.space16),
-          PanelSurface(
-            padding: EdgeInsets.zero,
-            borderRadius: BorderRadius.circular(AppUiTokens.radiusLg),
-            child: DashboardDayDetailPanel(
-              controller: controller,
-              fullWidth: true,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

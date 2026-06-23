@@ -223,5 +223,33 @@ final class AppScreens {
       middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
     ),
+    GetPage(
+      name: AppRoutes.priceListNew.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.priceListEdit.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.priceListDetail.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.priceList.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
   ];
 }

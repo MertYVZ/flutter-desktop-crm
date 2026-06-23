@@ -77,6 +77,21 @@ class MeetingDao extends DatabaseAccessor<AppDatabase> with _$MeetingDaoMixin {
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<MeetingListItem>> getMeetingsByCustomerId(
+    String customerId,
+  ) async {
+    final query = select(meetings).join([
+      innerJoin(customers, customers.id.equalsExp(meetings.customerId)),
+    ])
+      ..where(
+        meetings.deletedAt.isNull() & meetings.customerId.equals(customerId),
+      )
+      ..orderBy([OrderingTerm.desc(meetings.date)]);
+
+    final rows = await query.get();
+    return rows.map(_mapRowToListItem).toList();
+  }
+
   Future<Meeting?> getMeetingById(String id) => (select(meetings)
         ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
       .getSingleOrNull();

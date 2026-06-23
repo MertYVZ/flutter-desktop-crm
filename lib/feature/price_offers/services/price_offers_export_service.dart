@@ -10,11 +10,12 @@ import 'package:file_picker/file_picker.dart';
 final class PriceOffersExportService {
   Future<bool> exportOffersToExcel(List<PriceOfferListItem> offers) async {
     final excel = Excel.createExcel();
-    final defaultSheet = excel.getDefaultSheet();
-    if (defaultSheet != null) {
-      excel.delete(defaultSheet);
+    const sheetTitle = 'Fiyat Teklifleri';
+    final defaultSheetName = excel.sheets.keys.first;
+    if (defaultSheetName != sheetTitle) {
+      excel.rename(defaultSheetName, sheetTitle);
     }
-    final sheet = excel['Fiyat Teklifleri'];
+    final sheet = excel[sheetTitle];
 
     sheet.appendRow([
       TextCellValue('Tarih'),

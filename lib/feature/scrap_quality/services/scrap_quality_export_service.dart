@@ -9,11 +9,12 @@ import 'package:file_picker/file_picker.dart';
 final class ScrapQualityExportService {
   Future<bool> exportRecordsToExcel(List<ScrapQualityListItem> records) async {
     final excel = Excel.createExcel();
-    final defaultSheet = excel.getDefaultSheet();
-    if (defaultSheet != null) {
-      excel.delete(defaultSheet);
+    const sheetTitle = 'Hurda Kalite';
+    final defaultSheetName = excel.sheets.keys.first;
+    if (defaultSheetName != sheetTitle) {
+      excel.rename(defaultSheetName, sheetTitle);
     }
-    final sheet = excel['Hurda Kalite'];
+    final sheet = excel[sheetTitle];
 
     sheet.appendRow([
       TextCellValue('Müşteri adı'),

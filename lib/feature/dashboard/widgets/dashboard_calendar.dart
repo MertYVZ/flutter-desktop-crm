@@ -1,4 +1,5 @@
 import 'package:Ok/feature/dashboard/controllers/dashboard_controller.dart';
+import 'package:Ok/feature/dashboard/models/dashboard_calendar_event.dart';
 import 'package:Ok/feature/dashboard/models/dashboard_calendar_event_type.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
@@ -28,13 +29,7 @@ final class DashboardCalendar extends StatelessWidget {
         builder: (context, constraints) {
           final isCompact = constraints.maxWidth < 760;
           final weekCount = _weekCountForMonth(month);
-          final dayCellHeight = expanded
-              ? _expandedDayCellHeight(
-                  maxHeight: constraints.maxHeight,
-                  weekCount: weekCount,
-                  isCompact: isCompact,
-                )
-              : (isCompact ? 46.0 : 54.0);
+          final dayCellHeight = isCompact ? 88.0 : 100.0;
           final horizontalPadding =
               expanded ? AppUiTokens.space24 : AppUiTokens.space16;
           final topPadding =
@@ -43,6 +38,24 @@ final class DashboardCalendar extends StatelessWidget {
               expanded ? AppUiTokens.space16 : AppUiTokens.space12;
           final gridPadding =
               expanded ? AppUiTokens.space16 : AppUiTokens.space12;
+
+          final grid = isLoading && controller.calendarEvents.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: AppUiTokens.space40,
+                  ),
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : _CalendarGrid(
+                  month: month,
+                  today: today,
+                  selectedDate: selectedDate,
+                  dayCellHeight: dayCellHeight,
+                  getEventsForDate: controller.getEventsForDate,
+                  onDayTap: controller.selectDate,
+                );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,37 +82,41 @@ final class DashboardCalendar extends StatelessWidget {
                 ),
               ),
               const Divider(height: 1, color: AppUiTokens.border),
-              Padding(
-                padding: EdgeInsets.all(gridPadding),
-                child: isLoading && controller.calendarEvents.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: AppUiTokens.space40,
-                        ),
-                        child: Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : _CalendarGrid(
-                        month: month,
-                        today: today,
-                        selectedDate: selectedDate,
-                        dayCellHeight: dayCellHeight,
-                        getMeetingCount: (date) => _countForDate(
-                          date,
-                          DashboardCalendarEventType.meeting,
-                        ),
-                        getPriceOfferCount: (date) => _countForDate(
-                          date,
-                          DashboardCalendarEventType.priceOffer,
-                        ),
-                        getReminderCount: (date) => _countForDate(
-                          date,
-                          DashboardCalendarEventType.reminder,
-                        ),
-                        onDayTap: controller.selectDate,
-                      ),
-              ),
+              if (expanded)
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(gridPadding),
+                    child: LayoutBuilder(
+                      builder: (context, gridConstraints) {
+                        final fittedDayCellHeight = _expandedDayCellHeight(
+                          maxHeight: gridConstraints.maxHeight,
+                          weekCount: weekCount,
+                          isCompact: isCompact,
+                        );
+
+                        if (isLoading && controller.calendarEvents.isEmpty) {
+                          return const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          );
+                        }
+
+                        return _CalendarGrid(
+                          month: month,
+                          today: today,
+                          selectedDate: selectedDate,
+                          dayCellHeight: fittedDayCellHeight,
+                          getEventsForDate: controller.getEventsForDate,
+                          onDayTap: controller.selectDate,
+                        );
+                      },
+                    ),
+                  ),
+                )
+              else
+                Padding(
+                  padding: EdgeInsets.all(gridPadding),
+                  child: grid,
+                ),
             ],
           );
         },
@@ -114,50 +131,62 @@ final class DashboardCalendar extends StatelessWidget {
     );
   }
 
-  int _countForDate(DateTime date, DashboardCalendarEventType type) {
-    final normalized = AppDateUtils.normalizeDate(date);
-    return controller.calendarEvents
-        .where(
-          (event) =>
-              event.type == type &&
-              AppDateUtils.normalizeDate(event.date) == normalized,
-        )
-        .length;
-  }
-
-  int _weekCountForMonth(DateTime month) {
+  static int weekCountForMonth(DateTime month) {
     final firstDay = DateTime(month.year, month.month);
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     final totalCells = firstDay.weekday - 1 + daysInMonth;
     return (totalCells / 7).ceil();
   }
 
+  /// Fixed height for the non-expanded calendar used in dashboard split layout.
+  static double estimatedHeight({
+    required double width,
+    required DateTime month,
+  }) {
+    final isCompact = width < 760;
+    final weekCount = weekCountForMonth(month);
+    final dayCellHeight = isCompact ? 88.0 : 100.0;
+    const headerContentHeight = 44.0;
+    const compactHeaderContentHeight = 84.0;
+    const dividerHeight = 1.0;
+    const weekdayRowHeight = 28.0;
+
+    final gridRowsHeight =
+        weekCount * dayCellHeight + (weekCount - 1) * AppUiTokens.space4;
+
+    return AppUiTokens.space16 +
+        (isCompact ? compactHeaderContentHeight : headerContentHeight) +
+        AppUiTokens.space12 +
+        dividerHeight +
+        AppUiTokens.space12 * 2 +
+        weekdayRowHeight +
+        gridRowsHeight +
+        4;
+  }
+
+  int _weekCountForMonth(DateTime month) => weekCountForMonth(month);
+
   double _expandedDayCellHeight({
     required double maxHeight,
     required int weekCount,
     required bool isCompact,
   }) {
-    if (!maxHeight.isFinite) {
-      return isCompact ? 90 : 108;
+    if (!maxHeight.isFinite || maxHeight <= 0) {
+      return isCompact ? 80.0 : 88.0;
     }
 
-    const headerEstimate = 74.0;
-    const dividerHeight = 1.0;
-    const gridVerticalPadding = AppUiTokens.space16 * 2;
     const weekdayRowHeight = 28.0;
+    const safetyBuffer = 6.0;
     final rowGaps = (weekCount - 1) * AppUiTokens.space4;
-    final availableHeight = maxHeight -
-        headerEstimate -
-        dividerHeight -
-        gridVerticalPadding -
-        weekdayRowHeight -
-        rowGaps;
+    final availableHeight =
+        maxHeight - weekdayRowHeight - rowGaps - safetyBuffer;
+    if (availableHeight <= 0) {
+      return 56.0;
+    }
+
     final fittedHeight = availableHeight / weekCount;
 
-    return fittedHeight.clamp(
-      isCompact ? 64.0 : 72.0,
-      isCompact ? 90.0 : 108.0,
-    );
+    return fittedHeight.clamp(56.0, isCompact ? 124.0 : 148.0);
   }
 }
 
@@ -180,31 +209,34 @@ class _CalendarHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final monthStyle = expanded
+        ? Theme.of(context).textTheme.headlineMedium
+        : Theme.of(context).textTheme.headlineSmall;
+    final yearStyle = expanded
+        ? Theme.of(context).textTheme.headlineSmall
+        : Theme.of(context).textTheme.titleLarge;
+
     final title = Wrap(
-      spacing: AppUiTokens.space16,
-      runSpacing: AppUiTokens.space8,
+      spacing: AppUiTokens.space12,
+      runSpacing: AppUiTokens.space4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
           AppDateUtils.turkishMonths[month.month - 1],
-          style: (expanded
-                  ? Theme.of(context).textTheme.titleLarge
-                  : Theme.of(context).textTheme.titleSmall)
-              ?.copyWith(
+          style: monthStyle?.copyWith(
             color: AppUiTokens.textPrimary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.3,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            height: 1.1,
           ),
         ),
         Text(
           '${month.year}',
-          style: (expanded
-                  ? Theme.of(context).textTheme.titleLarge
-                  : Theme.of(context).textTheme.titleSmall)
-              ?.copyWith(
-            color: AppUiTokens.textPrimary,
-            fontWeight: FontWeight.w500,
+          style: yearStyle?.copyWith(
+            color: AppUiTokens.textSecondary,
+            fontWeight: FontWeight.w600,
             letterSpacing: -0.3,
+            height: 1.1,
           ),
         ),
       ],
@@ -316,9 +348,7 @@ class _CalendarGrid extends StatelessWidget {
     required this.today,
     required this.selectedDate,
     required this.dayCellHeight,
-    required this.getMeetingCount,
-    required this.getPriceOfferCount,
-    required this.getReminderCount,
+    required this.getEventsForDate,
     required this.onDayTap,
   });
 
@@ -326,9 +356,7 @@ class _CalendarGrid extends StatelessWidget {
   final DateTime today;
   final DateTime? selectedDate;
   final double dayCellHeight;
-  final int Function(DateTime date) getMeetingCount;
-  final int Function(DateTime date) getPriceOfferCount;
-  final int Function(DateTime date) getReminderCount;
+  final List<DashboardCalendarEvent> Function(DateTime date) getEventsForDate;
   final ValueChanged<DateTime> onDayTap;
 
   @override
@@ -355,14 +383,14 @@ class _CalendarGrid extends StatelessWidget {
                       height: 24,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: AppUiTokens.surfaceMuted,
+                        color: AppUiTokens.textPrimary,
                         borderRadius:
                             BorderRadius.circular(AppUiTokens.radiusSm),
                       ),
                       child: Text(
                         day,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppUiTokens.textMuted,
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 11,
                             ),
@@ -396,6 +424,7 @@ class _CalendarGrid extends StatelessWidget {
                   final isToday = normalized == today;
                   final isSelected = selectedDate != null &&
                       normalized == AppDateUtils.normalizeDate(selectedDate!);
+                  final events = getEventsForDate(date);
 
                   return Expanded(
                     child: _DayCell(
@@ -404,9 +433,7 @@ class _CalendarGrid extends StatelessWidget {
                       isToday: isToday,
                       isSelected: isSelected,
                       height: dayCellHeight,
-                      meetingCount: getMeetingCount(date),
-                      priceOfferCount: getPriceOfferCount(date),
-                      reminderCount: getReminderCount(date),
+                      events: events,
                       onTap: () => onDayTap(date),
                     ),
                   );
@@ -432,9 +459,7 @@ class _DayCell extends StatelessWidget {
     required this.isToday,
     required this.isSelected,
     required this.height,
-    required this.meetingCount,
-    required this.priceOfferCount,
-    required this.reminderCount,
+    required this.events,
     required this.onTap,
   });
 
@@ -443,148 +468,165 @@ class _DayCell extends StatelessWidget {
   final bool isToday;
   final bool isSelected;
   final double height;
-  final int meetingCount;
-  final int priceOfferCount;
-  final int reminderCount;
+  final List<DashboardCalendarEvent> events;
   final VoidCallback onTap;
+
+  static const _cellPadding = AppUiTokens.space8;
+  static const _headerBlockHeight = 24.0;
+  static const _headerBadgeGap = AppUiTokens.space12;
+  static const _badgeHeight = 26.0;
+  static const _badgeSpacing = 5.0;
+
+  ({List<DashboardCalendarEvent> visible, int hidden}) _resolveVisibleEvents(
+    double height,
+  ) {
+    final badgeAreaHeight = height -
+        (_cellPadding * 2) -
+        _headerBlockHeight -
+        (events.isEmpty ? 0 : _headerBadgeGap);
+
+    if (badgeAreaHeight < _badgeHeight || events.isEmpty) {
+      return (visible: const [], hidden: 0);
+    }
+
+    for (var count = events.length.clamp(0, 4); count >= 0; count--) {
+      final hidden = events.length - count;
+      final neededHeight = _badgesBlockHeight(
+        badgeCount: count,
+        includeOverflow: hidden > 0,
+      );
+      if (neededHeight <= badgeAreaHeight + 0.5) {
+        return (
+          visible: events.take(count).toList(),
+          hidden: hidden,
+        );
+      }
+    }
+
+    return (visible: const [], hidden: 0);
+  }
+
+  double _badgesBlockHeight({
+    required int badgeCount,
+    required bool includeOverflow,
+  }) {
+    if (badgeCount <= 0 && !includeOverflow) {
+      return 0;
+    }
+
+    var height = badgeCount * _badgeHeight;
+    if (badgeCount > 1) {
+      height += (badgeCount - 1) * _badgeSpacing;
+    }
+    if (includeOverflow) {
+      if (badgeCount > 0) {
+        height += _badgeSpacing;
+      }
+      height += _badgeHeight;
+    }
+    return height;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final hasEvents = events.isNotEmpty;
+    final accentColor = hasEvents ? _primaryEventColor : AppUiTokens.border;
     final borderColor = isSelected
         ? ColorName.primary
         : isToday
             ? ColorName.primary.withValues(alpha: 0.4)
-            : hasEvents
-                ? _eventAccentColor.withValues(alpha: 0.28)
-                : AppUiTokens.border;
+            : AppUiTokens.border;
     final backgroundColor = isSelected
         ? ColorName.primary.withValues(alpha: 0.08)
         : isToday
             ? AppUiTokens.surfaceMuted
-            : hasEvents
-                ? const Color(0xFFF8FAFC)
-                : AppUiTokens.surface;
+            : AppUiTokens.surface;
+    final resolved = _resolveVisibleEvents(height);
+    final visibleEvents = resolved.visible;
+    final hiddenCount = resolved.hidden;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Material(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
         child: InkWell(
           onTap: onTap,
           mouseCursor: SystemMouseCursors.click,
-          borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+          borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
           hoverColor: AppUiTokens.surfaceMuted,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             height: height,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 6,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.all(_cellPadding),
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
               border: Border.all(
                 color: borderColor,
                 width: isSelected ? 1.5 : 1,
               ),
-              boxShadow: hasEvents || isSelected
+              boxShadow: isSelected || isToday
                   ? [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.035),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ]
                   : null,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: Center(
-                        child: isToday
-                            ? Container(
-                                width: 22,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  color: ColorName.primary,
-                                  borderRadius: BorderRadius.circular(11),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '$dayNumber',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 11,
-                                      ),
-                                ),
-                              )
-                            : Text(
-                                '$dayNumber',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color: isSelected
-                                          ? ColorName.primary
-                                          : AppUiTokens.textPrimary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                              ),
+                SizedBox(
+                  height: _headerBlockHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _DayNumberBadge(
+                        dayNumber: dayNumber,
+                        isToday: isToday,
+                        isSelected: isSelected,
                       ),
-                    ),
-                    const Spacer(),
-                    if (totalEventCount > 0)
-                      Container(
-                        height: 18,
-                        constraints: const BoxConstraints(minWidth: 18),
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: _eventAccentColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: _eventAccentColor.withValues(alpha: 0.18),
+                      const Spacer(),
+                      if (hasEvents)
+                        Container(
+                          height: 20,
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.1),
+                            borderRadius:
+                                BorderRadius.circular(AppUiTokens.radiusSm),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${events.length}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: accentColor,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10,
+                                ),
                           ),
                         ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '$totalEventCount',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: _eventAccentColor,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 10,
-                                    height: 1,
-                                  ),
-                        ),
-                      ),
-                  ],
-                ),
-                const Spacer(),
-                if (hasEvents)
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: [
-                      if (meetingCount > 0)
-                        const _EventDot(color: Color(0xFF2563EB)),
-                      if (priceOfferCount > 0)
-                        const _EventDot(color: Color(0xFFF59E0B)),
-                      if (reminderCount > 0)
-                        const _EventDot(color: Color(0xFF7C3AED)),
                     ],
                   ),
+                ),
+                if (visibleEvents.isNotEmpty || hiddenCount > 0) ...[
+                  const SizedBox(height: _headerBadgeGap),
+                  if (visibleEvents.isNotEmpty)
+                    for (var i = 0; i < visibleEvents.length; i++) ...[
+                      _DayEventBadge(event: visibleEvents[i]),
+                      if (i < visibleEvents.length - 1 || hiddenCount > 0)
+                        const SizedBox(height: _badgeSpacing),
+                    ],
+                  if (hiddenCount > 0)
+                    _DayEventBadge.overflow(count: hiddenCount),
+                ],
               ],
             ),
           ),
@@ -593,35 +635,189 @@ class _DayCell extends StatelessWidget {
     );
   }
 
-  bool get hasEvents =>
-      meetingCount > 0 || priceOfferCount > 0 || reminderCount > 0;
-
-  int get totalEventCount => meetingCount + priceOfferCount + reminderCount;
-
-  Color get _eventAccentColor {
-    if (meetingCount > 0) {
-      return const Color(0xFF2563EB);
+  Color get _primaryEventColor {
+    for (final event in events) {
+      return _colorForType(event.type);
     }
-    if (priceOfferCount > 0) {
-      return const Color(0xFFF59E0B);
+    return AppUiTokens.border;
+  }
+
+  static Color _colorForType(DashboardCalendarEventType type) {
+    switch (type) {
+      case DashboardCalendarEventType.meeting:
+        return const Color(0xFF2563EB);
+      case DashboardCalendarEventType.priceOffer:
+        return const Color(0xFFF59E0B);
+      case DashboardCalendarEventType.reminder:
+        return const Color(0xFF7C3AED);
     }
-    return const Color(0xFF7C3AED);
   }
 }
 
-class _EventDot extends StatelessWidget {
-  const _EventDot({required this.color});
+class _DayNumberBadge extends StatelessWidget {
+  const _DayNumberBadge({
+    required this.dayNumber,
+    required this.isToday,
+    required this.isSelected,
+  });
+
+  final int dayNumber;
+  final bool isToday;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isToday) {
+      return Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: ColorName.primary,
+          borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '$dayNumber',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 24,
+      height: 24,
+      alignment: Alignment.center,
+      decoration: isSelected
+          ? BoxDecoration(
+              color: ColorName.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+            )
+          : null,
+      child: Text(
+        '$dayNumber',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: isSelected ? ColorName.primary : AppUiTokens.textPrimary,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+      ),
+    );
+  }
+}
+
+class _DayEventBadge extends StatelessWidget {
+  const _DayEventBadge({required this.event}) : count = null;
+
+  const _DayEventBadge.overflow({required this.count}) : event = null;
+
+  final DashboardCalendarEvent? event;
+  final int? count;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count != null) {
+      return _BadgeShell(
+        color: AppUiTokens.textMuted,
+        label: '+$count kayıt',
+        typeLabel: null,
+      );
+    }
+
+    final currentEvent = event!;
+    final color = _DayCell._colorForType(currentEvent.type);
+
+    return _BadgeShell(
+      color: color,
+      label: _contentLabel(currentEvent),
+      typeLabel: currentEvent.type.label,
+    );
+  }
+
+  String _contentLabel(DashboardCalendarEvent event) {
+    final subtitle = event.subtitle?.trim();
+    if (subtitle != null && subtitle.isNotEmpty) {
+      return subtitle;
+    }
+
+    final customer = event.customerName?.trim();
+    if (customer != null && customer.isNotEmpty) {
+      return customer;
+    }
+
+    return event.title;
+  }
+}
+
+class _BadgeShell extends StatelessWidget {
+  const _BadgeShell({
+    required this.color,
+    required this.label,
+    required this.typeLabel,
+  });
 
   final Color color;
+  final String label;
+  final String? typeLabel;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 7,
-      height: 7,
+      height: _DayCell._badgeHeight,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+        border: Border.all(color: color.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 14,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (typeLabel != null) ...[
+            Text(
+              typeLabel!,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                  ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '·',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppUiTokens.textMuted,
+                    fontSize: 10,
+                  ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppUiTokens.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
+                    height: 1.1,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

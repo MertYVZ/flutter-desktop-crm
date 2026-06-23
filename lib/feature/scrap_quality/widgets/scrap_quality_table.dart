@@ -5,6 +5,7 @@ import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/quantity_utils.dart';
+import 'package:Ok/product/widgets/app_empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
@@ -64,19 +65,11 @@ class ScrapQualityTable extends StatelessWidget {
               ? 'Kriterlere uygun hurda kalite kaydı bulunamadı.'
               : 'Henüz hurda kalite kaydı bulunmuyor.';
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppUiTokens.space24,
-              vertical: AppUiTokens.space24,
-            ),
-            child: Center(
-              child: Text(
-                message,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppUiTokens.textSecondary,
-                    ),
-              ),
-            ),
+          return AppTableEmptyState(
+            message: message,
+            icon: controller.hasActiveFilters
+                ? Icons.search_off_outlined
+                : Icons.recycling_outlined,
           );
         }
 

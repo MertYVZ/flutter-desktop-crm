@@ -8,11 +8,12 @@ import 'package:file_picker/file_picker.dart';
 final class NotesExportService {
   Future<bool> exportNotesToExcel(List<NoteListItem> records) async {
     final excel = Excel.createExcel();
-    final defaultSheet = excel.getDefaultSheet();
-    if (defaultSheet != null) {
-      excel.delete(defaultSheet);
+    const sheetTitle = 'Not Defteri';
+    final defaultSheetName = excel.sheets.keys.first;
+    if (defaultSheetName != sheetTitle) {
+      excel.rename(defaultSheetName, sheetTitle);
     }
-    final sheet = excel['Not Defteri'];
+    final sheet = excel[sheetTitle];
 
     sheet.appendRow([
       TextCellValue('Müşteri'),

@@ -67,6 +67,22 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<PriceOfferListItem>> getOffersByCustomerId(
+    String customerId,
+  ) async {
+    final query = select(priceOffers).join([
+      innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
+    ])
+      ..where(
+        priceOffers.deletedAt.isNull() &
+            priceOffers.customerId.equals(customerId),
+      )
+      ..orderBy([OrderingTerm.desc(priceOffers.offerDate)]);
+
+    final rows = await query.get();
+    return rows.map(_mapRowToListItem).toList();
+  }
+
   Future<PriceOfferDetail?> getOfferDetailById(String id) async {
     final offerQuery = select(priceOffers).join([
       innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),

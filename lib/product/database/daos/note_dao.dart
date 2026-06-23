@@ -63,6 +63,22 @@ class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<NoteListItem>> getNotesByCustomerId(String customerId) async {
+    final query = select(notes).join([
+      leftOuterJoin(
+        customers,
+        customers.id.equalsExp(notes.customerId),
+      ),
+    ])
+      ..where(
+        notes.deletedAt.isNull() & notes.customerId.equals(customerId),
+      )
+      ..orderBy([OrderingTerm.desc(notes.createdAt)]);
+
+    final rows = await query.get();
+    return rows.map(_mapRowToListItem).toList();
+  }
+
   Future<Note?> getNoteById(String id) => (select(notes)
         ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
       .getSingleOrNull();

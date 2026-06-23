@@ -5,6 +5,9 @@ import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
+import 'package:Ok/product/widgets/app_empty_state.dart';
+import 'package:Ok/product/widgets/app_status_badge.dart';
+import 'package:Ok/product/widgets/status_badge_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
@@ -66,19 +69,11 @@ class CustomersTable extends StatelessWidget {
             ? 'Kriterlere uygun müşteri bulunamadı.'
             : 'Henüz müşteri kaydı bulunmuyor.';
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppUiTokens.space24,
-            vertical: AppUiTokens.space24,
-          ),
-          child: Center(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppUiTokens.textSecondary,
-                  ),
-            ),
-          ),
+        return AppTableEmptyState(
+          message: message,
+          icon: controller.hasActiveFilters
+              ? Icons.search_off_outlined
+              : Icons.people_outline_rounded,
         );
       }
 
@@ -179,7 +174,15 @@ class CustomersTable extends StatelessWidget {
         DataCell(Text(customer.city ?? '-', style: _dataStyle)),
         DataCell(Text(customer.phone ?? '-', style: _dataStyle)),
         DataCell(Text(customer.email ?? '-', style: _dataStyle)),
-        DataCell(Text(status?.label ?? '-', style: _dataStyle)),
+        DataCell(
+          status == null
+              ? Text('-', style: _dataStyle)
+              : AppStatusBadge(
+                  label: status.label,
+                  style: status.badgeStyle,
+                  compact: true,
+                ),
+        ),
         DataCell(
           Row(
             mainAxisSize: MainAxisSize.min,
