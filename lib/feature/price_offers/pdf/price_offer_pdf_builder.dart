@@ -21,7 +21,10 @@ final class PriceOfferPdfBuilder {
 
   static const _pageMargin = 44.0;
   static const _logoAssetPath = 'assets/pdf/logo.png';
-  static const _headerLogoHeight = 110.0;
+  static const _headerLogoWidth = 210.0;
+
+  /// Logo PNG'sinin üst ~%35'inde içerik var; alt boşluk kırpılır.
+  static const _logoVisibleHeightRatio = 0.35;
 
   static const _brandPrimary = PdfColor.fromInt(0xFFED7C02);
   static const _brandTint = PdfColor.fromInt(0xFFFFF4E8);
@@ -64,16 +67,16 @@ final class PriceOfferPdfBuilder {
           _buildPageHeader(regularFont, boldFont, logoImage),
           pw.SizedBox(height: 20),
           _buildPartiesSection(regularFont, boldFont),
-          pw.SizedBox(height: 20),
-          _buildProductsTable(regularFont, boldFont),
+          pw.SizedBox(height: 12),
+          ..._buildProductsTable(regularFont, boldFont),
           pw.SizedBox(height: 16),
           ..._buildCurrencyTotals(regularFont, boldFont),
-          pw.SizedBox(height: 24),
-          ..._buildCompanyFooter(regularFont),
           pw.SizedBox(height: 24),
           _buildLegalHeading(boldFont),
           pw.SizedBox(height: 10),
           ..._buildLegalBody(regularFont),
+          pw.SizedBox(height: 24),
+          ..._buildCompanyFooter(regularFont),
         ],
       ),
     );
@@ -112,47 +115,48 @@ final class PriceOfferPdfBuilder {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        pw.Row(
+        pw.Stack(
           children: [
-            pw.Expanded(
-              flex: 3,
-              child: pw.Align(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Image(
-                  logoImage,
-                  height: _headerLogoHeight,
-                ),
+            pw.Align(
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Image(
+                logoImage,
+                width: _headerLogoWidth,
+                height: _headerLogoWidth * _logoVisibleHeightRatio,
+                fit: pw.BoxFit.fitWidth,
+                alignment: pw.Alignment.topCenter,
               ),
             ),
-            pw.SizedBox(width: 12),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              mainAxisAlignment: pw.MainAxisAlignment.center,
-              children: [
-                pw.Text(
-                  'TEKLİF FORMU',
-                  style: pw.TextStyle(
-                    font: boldFont,
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                    color: _textPrimary,
-                    letterSpacing: 0.6,
+            pw.Align(
+              alignment: pw.Alignment.topRight,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    'TEKLİF FORMU',
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                      color: _textPrimary,
+                      letterSpacing: 0.6,
+                    ),
                   ),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  AppDateUtils.formatDate(offer.offerDate),
-                  style: pw.TextStyle(
-                    font: regularFont,
-                    fontSize: 10,
-                    color: _textSecondary,
+                  pw.SizedBox(height: 4),
+                  pw.Text(
+                    AppDateUtils.formatDate(offer.offerDate),
+                    style: pw.TextStyle(
+                      font: regularFont,
+                      fontSize: 10,
+                      color: _textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
-        pw.SizedBox(height: 18),
+        pw.SizedBox(height: 8),
         pw.Container(height: 1, color: _borderColor),
       ],
     );
@@ -165,7 +169,7 @@ final class PriceOfferPdfBuilder {
         border: pw.Border.all(color: _borderColor, width: 0.5),
         borderRadius: pw.BorderRadius.circular(6),
       ),
-      padding: const pw.EdgeInsets.all(14),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
@@ -274,17 +278,25 @@ final class PriceOfferPdfBuilder {
     );
   }
 
-  pw.Widget _buildProductsTable(pw.Font regularFont, pw.Font boldFont) {
+  List<pw.Widget> _buildProductsTable(pw.Font regularFont, pw.Font boldFont) {
     final headerStyle = pw.TextStyle(
       font: boldFont,
       fontSize: 9,
       fontWeight: pw.FontWeight.bold,
       color: _textPrimary,
     );
-    final cellStyle = pw.TextStyle(font: regularFont, fontSize: 9, color: _textPrimary);
+    final cellStyle =
+        pw.TextStyle(font: regularFont, fontSize: 9, color: _textPrimary);
     final borderSide = pw.BorderSide(color: _borderColor, width: 0.5);
+    const columnWidths = {
+      0: pw.FlexColumnWidth(2.8),
+      1: pw.FlexColumnWidth(1.1),
+      2: pw.FlexColumnWidth(1.3),
+      3: pw.FlexColumnWidth(1.2),
+    };
 
-    pw.Widget headerCell(String text, {pw.TextAlign align = pw.TextAlign.left}) {
+    pw.Widget headerCell(String text,
+        {pw.TextAlign align = pw.TextAlign.left}) {
       return pw.Container(
         color: _brandTint,
         padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -302,57 +314,70 @@ final class PriceOfferPdfBuilder {
       );
     }
 
-    final rows = <pw.TableRow>[
-      pw.TableRow(
-        decoration: pw.BoxDecoration(
-          border: pw.Border(bottom: borderSide),
-        ),
+    pw.TableBorder tableBorder({
+      required bool isHeader,
+      required bool isLastRow,
+    }) {
+      return pw.TableBorder(
+        left: borderSide,
+        right: borderSide,
+        top: isHeader ? borderSide : pw.BorderSide.none,
+        bottom: isLastRow ? borderSide : pw.BorderSide.none,
+        horizontalInside: pw.BorderSide(color: _borderColor, width: 0.25),
+        verticalInside: pw.BorderSide(color: _borderColor, width: 0.25),
+      );
+    }
+
+    final widgets = <pw.Widget>[
+      pw.Table(
+        border: tableBorder(isHeader: true, isLastRow: offer.items.isEmpty),
+        columnWidths: columnWidths,
         children: [
-          headerCell('ÜRÜN'),
-          headerCell('MİKTAR'),
-          headerCell('BİRİM FİYAT'),
-          headerCell('TOPLAM', align: pw.TextAlign.right),
+          pw.TableRow(
+            children: [
+              headerCell('ÜRÜN'),
+              headerCell('MİKTAR'),
+              headerCell('BİRİM FİYAT'),
+              headerCell('TOPLAM', align: pw.TextAlign.right),
+            ],
+          ),
         ],
       ),
-      for (var i = 0; i < offer.items.length; i++)
-        pw.TableRow(
-          decoration: pw.BoxDecoration(
-            color: i.isOdd ? _surfaceAlt : PdfColors.white,
-            border: pw.Border(
-              bottom: i == offer.items.length - 1
-                  ? borderSide
-                  : pw.BorderSide.none,
-            ),
+    ];
+
+    for (var i = 0; i < offer.items.length; i++) {
+      final item = offer.items[i];
+      widgets.add(
+        pw.Table(
+          border: tableBorder(
+            isHeader: false,
+            isLastRow: i == offer.items.length - 1,
           ),
+          columnWidths: columnWidths,
           children: [
-            dataCell(offer.items[i].productName),
-            dataCell(_formatQuantityWithUnit(offer.items[i])),
-            dataCell(_formatUnitPrice(offer.items[i])),
-            dataCell(
-              _formatRowTotal(offer.items[i]),
-              align: pw.TextAlign.right,
+            pw.TableRow(
+              decoration: pw.BoxDecoration(
+                color: i.isOdd ? _surfaceAlt : PdfColors.white,
+                border: pw.Border(
+                  bottom: pw.BorderSide(color: _borderColor, width: 0.25),
+                ),
+              ),
+              children: [
+                dataCell(item.productName),
+                dataCell(_formatQuantityWithUnit(item)),
+                dataCell(_formatUnitPrice(item)),
+                dataCell(
+                  _formatRowTotal(item),
+                  align: pw.TextAlign.right,
+                ),
+              ],
             ),
           ],
         ),
-    ];
+      );
+    }
 
-    return pw.Table(
-      border: pw.TableBorder(
-        left: borderSide,
-        right: borderSide,
-        top: borderSide,
-        bottom: borderSide,
-        horizontalInside: pw.BorderSide(color: _borderColor, width: 0.25),
-        verticalInside: pw.BorderSide(color: _borderColor, width: 0.25),
-      ),
-      columnWidths: {
-        0: const pw.FlexColumnWidth(2.8),
-        1: const pw.FlexColumnWidth(1.1),
-        2: const pw.FlexColumnWidth(1.3),
-        3: const pw.FlexColumnWidth(1.2),
-      },
-      children: rows,
-    );
+    return widgets;
   }
 
   List<pw.Widget> _buildCurrencyTotals(pw.Font regularFont, pw.Font boldFont) {
@@ -551,7 +576,8 @@ final class PriceOfferPdfBuilder {
     };
   }
 
-  due_currency.CurrencyType _mapOfferCurrency(PriceOfferCurrencyType? currency) {
+  due_currency.CurrencyType _mapOfferCurrency(
+      PriceOfferCurrencyType? currency) {
     switch (currency) {
       case PriceOfferCurrencyType.try_:
         return due_currency.CurrencyType.try_;

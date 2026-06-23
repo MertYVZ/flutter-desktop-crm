@@ -26,8 +26,10 @@ final class PriceOfferPdfService {
     final bytes = await document.save();
 
     final customerSlug = _sanitizeFileNamePart(offer.customerName);
-    final datePart = AppDateUtils.exportTimestamp.format(offer.offerDate);
-    final fileName = 'FiyatTeklifi_${customerSlug}_$datePart.pdf';
+    final offerDatePart = AppDateUtils.displayDate.format(offer.offerDate);
+    final generatedAt = AppDateUtils.exportTimestamp.format(DateTime.now());
+    final fileName =
+        'FiyatTeklifi_${customerSlug}_${offerDatePart}_$generatedAt.pdf';
 
     final outputPath = await FilePicker.platform.saveFile(
       dialogTitle: 'PDF dosyasını kaydet',
