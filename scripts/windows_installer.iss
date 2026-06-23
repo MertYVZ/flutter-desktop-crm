@@ -1,32 +1,61 @@
 ; Inno Setup script for Ok Teknik Metal CRM (Flutter Windows release).
 ;
-; Compile from the repository root (or via scripts/build_windows_installer.ps1):
-;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ^
-;     /DMyAppVersion=1.0.0 ^
-;     /DSourceDir=build\windows\x64\runner\Release ^
-;     /DOutputDir=dist ^
-;     /DOutputBaseFilename=Ok_Teknik_Metal_CRM_1.0.0_windows_setup ^
-;     scripts\windows_installer.iss
+; Compile via scripts/build_windows_installer.ps1.
 ;
-; Required defines (passed by the build script):
-;   MyAppVersion, SourceDir, OutputDir, OutputBaseFilename
+; Optional defines/environment variables used by the build script:
+;   MyAppName, MyAppPublisher, MyAppExeName, MyAppVersion,
+;   SourceDir, OutputDir, OutputBaseFilename
 
+#ifndef MyAppName
+  #if GetEnv("OKTM_APP_NAME") != ""
+    #define MyAppName GetEnv("OKTM_APP_NAME")
+  #else
+    #define MyAppName "Ok Teknik Metal CRM"
+  #endif
+#endif
+#ifndef MyAppPublisher
+  #if GetEnv("OKTM_APP_PUBLISHER") != ""
+    #define MyAppPublisher GetEnv("OKTM_APP_PUBLISHER")
+  #else
+    #define MyAppPublisher "Ok Teknik Metal"
+  #endif
+#endif
+#ifndef MyAppExeName
+  #if GetEnv("OKTM_APP_EXE_NAME") != ""
+    #define MyAppExeName GetEnv("OKTM_APP_EXE_NAME")
+  #else
+    #define MyAppExeName "okteknikmetalcrm.exe"
+  #endif
+#endif
 #ifndef MyAppVersion
-  #define MyAppVersion "1.0.0"
+  #if GetEnv("OKTM_APP_VERSION") != ""
+    #define MyAppVersion GetEnv("OKTM_APP_VERSION")
+  #else
+    #define MyAppVersion "1.0.0"
+  #endif
 #endif
 #ifndef SourceDir
-  #define SourceDir "..\build\windows\x64\runner\Release"
+  #if GetEnv("OKTM_SOURCE_DIR") != ""
+    #define SourceDir GetEnv("OKTM_SOURCE_DIR")
+  #else
+    #define SourceDir "..\build\windows\x64\runner\Release"
+  #endif
 #endif
 #ifndef OutputDir
-  #define OutputDir "..\dist"
+  #if GetEnv("OKTM_OUTPUT_DIR") != ""
+    #define OutputDir GetEnv("OKTM_OUTPUT_DIR")
+  #else
+    #define OutputDir "..\dist"
+  #endif
 #endif
 #ifndef OutputBaseFilename
-  #define OutputBaseFilename "Ok_Teknik_Metal_CRM_windows_setup"
+  #if GetEnv("OKTM_OUTPUT_BASE_FILENAME") != ""
+    #define OutputBaseFilename GetEnv("OKTM_OUTPUT_BASE_FILENAME")
+  #else
+    #define OutputBaseFilename "Ok_Teknik_Metal_CRM_windows_setup"
+  #endif
 #endif
 
-#define MyAppName "Ok Teknik Metal CRM"
-#define MyAppPublisher "Ok Teknik Metal"
-#define MyAppExeName "okteknikmetalcrm.exe"
 #define MyAppId "{{A3B8C2D1-4E5F-6789-0ABC-DEF123456789}"
 
 #if FileExists(AddBackslash(SourceDir) + MyAppExeName) = 0

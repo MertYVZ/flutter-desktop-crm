@@ -1,0 +1,45 @@
+name: Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows-installer:
+    name: Build Windows installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress --yes
+
+      - name: Build installer
+        shell: pwsh
+        run: ./scripts/build_windows_installer.ps1 -SkipBuild
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/*_windows_setup.exe
+          if-no-files-found: error

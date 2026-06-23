@@ -57,40 +57,74 @@ $RootDir = Split-Path -Parent $PSScriptRoot
 Set-Location $RootDir
 
 $PubspecPath = Join-Path $RootDir 'pubspec.yaml'
-$AppInfoPath = Join-Path $RootDir 'macos\Runner\Configs\AppInfo.xcconfig'
 $CmakePath = Join-Path $RootDir 'windows\CMakeLists.txt'
+$WindowsMainPath = Join-Path $RootDir 'windows\runner\main.cpp'
 
-foreach ($required in @($PubspecPath, $AppInfoPath, $CmakePath)) {
+foreach ($required in @($PubspecPath, $CmakePath, $WindowsMainPath)) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Missing required file: $required"
     }
 }
 
-$AppName = (
-    Select-String -Path $AppInfoPath -Pattern '^\s*PRODUCT_NAME\s*=\s*(.+)$' |
-    Select-Object -First 1
-).Matches.Groups[1].Value.Trim()
+function Get-FirstRegexGroup {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
 
-$VersionLine = (
-    Select-String -Path $PubspecPath -Pattern '^\s*version:\s*(\S+)' |
-    Select-Object -First 1
-).Matches.Groups[1].Value.Trim()
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Description
+    )
+
+    $match = Select-String -Path $Path -Pattern $Pattern | Select-Object -First 1
+    if (-not $match) {
+        throw "Could not read $Description from $Path"
+    }
+
+    return $match.Matches.Groups[1].Value.Trim()
+}
+
+function Convert-ToFileNameToken {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    $invalidPattern = "[{0}]" -f [regex]::Escape(([System.IO.Path]::GetInvalidFileNameChars() -join ''))
+    return (($Value -replace $invalidPattern, '') -replace '\s+', '_')
+}
+
+$AppName = Get-FirstRegexGroup `
+    -Path $WindowsMainPath `
+    -Pattern 'window\.Create\(L"([^"]+)"' `
+    -Description 'Windows app display name'
+
+$VersionLine = Get-FirstRegexGroup `
+    -Path $PubspecPath `
+    -Pattern '^\s*version:\s*(\S+)' `
+    -Description 'pubspec version'
 $Version = ($VersionLine -split '\+')[0]
 
-$BinaryName = (
-    Select-String -Path $CmakePath -Pattern 'set\(BINARY_NAME\s+"([^"]+)"\)' |
-    Select-Object -First 1
-).Matches.Groups[1].Value.Trim()
+$BinaryName = Get-FirstRegexGroup `
+    -Path $CmakePath `
+    -Pattern 'set\(BINARY_NAME\s+"([^"]+)"\)' `
+    -Description 'Windows binary name'
 
+$ExeName = "$BinaryName.exe"
 $ReleaseDir = Join-Path $RootDir 'build\windows\x64\runner\Release'
-$ExePath = Join-Path $ReleaseDir "$BinaryName.exe"
+$ExePath = Join-Path $ReleaseDir $ExeName
 $DistDir = Join-Path $RootDir 'dist'
-$OutputBaseName = "Ok_Teknik_Metal_CRM_${Version}_windows_setup"
+$OutputPrefix = Convert-ToFileNameToken -Value $AppName
+$OutputBaseName = "${OutputPrefix}_${Version}_windows_setup"
 $InstallerPath = Join-Path $DistDir "$OutputBaseName.exe"
-$ZipPath = Join-Path $DistDir "Ok_Teknik_Metal_CRM_${Version}_windows.zip"
+$ZipPath = Join-Path $DistDir "${OutputPrefix}_${Version}_windows.zip"
 $IssPath = Join-Path $RootDir 'scripts\windows_installer.iss'
+$Publisher = 'Ok Teknik Metal'
 
 Write-Host "==> App:           $AppName"
+Write-Host "==> Publisher:     $Publisher"
 Write-Host "==> Version:       $Version"
 Write-Host "==> Executable:    $ExePath"
 Write-Host "==> Installer out: $InstallerPath"
@@ -168,15 +202,15 @@ if (Test-Path -LiteralPath $InstallerPath) {
 Write-Host "==> Compiling installer with Inno Setup..."
 Write-Host "    ISCC: $Iscc"
 
-$isccArgs = @(
-    "/DMyAppVersion=$Version",
-    "/DSourceDir=$ReleaseDir",
-    "/DOutputDir=$DistDir",
-    "/DOutputBaseFilename=$OutputBaseName",
-    $IssPath
-)
+$env:OKTM_APP_NAME = $AppName
+$env:OKTM_APP_PUBLISHER = $Publisher
+$env:OKTM_APP_EXE_NAME = $ExeName
+$env:OKTM_APP_VERSION = $Version
+$env:OKTM_SOURCE_DIR = $ReleaseDir
+$env:OKTM_OUTPUT_DIR = $DistDir
+$env:OKTM_OUTPUT_BASE_FILENAME = $OutputBaseName
 
-& $Iscc @isccArgs
+& $Iscc $IssPath
 if ($LASTEXITCODE -ne 0) {
     throw "Inno Setup compiler failed with exit code $LASTEXITCODE"
 }
