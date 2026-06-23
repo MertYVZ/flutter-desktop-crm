@@ -58,7 +58,7 @@
 
 #define MyAppId "{{A3B8C2D1-4E5F-6789-0ABC-DEF123456789}"
 
-#if FileExists(AddBackslash(SourceDir) + MyAppExeName) = 0
+#if !FileExists(AddBackslash(SourceDir) + MyAppExeName)
   #error "Release build not found. Run flutter build windows --release first."
 #endif
 
