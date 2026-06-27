@@ -1,6 +1,7 @@
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/formatters/turkish_amount_input_formatter.dart';
 import 'package:Ok/product/utility/money_utils.dart';
+import 'package:Ok/product/widgets/panel/panel_text_field.dart';
 import 'package:flutter/material.dart';
 
 class PanelAmountField extends StatelessWidget {
@@ -52,9 +53,8 @@ class PanelAmountField extends StatelessWidget {
             color: AppUiTokens.textPrimary,
             fontSize: 15,
           ),
-          decoration: InputDecoration(
+          decoration: PanelInputDecoration.build(
             hintText: hintText ?? '0,00',
-            hintStyle: const TextStyle(color: AppUiTokens.textMuted),
           ),
         ),
       ],

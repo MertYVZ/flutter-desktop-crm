@@ -23,7 +23,7 @@ extension ShellMenuItemX on ShellMenuItem {
   String get title {
     switch (this) {
       case ShellMenuItem.dashboard:
-        return 'Dashboard';
+        return 'Ana Sayfa';
       case ShellMenuItem.customers:
         return 'Müşteriler';
       case ShellMenuItem.priceQuotes:

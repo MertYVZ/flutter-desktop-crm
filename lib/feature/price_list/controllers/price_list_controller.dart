@@ -28,6 +28,7 @@ final class PriceListController extends GetxController {
   final RxBool isDeleting = false.obs;
   final RxBool isExporting = false.obs;
   final RxBool isArchiving = false.obs;
+  final RxBool isDeletingArchive = false.obs;
 
   final Rxn<PriceList> activePriceList = Rxn<PriceList>();
   final RxList<PriceListItemModel> activeItems = <PriceListItemModel>[].obs;
@@ -46,6 +47,7 @@ final class PriceListController extends GetxController {
   final RxnString successMessage = RxnString();
   final RxnString filterWarningMessage = RxnString();
   final RxnString deletingItemId = RxnString();
+  final RxnString deletingArchiveListId = RxnString();
 
   bool get hasActiveProductFilters =>
       productSearchQuery.value.trim().isNotEmpty ||
@@ -404,6 +406,37 @@ final class PriceListController extends GetxController {
     }
   }
 
+  Future<bool> deleteArchivedList(String id) async {
+    if (isDeletingArchive.value || deletingArchiveListId.value == id) {
+      return false;
+    }
+
+    final confirmed = await _showDeleteArchivedConfirmDialog();
+    if (!confirmed) {
+      return false;
+    }
+
+    clearMessages();
+    isDeletingArchive.value = true;
+    deletingArchiveListId.value = id;
+    try {
+      await _priceListService.deleteArchivedPriceList(id);
+      archivedLists.removeWhere((list) => list.id == id);
+      if (selectedPriceList.value?.id == id) {
+        selectedPriceList.value = null;
+        selectedItems.clear();
+      }
+      successMessage.value = PriceListMessages.deleteArchivedSuccess;
+      return true;
+    } catch (_) {
+      errorMessage.value = PriceListMessages.deleteArchivedError;
+      return false;
+    } finally {
+      isDeletingArchive.value = false;
+      deletingArchiveListId.value = null;
+    }
+  }
+
   Future<bool> deleteItem(String id) async {
     if (isDeleting.value || deletingItemId.value == id) {
       return false;
@@ -494,6 +527,25 @@ final class PriceListController extends GetxController {
         cancelLabel: PriceListMessages.archiveCancel,
         confirmLabel: PriceListMessages.archiveConfirm,
         confirmColor: ColorName.primary,
+      ),
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.42),
+    );
+
+    return result ?? false;
+  }
+
+  Future<bool> _showDeleteArchivedConfirmDialog() async {
+    final result = await Get.dialog<bool>(
+      _ConfirmDialog(
+        icon: Icons.delete_outline_rounded,
+        iconColor: ColorName.error,
+        iconBackground: const Color(0xFFFEF2F2),
+        title: PriceListMessages.deleteArchivedTitle,
+        body: PriceListMessages.deleteArchivedBody,
+        cancelLabel: PriceListMessages.deleteArchivedCancel,
+        confirmLabel: PriceListMessages.deleteArchivedConfirm,
+        confirmColor: ColorName.error,
       ),
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.42),

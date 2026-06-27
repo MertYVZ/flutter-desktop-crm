@@ -199,7 +199,6 @@ final class RemindersController extends GetxController {
     required String title,
     required ReminderPeriod? period,
     required DateTime? startDate,
-    required DateTime? nextReminderDate,
     required ReminderStatus? status,
     required String note,
   }) async {
@@ -214,9 +213,7 @@ final class RemindersController extends GetxController {
       title: title,
       period: period,
       startDate: startDate,
-      nextReminderDate: nextReminderDate,
       status: status,
-      requireNextReminderDate: true,
       requireStatus: true,
     );
     if (validationError != null) {
@@ -232,7 +229,6 @@ final class RemindersController extends GetxController {
         title: title,
         period: period!,
         startDate: startDate!,
-        nextReminderDate: nextReminderDate!,
         status: status!,
         note: note,
       );

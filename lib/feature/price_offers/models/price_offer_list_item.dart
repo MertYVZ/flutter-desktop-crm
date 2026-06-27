@@ -8,6 +8,7 @@ final class PriceOfferListItem extends Equatable {
     required this.id,
     required this.type,
     required this.offerDate,
+    required this.validityDate,
     required this.customerId,
     required this.customerName,
     required this.contactPerson,
@@ -21,6 +22,7 @@ final class PriceOfferListItem extends Equatable {
   final String id;
   final String type;
   final DateTime offerDate;
+  final DateTime validityDate;
   final String customerId;
   final String customerName;
   final String contactPerson;
@@ -49,6 +51,7 @@ final class PriceOfferListItem extends Equatable {
         id,
         type,
         offerDate,
+        validityDate,
         customerId,
         customerName,
         contactPerson,
@@ -101,6 +104,7 @@ final class PriceOfferDetail extends Equatable {
     required this.id,
     required this.type,
     required this.offerDate,
+    required this.validityDate,
     required this.customerId,
     required this.customerName,
     required this.contactPerson,
@@ -116,6 +120,7 @@ final class PriceOfferDetail extends Equatable {
   final String id;
   final String type;
   final DateTime offerDate;
+  final DateTime validityDate;
   final String customerId;
   final String customerName;
   final String contactPerson;
@@ -146,6 +151,7 @@ final class PriceOfferDetail extends Equatable {
         id,
         type,
         offerDate,
+        validityDate,
         customerId,
         customerName,
         contactPerson,

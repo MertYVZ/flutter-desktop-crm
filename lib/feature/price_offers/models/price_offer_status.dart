@@ -4,6 +4,7 @@ enum PriceOfferStatus {
   approved,
   rejected,
   cancelled,
+  expired,
 }
 
 extension PriceOfferStatusX on PriceOfferStatus {
@@ -19,6 +20,8 @@ extension PriceOfferStatusX on PriceOfferStatus {
         return 'rejected';
       case PriceOfferStatus.cancelled:
         return 'cancelled';
+      case PriceOfferStatus.expired:
+        return 'expired';
     }
   }
 
@@ -34,8 +37,12 @@ extension PriceOfferStatusX on PriceOfferStatus {
         return 'Reddedildi';
       case PriceOfferStatus.cancelled:
         return 'İptal';
+      case PriceOfferStatus.expired:
+        return 'Süresi Doldu';
     }
   }
+
+  bool get isProtectedFromAutoExpiry => this == PriceOfferStatus.approved;
 
   static PriceOfferStatus? fromValue(String? value) {
     if (value == null || value.isEmpty) {

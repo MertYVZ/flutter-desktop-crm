@@ -69,6 +69,8 @@ final class DashboardEventChip extends StatelessWidget {
         return const Color(0xFFF59E0B);
       case DashboardCalendarEventType.reminder:
         return const Color(0xFF7C3AED);
+      case DashboardCalendarEventType.dueRecord:
+        return const Color(0xFF059669);
     }
   }
 }

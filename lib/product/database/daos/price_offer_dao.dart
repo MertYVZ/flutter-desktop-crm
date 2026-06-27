@@ -7,6 +7,7 @@ import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/database/tables/customers_table.dart';
 import 'package:Ok/product/database/tables/price_offer_items_table.dart';
 import 'package:Ok/product/database/tables/price_offers_table.dart';
+import 'package:Ok/product/utility/app_date_utils.dart';
 
 part 'price_offer_dao.g.dart';
 
@@ -15,7 +16,31 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     with _$PriceOfferDaoMixin {
   PriceOfferDao(super.db);
 
-  Future<List<PriceOfferListItem>> getOffers() => searchOffers();
+  Future<void> applyAutomaticExpiry() async {
+    final today = AppDateUtils.normalizeDate(DateTime.now());
+
+    await (update(priceOffers)
+          ..where(
+            (t) =>
+                t.deletedAt.isNull() &
+                t.validityDate.isSmallerThanValue(today) &
+                t.status.isNotIn([
+                  PriceOfferStatus.approved.value,
+                  PriceOfferStatus.expired.value,
+                ]),
+          ))
+        .write(
+      PriceOffersCompanion(
+        status: Value(PriceOfferStatus.expired.value),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<List<PriceOfferListItem>> getOffers() async {
+    await applyAutomaticExpiry();
+    return searchOffers();
+  }
 
   Future<List<PriceOfferListItem>> searchOffers({
     String? searchQuery,
@@ -24,6 +49,8 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     DateTime? startDate,
     DateTime? endDate,
   }) async {
+    await applyAutomaticExpiry();
+
     final query = select(priceOffers).join([
       innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
     ]);
@@ -70,6 +97,8 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
   Future<List<PriceOfferListItem>> getOffersByCustomerId(
     String customerId,
   ) async {
+    await applyAutomaticExpiry();
+
     final query = select(priceOffers).join([
       innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
     ])
@@ -84,6 +113,8 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<PriceOfferDetail?> getOfferDetailById(String id) async {
+    await applyAutomaticExpiry();
+
     final offerQuery = select(priceOffers).join([
       innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
     ])
@@ -108,6 +139,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
       id: offer.id,
       type: offer.type,
       offerDate: offer.offerDate,
+      validityDate: offer.validityDate,
       customerId: offer.customerId,
       customerName: customer.name,
       contactPerson: offer.contactPerson,
@@ -192,6 +224,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
       id: offer.id,
       type: offer.type,
       offerDate: offer.offerDate,
+      validityDate: offer.validityDate,
       customerId: offer.customerId,
       customerName: customer.name,
       contactPerson: offer.contactPerson,

@@ -27,6 +27,7 @@ import 'package:Ok/feature/reminders/views/reminder_create_page.dart';
 import 'package:Ok/feature/reminders/views/reminder_edit_page.dart';
 import 'package:Ok/feature/reminders/views/reminders_list_page.dart';
 import 'package:Ok/feature/scrap_quality/views/scrap_quality_create_page.dart';
+import 'package:Ok/feature/scrap_quality/views/scrap_quality_detail_page.dart';
 import 'package:Ok/feature/scrap_quality/views/scrap_quality_edit_page.dart';
 import 'package:Ok/feature/scrap_quality/views/scrap_quality_list_page.dart';
 import 'package:Ok/feature/settings/view/settings_page.dart';
@@ -366,6 +367,11 @@ class _ScrapQualityRouteContent extends StatelessWidget {
 
     if (route.endsWith('/edit') && route.startsWith('/scrap-quality/')) {
       return const ScrapQualityEditPage();
+    }
+
+    if (route.startsWith('/scrap-quality/') &&
+        route != AppRoutes.scrapQualityNew.value) {
+      return const ScrapQualityDetailPage();
     }
 
     return const ScrapQualityListPage();

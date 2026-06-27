@@ -21,6 +21,10 @@ final class PriceOfferMessages {
   static const deleteConfirm = 'Sil';
   static const dateRangeError =
       'Başlangıç tarihi bitiş tarihinden büyük olamaz.';
+  static const noContactsForSelectedCustomer =
+      'Seçili müşteriye ait yetkili kişi bulunmuyor.';
+  static const selectCustomerForContact =
+      'Yetkili kişi seçmek için önce müşteri seçiniz.';
   static const noCustomersForForm =
       'Fiyat teklifi oluşturmak için önce aktif bir müşteri eklemeniz gerekir.';
   static const listEmpty = 'Henüz fiyat teklifi bulunmuyor.';
@@ -32,9 +36,13 @@ final class PriceOfferMessages {
 
   static const typeRequired = 'Tip seçiniz.';
   static const dateRequired = 'Tarih seçiniz.';
+  static const validityDateRequired = 'Geçerlilik tarihi seçiniz.';
+  static const validityDateBeforeOfferDate =
+      'Geçerlilik tarihi teklif tarihinden önce olamaz.';
   static const customerRequired = 'Müşteri seçiniz.';
   static const contactPersonRequired = 'Yetkili kişi zorunludur.';
-  static const legalTextRequired = 'Yasal metin zorunludur.';
+  static const legalTextRequired =
+      'Teklif bilgilendirme metni zorunludur.';
   static const statusRequired = 'Durum seçiniz.';
   static const itemsRequired = 'En az bir ürün ekleyiniz.';
   static const productNameRequired = 'Ürün adı zorunludur.';

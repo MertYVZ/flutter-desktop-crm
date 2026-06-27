@@ -1,11 +1,17 @@
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
 import 'package:Ok/feature/scrap_quality/widgets/scrap_quality_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
+import 'package:Ok/product/navigation/app_route_args.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
+import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -19,27 +25,50 @@ final class ScrapQualityCreatePage extends StatefulWidget {
 }
 
 class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
-  late final TextEditingController _qualityController;
+  late final TextEditingController _customScrapTypeController;
   late final TextEditingController _quantityController;
   late final TextEditingController _customUnitController;
+  late final TextEditingController _quantityKgController;
+  late final TextEditingController _cityController;
+  late final TextEditingController _offerPriceController;
+  late final TextEditingController _targetPriceController;
+  late final TextEditingController _customLostReasonController;
   late final TextEditingController _noteController;
+
   String? _selectedCustomerId;
+  ScrapType? _selectedScrapType;
   ScrapQualityUnit? _selectedUnit = ScrapQualityUnit.defaultUnit;
+  ScrapSalesStatus? _selectedSalesStatus = ScrapSalesStatus.unresolved;
+  ScrapLostReason? _selectedLostReason;
+  DateTime? _recordDate;
+  DateTime? _followUpDate;
 
   @override
   void initState() {
     super.initState();
-    _qualityController = TextEditingController();
+    _selectedCustomerId = AppRouteArgs.readCustomerId();
+    _recordDate = AppDateUtils.normalizeDate(DateTime.now());
+    _customScrapTypeController = TextEditingController();
     _quantityController = TextEditingController();
     _customUnitController = TextEditingController();
+    _quantityKgController = TextEditingController();
+    _cityController = TextEditingController();
+    _offerPriceController = TextEditingController();
+    _targetPriceController = TextEditingController();
+    _customLostReasonController = TextEditingController();
     _noteController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _qualityController.dispose();
+    _customScrapTypeController.dispose();
     _quantityController.dispose();
     _customUnitController.dispose();
+    _quantityKgController.dispose();
+    _cityController.dispose();
+    _offerPriceController.dispose();
+    _targetPriceController.dispose();
+    _customLostReasonController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -51,26 +80,36 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
       onModelReady: (controller) {
         controller.clearMessages();
         controller.loadCustomersForDropdown();
+        controller.loadFilterOptions();
       },
       onPageBuilder: (context, controller) {
         return PanelFormScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _PageHeader(
-                title: 'Yeni Hurda Kalite Kaydı',
-                subtitle: 'Yeni hurda kalite kaydı oluşturun.',
+              PanelFormPageHeader(
+                title: 'Yeni Hurda Kaydı',
+                subtitle: 'Aylık hurda takip kaydı oluşturun.',
+                onBack: () => Get.offNamed<void>(AppRoutes.scrapQuality.value),
               ),
               const SizedBox(height: AppUiTokens.space16),
               Obx(() {
                 final error = controller.errorMessage.value;
-                if (error == null) {
+                final success = controller.successMessage.value;
+                if (error == null && success == null) {
                   return const SizedBox.shrink();
                 }
 
                 return Column(
                   children: [
-                    PanelMessage(message: error),
+                    if (error != null) PanelMessage(message: error),
+                    if (error != null && success != null)
+                      const SizedBox(height: AppUiTokens.space8),
+                    if (success != null)
+                      PanelMessage(
+                        message: success,
+                        type: PanelMessageType.info,
+                      ),
                     const SizedBox(height: AppUiTokens.space16),
                   ],
                 );
@@ -84,17 +123,44 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
                       () => ScrapQualityForm(
                         customers: controller.customers.toList(),
                         selectedCustomerId: _selectedCustomerId,
-                        qualityController: _qualityController,
+                        selectedScrapType: _selectedScrapType,
+                        customScrapTypeController: _customScrapTypeController,
                         quantityController: _quantityController,
                         selectedUnit: _selectedUnit,
                         customUnitController: _customUnitController,
-                        recordDate: DateTime.now(),
+                        quantityKgController: _quantityKgController,
+                        recordDate: _recordDate,
+                        cityController: _cityController,
+                        selectedSalesStatus: _selectedSalesStatus,
+                        offerPriceController: _offerPriceController,
+                        targetPriceController: _targetPriceController,
+                        selectedLostReason: _selectedLostReason,
+                        customLostReasonController: _customLostReasonController,
+                        followUpDate: _followUpDate,
                         noteController: _noteController,
                         onCustomerChanged: (value) => setState(() {
                           _selectedCustomerId = value;
                         }),
+                        onScrapTypeChanged: (value) => setState(() {
+                          _selectedScrapType = value;
+                          if (value != ScrapType.other) {
+                            _customScrapTypeController.clear();
+                          }
+                        }),
                         onUnitChanged: (value) => setState(() {
                           _selectedUnit = value;
+                        }),
+                        onRecordDateChanged: (value) => setState(() {
+                          _recordDate = value;
+                        }),
+                        onSalesStatusChanged: (value) => setState(() {
+                          _selectedSalesStatus = value;
+                        }),
+                        onLostReasonChanged: (value) => setState(() {
+                          _selectedLostReason = value;
+                        }),
+                        onFollowUpDateChanged: (value) => setState(() {
+                          _followUpDate = value;
                         }),
                       ),
                     ),
@@ -105,7 +171,11 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
                         onSave: controller.isSaving.value ||
                                 controller.customers.isEmpty
                             ? null
-                            : () => _submit(controller),
+                            : () => _submit(controller, closeAfterSave: true),
+                        onSaveAndNew: controller.isSaving.value ||
+                                controller.customers.isEmpty
+                            ? null
+                            : () => _submit(controller, closeAfterSave: false),
                         onCancel: controller.isSaving.value
                             ? () {}
                             : () => Get.offNamed<void>(
@@ -123,52 +193,63 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
     );
   }
 
-  Future<void> _submit(ScrapQualityController controller) async {
+  Future<void> _submit(
+    ScrapQualityController controller, {
+    required bool closeAfterSave,
+  }) async {
     final id = await controller.createRecord(
       customerId: _selectedCustomerId,
-      quality: _qualityController.text,
+      scrapType: ScrapTypeX.resolve(
+        _selectedScrapType,
+        _customScrapTypeController.text,
+      ),
       quantityText: _quantityController.text,
       unit: _selectedUnit,
       customUnitText: _customUnitController.text,
+      quantityKgText: _quantityKgController.text,
+      recordDate: _recordDate,
+      salesStatus: _selectedSalesStatus,
+      city: _cityController.text,
+      offerPriceText: _offerPriceController.text,
+      targetPriceText: _targetPriceController.text,
+      lostReason: _selectedLostReason,
+      customLostReasonText: _customLostReasonController.text,
+      followUpDate: _followUpDate,
       note: _noteController.text,
     );
 
-    if (id != null) {
-      Get.offNamed<void>(AppRoutes.scrapQuality.value);
+    if (id == null) {
+      return;
     }
-  }
-}
 
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
+    if (closeAfterSave) {
+      Get.offNamed<void>(AppRoutes.scrapQuality.value);
+      return;
+    }
 
-  final String title;
-  final String subtitle;
+    final preservedDate = _recordDate;
+    final preservedCity = _cityController.text;
+    final preservedScrapType = _selectedScrapType;
+    final preservedCustomScrapType = _customScrapTypeController.text;
+    final preservedStatus = _selectedSalesStatus;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
+    setState(() {
+      _selectedCustomerId = null;
+      _quantityController.clear();
+      _customUnitController.clear();
+      _quantityKgController.clear();
+      _offerPriceController.clear();
+      _targetPriceController.clear();
+      _customLostReasonController.clear();
+      _customScrapTypeController.clear();
+      _noteController.clear();
+      _selectedLostReason = null;
+      _followUpDate = null;
+      _recordDate = preservedDate;
+      _cityController.text = preservedCity;
+      _selectedScrapType = preservedScrapType;
+      _customScrapTypeController.text = preservedCustomScrapType;
+      _selectedSalesStatus = preservedStatus;
+    });
   }
 }

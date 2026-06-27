@@ -46,4 +46,13 @@ final class PriceListMessages {
       'Bu ürünü fiyat listesinden silmek istediğinize emin misiniz?';
   static const deleteItemCancel = 'Vazgeç';
   static const deleteItemConfirm = 'Sil';
+
+  static const deleteArchivedSuccess = 'Arşivlenmiş fiyat listesi silindi.';
+  static const deleteArchivedError =
+      'Arşivlenmiş fiyat listesi silinirken bir hata oluştu.';
+  static const deleteArchivedTitle = 'Arşivlenmiş Listeyi Sil';
+  static const deleteArchivedBody =
+      'Bu arşivlenmiş fiyat listesini silmek istediğinize emin misiniz? Liste ve içindeki tüm ürünler kaldırılır.';
+  static const deleteArchivedCancel = 'Vazgeç';
+  static const deleteArchivedConfirm = 'Sil';
 }

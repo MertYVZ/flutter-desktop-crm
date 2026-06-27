@@ -72,7 +72,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +118,107 @@ class AppDatabase extends _$AppDatabase {
           if (from < 12) {
             await m.createTable(customerContacts);
           }
+          if (from < 13) {
+            final hasValidityDate = await customSelect(
+              "SELECT 1 FROM pragma_table_info('price_offers') "
+              "WHERE name = 'validity_date' LIMIT 1",
+            ).getSingleOrNull();
+
+            if (hasValidityDate == null) {
+              // SQLite cannot ADD NOT NULL without default on populated tables.
+              await customStatement(
+                'ALTER TABLE price_offers ADD COLUMN validity_date INTEGER',
+              );
+            }
+
+            await customStatement(
+              'UPDATE price_offers SET validity_date = offer_date + 604800000 '
+              'WHERE validity_date IS NULL',
+            );
+          }
+          if (from < 14) {
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'customer_name_snapshot',
+              'TEXT',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'quantity_kg',
+              'REAL DEFAULT 0',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'city',
+              'TEXT',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'sales_status',
+              "TEXT DEFAULT 'unresolved'",
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'offer_price',
+              'REAL',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'target_price',
+              'REAL',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'lost_reason',
+              'TEXT',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'follow_up_date',
+              'INTEGER',
+            );
+
+            await customStatement('''
+              UPDATE scrap_quality_records
+              SET quantity_kg = CASE
+                WHEN LOWER(unit) = 'kg' THEN quantity
+                WHEN LOWER(unit) = 'ton' THEN quantity * 1000
+                WHEN LOWER(unit) = 'gram' THEN quantity / 1000.0
+                ELSE quantity
+              END
+              WHERE quantity_kg IS NULL OR quantity_kg = 0
+            ''');
+
+            await customStatement('''
+              UPDATE scrap_quality_records
+              SET sales_status = 'unresolved'
+              WHERE sales_status IS NULL OR TRIM(sales_status) = ''
+            ''');
+
+            await customStatement('''
+              UPDATE scrap_quality_records
+              SET customer_name_snapshot = (
+                SELECT name FROM customers
+                WHERE customers.id = scrap_quality_records.customer_id
+              )
+              WHERE customer_name_snapshot IS NULL
+            ''');
+          }
         },
       );
+
+  Future<void> _addColumnIfNotExists(
+    String table,
+    String column,
+    String definition,
+  ) async {
+    final exists = await customSelect(
+      "SELECT 1 FROM pragma_table_info('$table') "
+      "WHERE name = '$column' LIMIT 1",
+    ).getSingleOrNull();
+
+    if (exists == null) {
+      await customStatement('ALTER TABLE $table ADD COLUMN $column $definition');
+    }
+  }
 }

@@ -21,7 +21,7 @@ final class RemindersExportService {
       TextCellValue('Müşteri Adı'),
       TextCellValue('Başlık'),
       TextCellValue('Periyot'),
-      TextCellValue('Kayıt Tarihi'),
+      TextCellValue('Hatırlatma Tarihi'),
       TextCellValue('Bir Sonraki Hatırlatma Tarihi'),
       TextCellValue('Durum'),
       TextCellValue('Not'),

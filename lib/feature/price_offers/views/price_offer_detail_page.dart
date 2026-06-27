@@ -129,6 +129,7 @@ class _PriceOfferDetailPageState extends BaseState<PriceOfferDetailPage> {
                 }),
                 _OfferInfoCard(
                   offerDate: AppDateUtils.formatDate(offer.offerDate),
+                  validityDate: AppDateUtils.formatDate(offer.validityDate),
                   offerType: offer.offerType,
                   typeFallback: offer.type,
                   customerName: offer.customerName,
@@ -316,6 +317,7 @@ class _HeaderButton extends StatelessWidget {
 class _OfferInfoCard extends StatelessWidget {
   const _OfferInfoCard({
     required this.offerDate,
+    required this.validityDate,
     required this.offerType,
     required this.typeFallback,
     required this.customerName,
@@ -329,6 +331,7 @@ class _OfferInfoCard extends StatelessWidget {
   });
 
   final String offerDate;
+  final String validityDate;
   final OfferType? offerType;
   final String typeFallback;
   final String customerName;
@@ -350,7 +353,8 @@ class _OfferInfoCard extends StatelessWidget {
           final isCompact = maxWidth < _infoCompactBreakpoint;
 
           final quoteInfoFields = <_InfoFieldData>[
-            (label: 'Tarih', value: offerDate, child: null),
+            (label: 'Teklif Tarihi', value: offerDate, child: null),
+            (label: 'Geçerlilik Tarihi', value: validityDate, child: null),
             (
               label: 'Tip',
               value: null,
@@ -362,7 +366,7 @@ class _OfferInfoCard extends StatelessWidget {
             (label: 'Müşteri', value: customerName, child: null),
             (label: 'İlgili Kişi', value: contactPerson, child: null),
             (label: 'Yetkili Telefon', value: authorizedPhone, child: null),
-            (label: 'Cep Telefon', value: mobilePhone, child: null),
+            (label: 'Yetkili Telefonu', value: mobilePhone, child: null),
             (
               label: 'Durum',
               value: null,
@@ -721,7 +725,7 @@ class _LegalTextCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const _SectionTitle(
-            title: 'Yasal Metin',
+            title: 'Teklif Bilgilendirme Metni',
             icon: Icons.gavel_outlined,
           ),
           const SizedBox(height: AppUiTokens.space16),

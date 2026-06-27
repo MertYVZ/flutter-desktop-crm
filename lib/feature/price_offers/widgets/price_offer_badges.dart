@@ -51,6 +51,8 @@ extension PriceOfferStatusBadgeStyle on PriceOfferStatus {
         return AppStatusTone.error.badgeStyle;
       case PriceOfferStatus.cancelled:
         return AppStatusTone.warning.badgeStyle;
+      case PriceOfferStatus.expired:
+        return AppStatusTone.error.badgeStyle;
     }
   }
 }

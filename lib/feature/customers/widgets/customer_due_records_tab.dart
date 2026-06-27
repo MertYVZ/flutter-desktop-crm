@@ -31,7 +31,7 @@ class CustomerDueRecordsTab extends StatelessWidget {
         isEmpty: records.isEmpty,
         emptyMessage: CustomerDetailMessages.dueRecordsEmpty,
         emptyActionLabel: 'Vade Kaydı Ekle',
-        onEmptyAction: () => Get.toNamed<void>(AppRoutes.dueTrackingNew.value),
+        onEmptyAction: () => controller.openCreateForm(AppRoutes.dueTrackingNew),
         children: records
             .map(
               (record) {

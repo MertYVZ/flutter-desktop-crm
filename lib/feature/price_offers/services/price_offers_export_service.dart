@@ -18,12 +18,13 @@ final class PriceOffersExportService {
     final sheet = excel[sheetTitle];
 
     sheet.appendRow([
-      TextCellValue('Tarih'),
+      TextCellValue('Teklif Tarihi'),
+      TextCellValue('Geçerlilik Tarihi'),
       TextCellValue('Tip'),
       TextCellValue('Müşteri'),
       TextCellValue('İlgili Kişi'),
       TextCellValue('Yetkili Telefon'),
-      TextCellValue('Cep Telefon'),
+      TextCellValue('Yetkili Telefonu'),
       TextCellValue('Durum'),
       TextCellValue('Oluşturulma tarihi'),
       TextCellValue('Güncellenme tarihi'),
@@ -32,6 +33,7 @@ final class PriceOffersExportService {
     for (final offer in offers) {
       sheet.appendRow([
         TextCellValue(AppDateUtils.formatDate(offer.offerDate)),
+        TextCellValue(AppDateUtils.formatDate(offer.validityDate)),
         TextCellValue(offer.offerType?.label ?? offer.type),
         TextCellValue(offer.customerName),
         TextCellValue(offer.contactPerson),

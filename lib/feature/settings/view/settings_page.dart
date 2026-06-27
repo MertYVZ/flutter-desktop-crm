@@ -15,11 +15,13 @@ import 'package:Ok/product/widgets/panel/panel_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const _settingsMaxWidth = 1200.0;
 const _twoColumnBreakpoint = 900.0;
 const _leftColumnFlex = 62;
 const _rightColumnFlex = 38;
+const _meonsBrandColor = Color(0xFF00020F);
 
 bool _isSettingsBusy(SettingsController controller) {
   return controller.isChangingPassword.value ||
@@ -69,7 +71,8 @@ class _SettingsPageState extends BaseState<SettingsPage>
       viewModel: Get.find<SettingsController>(),
       onPageBuilder: (context, controller) => LayoutBuilder(
         builder: (context, constraints) {
-          final contentWidth = constraints.maxWidth.clamp(0.0, _settingsMaxWidth);
+          final contentWidth =
+              constraints.maxWidth.clamp(0.0, _settingsMaxWidth);
 
           return Align(
             alignment: Alignment.topLeft,
@@ -93,8 +96,7 @@ class _SettingsPageState extends BaseState<SettingsPage>
                           controller: controller,
                           oldPasswordController: _oldPasswordController,
                           newPasswordController: _newPasswordController,
-                          confirmPasswordController:
-                              _confirmPasswordController,
+                          confirmPasswordController: _confirmPasswordController,
                           onSubmitPassword: () =>
                               _submitPasswordChange(controller),
                         ),
@@ -150,7 +152,7 @@ class _PageHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppUiTokens.space8),
         Text(
-          'Hesap güvenliği, veritabanı yedekleme, teklif PDF bilgileri ve yasal metin şablonlarını sekmeler halinde yönetin.',
+          'Hesap güvenliği, veritabanı yedekleme, teklif PDF bilgileri ve teklif bilgilendirme metni şablonlarını sekmeler halinde yönetin.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppUiTokens.textSecondary,
               ),
@@ -196,7 +198,7 @@ class _SettingsTabBar extends StatelessWidget {
           Tab(text: 'Hesap'),
           Tab(text: 'Veri'),
           Tab(text: 'Teklif PDF'),
-          Tab(text: 'Yasal Metinler'),
+          Tab(text: 'Teklif Bilgilendirme Metinleri'),
         ],
       ),
     );
@@ -594,8 +596,8 @@ class _AboutCard extends StatelessWidget {
             value: 'Veriler bu bilgisayarda saklanır.',
             compact: compact,
           ),
-          _AboutDivider(compact: compact),
-          _AboutDeveloperRow(compact: compact),
+          SizedBox(height: compact ? AppUiTokens.space16 : AppUiTokens.space24),
+          const _DeveloperSpotlightCard(),
         ],
       ),
     );
@@ -618,63 +620,130 @@ class _AboutDivider extends StatelessWidget {
   }
 }
 
-class _AboutDeveloperRow extends StatelessWidget {
-  const _AboutDeveloperRow({this.compact = false});
+class _DeveloperSpotlightCard extends StatelessWidget {
+  const _DeveloperSpotlightCard();
 
-  final bool compact;
+  static final Uri _websiteUri = Uri.parse('https://meons.io');
+
+  Future<void> _openWebsite() async {
+    await launchUrl(_websiteUri, mode: LaunchMode.externalApplication);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final developer = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Assets.icons.meonsLogo.svg(
-          width: 28,
-          height: 28,
-          package: 'gen',
-        ),
-        const SizedBox(width: AppUiTokens.space8),
-        Text(
-          'Meons',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-      ],
-    );
-
-    if (compact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Geliştirici',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppUiTokens.textMuted,
-                  fontWeight: FontWeight.w500,
-                ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppUiTokens.surface,
+        border: Border.all(color: AppUiTokens.border),
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusMd),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(height: AppUiTokens.space4),
-          developer,
         ],
-      );
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 140,
-          child: Text(
-            'Geliştirici',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppUiTokens.textSecondary,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppUiTokens.space16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Geliştirici',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppUiTokens.textMuted,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
+            ),
+            const SizedBox(height: AppUiTokens.space12),
+            Row(
+              children: [
+                Assets.icons.meonsLogo.svg(
+                  width: 38,
+                  height: 38,
+                  package: 'gen',
                 ),
-          ),
+                const SizedBox(width: AppUiTokens.space12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'MEONS',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppUiTokens.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: AppUiTokens.space4),
+                      Text(
+                        'Dijital ürün ve yazılım geliştirme',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppUiTokens.textSecondary,
+                              height: 1.35,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppUiTokens.space16),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+                mouseCursor: SystemMouseCursors.click,
+                onTap: _openWebsite,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppUiTokens.surface,
+                    border: Border.all(
+                      color: _meonsBrandColor.withValues(alpha: 0.18),
+                    ),
+                    borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppUiTokens.space12,
+                      vertical: AppUiTokens.space8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.language_rounded,
+                          size: 16,
+                          color: _meonsBrandColor,
+                        ),
+                        const SizedBox(width: AppUiTokens.space8),
+                        Text(
+                          'meons.io',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: _meonsBrandColor,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                        ),
+                        const SizedBox(width: AppUiTokens.space8),
+                        const Icon(
+                          Icons.open_in_new_rounded,
+                          size: 14,
+                          color: _meonsBrandColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        Expanded(child: developer),
-      ],
+      ),
     );
   }
 }
@@ -1141,9 +1210,9 @@ class _LegalTextTemplatesCardState extends State<_LegalTextTemplatesCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _SettingsCardHeader(
-              title: 'Yasal Metin Şablonları',
+              title: 'Teklif Bilgilendirme Metni Şablonları',
               description:
-                  'Yeni tekliflerde otomatik doldurulacak yasal metin şablonlarını düzenleyin. Mevcut tekliflerdeki kayıtlı metinler değişmez.',
+                  'Yeni tekliflerde otomatik doldurulacak teklif bilgilendirme metni şablonlarını düzenleyin. Mevcut tekliflerdeki kayıtlı metinler değişmez.',
             ),
             const SizedBox(height: AppUiTokens.space24),
             Obx(() {
@@ -1203,7 +1272,7 @@ class _LegalTextTemplatesCardState extends State<_LegalTextTemplatesCard> {
                   const SizedBox(height: AppUiTokens.space16),
                   PanelTextField(
                     controller: _contentController,
-                    label: 'Yasal metin',
+                    label: 'Teklif bilgilendirme metni',
                     minLines: 6,
                     maxLines: 12,
                   ),

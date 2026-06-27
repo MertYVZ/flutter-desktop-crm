@@ -2,6 +2,7 @@ import 'package:Ok/feature/due_tracking/widgets/customer_search_dropdown.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
+import 'package:Ok/product/widgets/panel/panel_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 
@@ -34,79 +35,17 @@ class NoteForm extends StatelessWidget {
           onChanged: onCustomerChanged,
         ),
         const SizedBox(height: AppUiTokens.space16),
-        _TitleField(controller: titleController),
+        PanelTextField(
+          controller: titleController,
+          label: 'Başlık',
+        ),
         const SizedBox(height: AppUiTokens.space16),
-        _ContentField(controller: contentController),
-      ],
-    );
-  }
-}
-
-class _TitleField extends StatelessWidget {
-  const _TitleField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Başlık',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Başlık',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ContentField extends StatelessWidget {
-  const _ContentField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'İçerik',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
+        PanelTextField(
+          controller: contentController,
+          label: 'İçerik',
+          hintText: 'Not içeriğini girin',
           minLines: 5,
           maxLines: 10,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'İçerik',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-            alignLabelWithHint: true,
-          ),
         ),
       ],
     );

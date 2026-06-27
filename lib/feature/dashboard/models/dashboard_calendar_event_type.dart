@@ -2,6 +2,7 @@ enum DashboardCalendarEventType {
   meeting,
   priceOffer,
   reminder,
+  dueRecord,
 }
 
 extension DashboardCalendarEventTypeX on DashboardCalendarEventType {
@@ -13,6 +14,8 @@ extension DashboardCalendarEventTypeX on DashboardCalendarEventType {
         return 'Teklif';
       case DashboardCalendarEventType.reminder:
         return 'Hatırlatma';
+      case DashboardCalendarEventType.dueRecord:
+        return 'Vade';
     }
   }
 
@@ -24,6 +27,8 @@ extension DashboardCalendarEventTypeX on DashboardCalendarEventType {
         return 'Teklif';
       case DashboardCalendarEventType.reminder:
         return 'Hatırlatma';
+      case DashboardCalendarEventType.dueRecord:
+        return 'Vade';
     }
   }
 
@@ -35,6 +40,8 @@ extension DashboardCalendarEventTypeX on DashboardCalendarEventType {
         return 'price_offer';
       case DashboardCalendarEventType.reminder:
         return 'reminder';
+      case DashboardCalendarEventType.dueRecord:
+        return 'due_record';
     }
   }
 }

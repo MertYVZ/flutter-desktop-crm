@@ -91,7 +91,7 @@ class RemindersTable extends StatelessWidget {
             DataColumn(label: Text('Müşteri Adı')),
             DataColumn(label: Text('Başlık')),
             DataColumn(label: Text('Periyot')),
-            DataColumn(label: Text('Kayıt Tarihi')),
+            DataColumn(label: Text('Hatırlatma Tarihi')),
             DataColumn(label: Text('Bir Sonraki Hatırlatma Tarihi')),
             DataColumn(label: Text('İşlemler')),
           ],

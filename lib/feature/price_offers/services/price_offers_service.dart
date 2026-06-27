@@ -1,3 +1,4 @@
+import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
@@ -38,9 +39,20 @@ final class PriceOffersService {
   Future<List<Customer>> getSelectableCustomers() =>
       _databaseService.customers.getSelectableCustomers();
 
+  Future<List<CustomerContactItem>> getCustomerContacts(
+    String customerId,
+  ) async {
+    final contacts =
+        await _databaseService.customerContacts.getContactsByCustomerId(
+      customerId,
+    );
+    return contacts.map(CustomerContactItem.fromEntity).toList();
+  }
+
   Future<String> createOffer({
     required OfferType type,
     required DateTime offerDate,
+    required DateTime validityDate,
     required String customerId,
     required String contactPerson,
     String? authorizedPhone,
@@ -55,6 +67,7 @@ final class PriceOffersService {
       id: offerId,
       type: type.value,
       offerDate: offerDate,
+      validityDate: validityDate,
       customerId: customerId,
       contactPerson: contactPerson.trim(),
       authorizedPhone: Value(_nullableTrim(authorizedPhone)),
@@ -81,6 +94,7 @@ final class PriceOffersService {
     required String id,
     required OfferType type,
     required DateTime offerDate,
+    required DateTime validityDate,
     required String customerId,
     required String contactPerson,
     String? authorizedPhone,
@@ -99,6 +113,7 @@ final class PriceOffersService {
       id: id,
       type: type.value,
       offerDate: offerDate,
+      validityDate: validityDate,
       customerId: customerId,
       contactPerson: contactPerson.trim(),
       authorizedPhone: _nullableTrim(authorizedPhone),

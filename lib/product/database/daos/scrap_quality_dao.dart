@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_list_item.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/database/tables/customers_table.dart';
 import 'package:Ok/product/database/tables/scrap_quality_records_table.dart';
@@ -17,8 +18,17 @@ class ScrapQualityDao extends DatabaseAccessor<AppDatabase>
   Future<List<ScrapQualityListItem>> searchRecords({
     String? searchQuery,
     String? unitFilter,
+    String? customerIdFilter,
+    String? cityFilter,
+    String? scrapTypeFilter,
+    ScrapSalesStatus? salesStatusFilter,
     DateTime? startDate,
     DateTime? endDate,
+    double? minOfferPrice,
+    double? maxOfferPrice,
+    bool onlyPurchased = false,
+    bool onlyNotPurchased = false,
+    bool onlyPending = false,
   }) async {
     final query = select(scrapQualityRecords).join([
       innerJoin(
@@ -35,12 +45,52 @@ class ScrapQualityDao extends DatabaseAccessor<AppDatabase>
       query.where(
         customers.name.lower().like(pattern) |
             scrapQualityRecords.quality.lower().like(pattern) |
-            scrapQualityRecords.unit.lower().like(pattern),
+            scrapQualityRecords.unit.lower().like(pattern) |
+            scrapQualityRecords.city.lower().like(pattern) |
+            scrapQualityRecords.note.lower().like(pattern),
       );
     }
 
     if (unitFilter != null && unitFilter.isNotEmpty) {
       query.where(scrapQualityRecords.unit.equals(unitFilter));
+    }
+
+    if (customerIdFilter != null && customerIdFilter.isNotEmpty) {
+      query.where(scrapQualityRecords.customerId.equals(customerIdFilter));
+    }
+
+    if (cityFilter != null && cityFilter.isNotEmpty) {
+      query.where(scrapQualityRecords.city.equals(cityFilter));
+    }
+
+    if (scrapTypeFilter != null && scrapTypeFilter.isNotEmpty) {
+      query.where(scrapQualityRecords.quality.equals(scrapTypeFilter));
+    }
+
+    if (salesStatusFilter != null) {
+      query.where(scrapQualityRecords.salesStatus.equals(salesStatusFilter.value));
+    }
+
+    if (onlyPurchased) {
+      query.where(
+        scrapQualityRecords.salesStatus.equals(ScrapSalesStatus.purchased.value),
+      );
+    }
+
+    if (onlyNotPurchased) {
+      query.where(
+        scrapQualityRecords.salesStatus
+            .equals(ScrapSalesStatus.notPurchased.value),
+      );
+    }
+
+    if (onlyPending) {
+      query.where(
+        scrapQualityRecords.salesStatus.isIn([
+          ScrapSalesStatus.waiting.value,
+          ScrapSalesStatus.unresolved.value,
+        ]),
+      );
     }
 
     if (startDate != null) {
@@ -54,6 +104,18 @@ class ScrapQualityDao extends DatabaseAccessor<AppDatabase>
       query.where(
         scrapQualityRecords.recordDate
             .isSmallerOrEqualValue(_endOfDay(endDate)),
+      );
+    }
+
+    if (minOfferPrice != null) {
+      query.where(
+        scrapQualityRecords.offerPrice.isBiggerOrEqualValue(minOfferPrice),
+      );
+    }
+
+    if (maxOfferPrice != null) {
+      query.where(
+        scrapQualityRecords.offerPrice.isSmallerOrEqualValue(maxOfferPrice),
       );
     }
 
@@ -82,6 +144,40 @@ class ScrapQualityDao extends DatabaseAccessor<AppDatabase>
     return rows.map(_mapRowToListItem).toList();
   }
 
+  Future<List<String>> getDistinctScrapTypes() async {
+    final rows = await customSelect(
+      '''
+      SELECT DISTINCT quality
+      FROM scrap_quality_records
+      WHERE deleted_at IS NULL AND TRIM(quality) != ''
+      ORDER BY quality COLLATE NOCASE ASC
+      ''',
+      readsFrom: {scrapQualityRecords},
+    ).get();
+
+    return rows
+        .map((row) => row.read<String>('quality').trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getDistinctCities() async {
+    final rows = await customSelect(
+      '''
+      SELECT DISTINCT city
+      FROM scrap_quality_records
+      WHERE deleted_at IS NULL AND city IS NOT NULL AND TRIM(city) != ''
+      ORDER BY city COLLATE NOCASE ASC
+      ''',
+      readsFrom: {scrapQualityRecords},
+    ).get();
+
+    return rows
+        .map((row) => row.read<String>('city').trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+  }
+
   Future<ScrapQualityRecord?> getRecordById(String id) =>
       (select(scrapQualityRecords)
             ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
@@ -107,9 +203,17 @@ class ScrapQualityDao extends DatabaseAccessor<AppDatabase>
       id: record.id,
       customerId: record.customerId,
       customerName: customer.name,
+      customerNameSnapshot: record.customerNameSnapshot,
       quality: record.quality,
       quantity: record.quantity,
       unit: record.unit,
+      quantityKg: record.quantityKg,
+      city: record.city,
+      salesStatus: record.salesStatus,
+      offerPrice: record.offerPrice,
+      targetPrice: record.targetPrice,
+      lostReason: record.lostReason,
+      followUpDate: record.followUpDate,
       recordDate: record.recordDate,
       note: record.note,
       createdAt: record.createdAt,

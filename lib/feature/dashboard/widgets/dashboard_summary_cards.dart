@@ -57,7 +57,7 @@ final class DashboardSummaryCards extends StatelessWidget {
                 label: 'Toplam Müşteri',
                 value: summary.totalCustomers,
                 icon: Icons.people_outline_rounded,
-                helper: 'Aktif müşteri kayıtları',
+                helper: 'Müşteri sayısı',
                 onTap: controller.navigateToCustomers,
               ),
               _SummaryCard(

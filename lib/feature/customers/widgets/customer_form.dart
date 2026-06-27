@@ -98,9 +98,11 @@ class CustomerForm extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppUiTokens.space16),
-            _MultilineField(
+            PanelTextField(
               controller: addressController,
               label: 'Adres',
+              minLines: 3,
+              maxLines: 5,
             ),
           ],
         );
@@ -125,47 +127,6 @@ class CustomerForm extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _MultilineField extends StatelessWidget {
-  const _MultilineField({
-    required this.controller,
-    required this.label,
-  });
-
-  final TextEditingController controller;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          minLines: 3,
-          maxLines: 5,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: InputDecoration(
-            hintText: label,
-            hintStyle: const TextStyle(color: AppUiTokens.textMuted),
-            alignLabelWithHint: true,
-          ),
-        ),
-      ],
     );
   }
 }

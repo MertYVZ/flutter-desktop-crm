@@ -2,6 +2,8 @@ import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
+import 'package:Ok/feature/scrap_quality/services/scrap_kg_utils.dart';
 import 'package:Ok/feature/customers/models/customer_type.dart';
 import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/due_tracking/models/due_record_status.dart';
@@ -9,6 +11,7 @@ import 'package:Ok/feature/meetings/models/meeting_method.dart';
 import 'package:Ok/feature/meetings/models/meeting_subject.dart';
 import 'package:Ok/product/utility/constants/auth_messages.dart';
 import 'package:Ok/product/utility/constants/customer_detail_messages.dart';
+import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/utility/constants/due_record_messages.dart';
 import 'package:Ok/product/utility/constants/meeting_messages.dart';
@@ -237,22 +240,25 @@ abstract final class Validators {
 
   static String? validateScrapQualityForm({
     required String? customerId,
-    required String quality,
+    required String scrapType,
     required String quantityText,
     required ScrapQualityUnit? unit,
     required String customUnitText,
+    required DateTime? recordDate,
+    required ScrapSalesStatus? salesStatus,
+    String quantityKgText = '',
   }) {
     if (customerId == null || customerId.isEmpty) {
       return ScrapQualityMessages.customerRequired;
     }
 
-    final trimmedQuality = quality.trim();
-    if (trimmedQuality.isEmpty) {
-      return ScrapQualityMessages.qualityRequired;
+    final trimmedScrapType = scrapType.trim();
+    if (trimmedScrapType.isEmpty) {
+      return ScrapQualityMessages.scrapTypeRequired;
     }
 
-    if (trimmedQuality.length < 2) {
-      return ScrapQualityMessages.qualityMinLength;
+    if (trimmedScrapType.length < 2) {
+      return ScrapQualityMessages.scrapTypeMinLength;
     }
 
     final trimmedQuantity = quantityText.trim();
@@ -273,6 +279,21 @@ abstract final class Validators {
       return ScrapQualityMessages.customUnitRequired;
     }
 
+    if (recordDate == null) {
+      return ScrapQualityMessages.recordDateRequired;
+    }
+
+    if (salesStatus == null) {
+      return ScrapQualityMessages.salesStatusRequired;
+    }
+
+    if (ScrapKgUtils.requiresManualKg(unit)) {
+      final manualKg = QuantityUtils.parseQuantity(quantityKgText.trim());
+      if (manualKg == null || manualKg <= 0) {
+        return ScrapQualityMessages.quantityKgRequired;
+      }
+    }
+
     return null;
   }
 
@@ -281,9 +302,7 @@ abstract final class Validators {
     required String title,
     required ReminderPeriod? period,
     required DateTime? startDate,
-    DateTime? nextReminderDate,
     ReminderStatus? status,
-    bool requireNextReminderDate = false,
     bool requireStatus = false,
   }) {
     if (customerId == null || customerId.isEmpty) {
@@ -307,10 +326,6 @@ abstract final class Validators {
       return ReminderMessages.startDateRequired;
     }
 
-    if (requireNextReminderDate && nextReminderDate == null) {
-      return ReminderMessages.nextReminderDateRequired;
-    }
-
     if (requireStatus && status == null) {
       return ReminderMessages.statusRequired;
     }
@@ -321,6 +336,7 @@ abstract final class Validators {
   static String? validatePriceOfferForm({
     required OfferType? type,
     required DateTime? offerDate,
+    required DateTime? validityDate,
     required String? customerId,
     required String contactPerson,
     required String legalText,
@@ -336,6 +352,14 @@ abstract final class Validators {
 
     if (offerDate == null) {
       return PriceOfferMessages.dateRequired;
+    }
+
+    if (validityDate == null) {
+      return PriceOfferMessages.validityDateRequired;
+    }
+
+    if (validityDate.isBefore(AppDateUtils.normalizeDate(offerDate))) {
+      return PriceOfferMessages.validityDateBeforeOfferDate;
     }
 
     if (customerId == null || customerId.isEmpty) {

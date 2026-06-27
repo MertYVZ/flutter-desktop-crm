@@ -1,3 +1,4 @@
+import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/controllers/price_offers_controller.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
 import 'package:Ok/feature/price_offers/services/legal_text_template_service.dart';
@@ -5,10 +6,13 @@ import 'package:Ok/feature/price_offers/widgets/price_offer_form.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_items_editor.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
+import 'package:Ok/product/navigation/app_route_args.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
+import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/validators.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
@@ -23,7 +27,6 @@ final class PriceOfferCreatePage extends StatefulWidget {
 }
 
 class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
-  late final TextEditingController _contactPersonController;
   late final TextEditingController _authorizedPhoneController;
   late final TextEditingController _mobilePhoneController;
   late final TextEditingController _legalTextController;
@@ -31,19 +34,23 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
   late final LegalTextTemplateService _legalTextTemplateService;
 
   String? _selectedCustomerId;
+  CustomerContactItem? _selectedContact;
   OfferType? _selectedType;
   DateTime? _offerDate;
+  DateTime? _validityDate;
   bool _isLegalTextDirty = false;
+  bool _isValidityDateDirty = false;
 
   @override
   void initState() {
     super.initState();
-    _contactPersonController = TextEditingController();
+    _selectedCustomerId = AppRouteArgs.readCustomerId();
     _authorizedPhoneController = TextEditingController();
     _mobilePhoneController = TextEditingController();
     _legalTextTemplateService = Get.find<LegalTextTemplateService>();
     _selectedType = OfferType.general;
     _offerDate = AppDateUtils.normalizeDate(DateTime.now());
+    _validityDate = AppDateUtils.addDays(_offerDate!, 7);
     _legalTextController = TextEditingController();
     _itemRows = [PriceOfferItemFormRow()];
     _loadInitialLegalText();
@@ -64,7 +71,6 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
 
   @override
   void dispose() {
-    _contactPersonController.dispose();
     _authorizedPhoneController.dispose();
     _mobilePhoneController.dispose();
     _legalTextController.dispose();
@@ -76,8 +82,7 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
 
   Future<void> _handleTypeChanged(OfferType? type) async {
     if (!_isLegalTextDirty && type != null) {
-      final text =
-          await _legalTextTemplateService.getTemplateByOfferType(type);
+      final text = await _legalTextTemplateService.getTemplateByOfferType(type);
       if (!mounted) {
         return;
       }
@@ -92,6 +97,93 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
     setState(() {
       _selectedType = type;
     });
+  }
+
+  void _handleOfferDateChanged(DateTime? date) {
+    setState(() {
+      _offerDate = date;
+      if (!_isValidityDateDirty && date != null) {
+        _validityDate = AppDateUtils.addDays(date, 7);
+      }
+    });
+  }
+
+  void _handleValidityDateChanged(DateTime? date) {
+    setState(() {
+      _validityDate = date;
+      _isValidityDateDirty = true;
+    });
+  }
+
+  Future<void> _handleCustomerChanged(
+    PriceOffersController controller,
+    String? customerId,
+  ) async {
+    setState(() {
+      _selectedCustomerId = customerId;
+      _selectedContact = null;
+      _mobilePhoneController.clear();
+      _applyCustomerPhone(controller, customerId);
+    });
+
+    await controller.loadCustomerContacts(customerId);
+    if (!mounted) {
+      return;
+    }
+
+    final defaultContact = _findDefaultContact(controller.customerContacts);
+    if (defaultContact != null) {
+      setState(() {
+        _applyContactSelection(defaultContact);
+      });
+    }
+  }
+
+  void _handleContactChanged(CustomerContactItem? contact) {
+    setState(() {
+      _applyContactSelection(contact);
+    });
+  }
+
+  void _applyCustomerPhone(
+    PriceOffersController controller,
+    String? customerId,
+  ) {
+    if (customerId == null) {
+      _authorizedPhoneController.clear();
+      return;
+    }
+
+    Customer? customer;
+    for (final item in controller.customers) {
+      if (item.id == customerId) {
+        customer = item;
+        break;
+      }
+    }
+
+    final phone = customer?.phone?.trim();
+    _authorizedPhoneController.text =
+        phone != null && phone.isNotEmpty ? phone : '';
+  }
+
+  void _applyContactSelection(CustomerContactItem? contact) {
+    _selectedContact = contact;
+    final phone = contact?.phone?.trim();
+    _mobilePhoneController.text =
+        phone != null && phone.isNotEmpty ? phone : '';
+  }
+
+  CustomerContactItem? _findDefaultContact(
+    List<CustomerContactItem> contacts,
+  ) {
+    for (final contact in contacts) {
+      if (contact.isPrimary) {
+        return contact;
+      }
+    }
+
+    return contacts.isEmpty ? null : contacts.first;
   }
 
   List<PriceOfferItemFormValidation> _buildItemValidations() {
@@ -112,8 +204,9 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
     final id = await controller.createOffer(
       type: _selectedType,
       offerDate: _offerDate,
+      validityDate: _validityDate,
       customerId: _selectedCustomerId,
-      contactPerson: _contactPersonController.text,
+      contactPerson: _selectedContact?.fullName ?? '',
       authorizedPhone: _authorizedPhoneController.text,
       mobilePhone: _mobilePhoneController.text,
       legalText: _legalTextController.text,
@@ -125,22 +218,46 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
     }
   }
 
+  Future<void> _initializeCustomerContacts(
+    PriceOffersController controller,
+  ) async {
+    if (_selectedCustomerId == null) {
+      return;
+    }
+
+    await controller.loadCustomerContacts(_selectedCustomerId);
+    if (!mounted) {
+      return;
+    }
+
+    final defaultContact = _findDefaultContact(controller.customerContacts);
+    setState(() {
+      _applyCustomerPhone(controller, _selectedCustomerId);
+      if (defaultContact != null) {
+        _applyContactSelection(defaultContact);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseView<PriceOffersController>(
       viewModel: Get.find<PriceOffersController>(),
       onModelReady: (controller) {
         controller.clearMessages();
-        controller.loadCustomersForDropdown();
+        controller.loadCustomersForDropdown().then((_) {
+          _initializeCustomerContacts(controller);
+        });
       },
       onPageBuilder: (context, controller) {
         return PanelFormScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _PageHeader(
+              PanelFormPageHeader(
                 title: 'Yeni Fiyat Teklifi',
                 subtitle: 'Yeni fiyat teklifi oluşturun.',
+                onBack: () => Get.offNamed<void>(AppRoutes.priceOffers.value),
               ),
               const SizedBox(height: AppUiTokens.space16),
               Obx(() {
@@ -167,18 +284,20 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
                         selectedCustomerId: _selectedCustomerId,
                         selectedType: _selectedType,
                         offerDate: _offerDate,
-                        contactPersonController: _contactPersonController,
+                        validityDate: _validityDate,
+                        contacts: controller.customerContacts.toList(),
+                        selectedContact: _selectedContact,
+                        isLoadingContacts: controller.isLoadingContacts.value,
                         authorizedPhoneController: _authorizedPhoneController,
                         mobilePhoneController: _mobilePhoneController,
                         legalTextController: _legalTextController,
                         itemRows: _itemRows,
-                        onCustomerChanged: (value) => setState(() {
-                          _selectedCustomerId = value;
-                        }),
+                        onCustomerChanged: (value) =>
+                            _handleCustomerChanged(controller, value),
+                        onContactChanged: _handleContactChanged,
                         onTypeChanged: _handleTypeChanged,
-                        onDateChanged: (value) => setState(() {
-                          _offerDate = value;
-                        }),
+                        onDateChanged: _handleOfferDateChanged,
+                        onValidityDateChanged: _handleValidityDateChanged,
                         onLegalTextChanged: (_) {
                           _isLegalTextDirty = true;
                         },
@@ -205,40 +324,6 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
           ),
         );
       },
-    );
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
     );
   }
 }

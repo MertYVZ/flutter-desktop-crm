@@ -23,10 +23,12 @@ abstract final class SettingsMessages {
   static const pdfSettingsLoadError =
       'Teklif PDF bilgileri yüklenirken bir hata oluştu.';
   static const pdfSettingsRequiredField = 'Bu alan zorunludur.';
-  static const legalTemplateSaved = 'Yasal metin şablonu kaydedildi.';
+  static const legalTemplateSaved =
+      'Teklif bilgilendirme metni şablonu kaydedildi.';
   static const legalTemplateSaveError =
-      'Yasal metin şablonu kaydedilirken bir hata oluştu.';
+      'Teklif bilgilendirme metni şablonu kaydedilirken bir hata oluştu.';
   static const legalTemplateLoadError =
-      'Yasal metin şablonları yüklenirken bir hata oluştu.';
-  static const legalTemplateRequired = 'Yasal metin boş olamaz.';
+      'Teklif bilgilendirme metni şablonları yüklenirken bir hata oluştu.';
+  static const legalTemplateRequired =
+      'Teklif bilgilendirme metni boş olamaz.';
 }

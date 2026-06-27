@@ -6,6 +6,7 @@ import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:Ok/product/widgets/panel/panel_text_field.dart';
@@ -54,9 +55,10 @@ class _PriceListCreatePageState extends BaseState<PriceListCreatePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _PageHeader(
+              PanelFormPageHeader(
                 title: 'Yeni Fiyat Listesi',
                 subtitle: 'Yeni aktif fiyat listesi oluşturun.',
+                onBack: () => Get.offNamed<void>(AppRoutes.priceList.value),
               ),
               const SizedBox(height: AppUiTokens.space16),
               Obx(() {
@@ -193,39 +195,5 @@ class _PriceListCreatePageState extends BaseState<PriceListCreatePage> {
     if (id != null) {
       Get.offNamed<void>(AppRoutes.priceList.value);
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

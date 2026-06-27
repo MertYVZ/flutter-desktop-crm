@@ -1,3 +1,4 @@
+import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/due_tracking/widgets/customer_search_dropdown.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
@@ -18,14 +19,19 @@ class PriceOfferForm extends StatelessWidget {
     required this.selectedCustomerId,
     required this.selectedType,
     required this.offerDate,
-    required this.contactPersonController,
+    required this.validityDate,
+    required this.contacts,
+    required this.selectedContact,
+    required this.isLoadingContacts,
     required this.authorizedPhoneController,
     required this.mobilePhoneController,
     required this.legalTextController,
     required this.itemRows,
     required this.onCustomerChanged,
+    required this.onContactChanged,
     required this.onTypeChanged,
     required this.onDateChanged,
+    required this.onValidityDateChanged,
     required this.onLegalTextChanged,
     this.selectedStatus,
     this.onStatusChanged,
@@ -37,14 +43,19 @@ class PriceOfferForm extends StatelessWidget {
   final String? selectedCustomerId;
   final OfferType? selectedType;
   final DateTime? offerDate;
-  final TextEditingController contactPersonController;
+  final DateTime? validityDate;
+  final List<CustomerContactItem> contacts;
+  final CustomerContactItem? selectedContact;
+  final bool isLoadingContacts;
   final TextEditingController authorizedPhoneController;
   final TextEditingController mobilePhoneController;
   final TextEditingController legalTextController;
   final List<PriceOfferItemFormRow> itemRows;
   final ValueChanged<String?> onCustomerChanged;
+  final ValueChanged<CustomerContactItem?> onContactChanged;
   final ValueChanged<OfferType?> onTypeChanged;
   final ValueChanged<DateTime?> onDateChanged;
+  final ValueChanged<DateTime?> onValidityDateChanged;
   final ValueChanged<String> onLegalTextChanged;
   final PriceOfferStatus? selectedStatus;
   final ValueChanged<PriceOfferStatus?>? onStatusChanged;
@@ -64,7 +75,8 @@ class PriceOfferForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionTitle(title: 'Teklif Bilgileri', icon: Icons.description_outlined),
+        _SectionTitle(
+            title: 'Teklif Bilgileri', icon: Icons.description_outlined),
         const SizedBox(height: AppUiTokens.space16),
         _OfferTypeSelector(
           selectedType: selectedType,
@@ -78,23 +90,26 @@ class PriceOfferForm extends StatelessWidget {
             final leftColumn = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AppDatePickerField(
-                  key: ValueKey(offerDate),
-                  label: 'Tarih',
-                  placeholder: 'Tarih seçiniz',
-                  selectedDate: offerDate,
-                  onDateSelected: onDateChanged,
-                ),
-                const SizedBox(height: AppUiTokens.space16),
                 CustomerSearchDropdown(
                   customers: customers,
                   selectedCustomerId: selectedCustomerId,
                   onChanged: onCustomerChanged,
                 ),
                 const SizedBox(height: AppUiTokens.space16),
-                PanelTextField(
-                  controller: contactPersonController,
-                  label: 'Yetkili Kişi',
+                AppDatePickerField(
+                  key: ValueKey(offerDate),
+                  label: 'Teklif Tarihi',
+                  placeholder: 'Teklif tarihi seçiniz',
+                  selectedDate: offerDate,
+                  onDateSelected: onDateChanged,
+                ),
+                const SizedBox(height: AppUiTokens.space16),
+                AppDatePickerField(
+                  key: ValueKey(validityDate),
+                  label: 'Geçerlilik Tarihi',
+                  placeholder: 'Geçerlilik tarihi seçiniz',
+                  selectedDate: validityDate,
+                  onDateSelected: onValidityDateChanged,
                 ),
               ],
             );
@@ -102,6 +117,22 @@ class PriceOfferForm extends StatelessWidget {
             final rightColumn = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                PanelDropdown<CustomerContactItem>(
+                  label: 'Yetkili Kişi',
+                  hint: _contactHint(
+                    selectedCustomerId: selectedCustomerId,
+                    isLoadingContacts: isLoadingContacts,
+                    hasContacts: contacts.isNotEmpty,
+                  ),
+                  value: selectedContact,
+                  items: contacts,
+                  itemLabel: _contactLabel,
+                  enabled: selectedCustomerId != null &&
+                      !isLoadingContacts &&
+                      contacts.isNotEmpty,
+                  onChanged: onContactChanged,
+                ),
+                const SizedBox(height: AppUiTokens.space16),
                 PanelTextField(
                   controller: authorizedPhoneController,
                   label: 'Telefon',
@@ -110,7 +141,7 @@ class PriceOfferForm extends StatelessWidget {
                 const SizedBox(height: AppUiTokens.space16),
                 PanelTextField(
                   controller: mobilePhoneController,
-                  label: 'Cep Telefonu',
+                  label: 'Yetkili Telefonu',
                   keyboardType: TextInputType.phone,
                 ),
                 if (showStatus) ...[
@@ -158,15 +189,51 @@ class PriceOfferForm extends StatelessWidget {
           rows: itemRows,
         ),
         const SizedBox(height: AppUiTokens.space32),
-        _SectionTitle(title: 'Yasal Metin', icon: Icons.gavel_outlined),
+        _SectionTitle(
+          title: 'Teklif Bilgilendirme Metni',
+          icon: Icons.gavel_outlined,
+        ),
         const SizedBox(height: AppUiTokens.space16),
-        _LegalTextField(
+        PanelTextField(
           controller: legalTextController,
+          label: 'Teklif Bilgilendirme Metni',
+          hintText: 'Teklif bilgilendirme metni',
+          minLines: 5,
+          maxLines: 8,
           onChanged: onLegalTextChanged,
         ),
       ],
     );
   }
+}
+
+String _contactLabel(CustomerContactItem contact) {
+  final title = contact.title?.trim();
+  if (title != null && title.isNotEmpty) {
+    return '${contact.fullName} · $title';
+  }
+
+  return contact.fullName;
+}
+
+String _contactHint({
+  required String? selectedCustomerId,
+  required bool isLoadingContacts,
+  required bool hasContacts,
+}) {
+  if (selectedCustomerId == null) {
+    return PriceOfferMessages.selectCustomerForContact;
+  }
+
+  if (isLoadingContacts) {
+    return 'Yetkili kişiler yükleniyor...';
+  }
+
+  if (!hasContacts) {
+    return PriceOfferMessages.noContactsForSelectedCustomer;
+  }
+
+  return 'Yetkili kişi seçiniz';
 }
 
 class PriceOfferFormActions extends StatelessWidget {
@@ -303,10 +370,12 @@ class _OfferTypeSelector extends StatelessWidget {
                 onPressed: () => onTypeChanged(type),
                 style: AppInteractiveTheme.outlinedButtonStyle(
                   OutlinedButton.styleFrom(
-                    foregroundColor:
-                        isSelected ? ColorName.primary : AppUiTokens.textPrimary,
-                    backgroundColor:
-                        isSelected ? AppUiTokens.accentSoft : AppUiTokens.surface,
+                    foregroundColor: isSelected
+                        ? ColorName.primary
+                        : AppUiTokens.textPrimary,
+                    backgroundColor: isSelected
+                        ? AppUiTokens.accentSoft
+                        : AppUiTokens.surface,
                     side: BorderSide(
                       color: isSelected
                           ? ColorName.primary.withValues(alpha: 0.5)
@@ -323,56 +392,13 @@ class _OfferTypeSelector extends StatelessWidget {
                 child: Text(
                   type.label,
                   style: TextStyle(
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     fontSize: 13,
                   ),
                 ),
               ),
             );
           }).toList(),
-        ),
-      ],
-    );
-  }
-}
-
-class _LegalTextField extends StatelessWidget {
-  const _LegalTextField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Yasal Metin',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          minLines: 5,
-          maxLines: 8,
-          onChanged: onChanged,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Yasal metin',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-            alignLabelWithHint: true,
-          ),
         ),
       ],
     );

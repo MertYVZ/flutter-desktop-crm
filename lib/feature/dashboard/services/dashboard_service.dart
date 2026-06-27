@@ -1,6 +1,8 @@
 import 'package:Ok/feature/dashboard/models/dashboard_calendar_event.dart';
 import 'package:Ok/feature/dashboard/models/dashboard_calendar_event_type.dart';
 import 'package:Ok/feature/dashboard/models/dashboard_summary.dart';
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
+import 'package:Ok/feature/due_tracking/models/due_record_display_status.dart';
 import 'package:Ok/feature/due_tracking/models/due_record_status.dart';
 import 'package:Ok/feature/meetings/models/meeting_method.dart';
 import 'package:Ok/feature/meetings/models/meeting_subject.dart';
@@ -11,6 +13,7 @@ import 'package:Ok/feature/reminders/services/reminders_service.dart';
 import 'package:Ok/product/database/database_service.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
+import 'package:Ok/product/utility/money_utils.dart';
 import 'package:drift/drift.dart';
 
 final class DashboardService {
@@ -88,11 +91,13 @@ final class DashboardService {
     final meetingEvents = await getMeetingEventsForMonth(month);
     final priceOfferEvents = await getPriceOfferEventsForMonth(month);
     final reminderEvents = await getReminderEventsForMonth(month);
+    final dueRecordEvents = await getDueRecordEventsForMonth(month);
 
     final events = <DashboardCalendarEvent>[
       ...meetingEvents,
       ...priceOfferEvents,
       ...reminderEvents,
+      ...dueRecordEvents,
     ]..sort((a, b) => a.date.compareTo(b.date));
 
     return events;
@@ -108,8 +113,7 @@ final class DashboardService {
     );
 
     return rows.map((meeting) {
-      final subjectLabel =
-          meeting.meetingSubject?.label ?? meeting.subject;
+      final subjectLabel = meeting.meetingSubject?.label ?? meeting.subject;
       final methodLabel = meeting.meetingMethod?.label ?? meeting.method;
 
       return DashboardCalendarEvent(
@@ -175,6 +179,34 @@ final class DashboardService {
     }).toList();
   }
 
+  Future<List<DashboardCalendarEvent>> getDueRecordEventsForMonth(
+    DateTime month,
+  ) async {
+    final range = _monthRange(month);
+    final rows = await _databaseService.dueRecords.searchDueRecords(
+      startDate: range.start,
+      endDate: range.endInclusive,
+    );
+
+    return rows.map((record) {
+      final currency = record.currencyType ?? CurrencyType.try_;
+      final amount = MoneyUtils.formatAmountMinor(record.amountMinor, currency);
+      final statusLabel = record.displayStatus.label;
+
+      return DashboardCalendarEvent(
+        id: 'due-record-${record.id}',
+        title: 'Vade',
+        subtitle: '$amount · $statusLabel',
+        date: AppDateUtils.normalizeDate(record.dueDate),
+        type: DashboardCalendarEventType.dueRecord,
+        customerName: record.customerName,
+        route: AppRoutes.dueTrackingEdit.pathForId(record.id),
+        sourceId: record.id,
+        sourceType: DashboardCalendarEventType.dueRecord.sourceType,
+      );
+    }).toList();
+  }
+
   Future<int> _countWhere<T extends Table>(
     TableInfo<T, dynamic> table,
     Expression<bool> where,
@@ -193,7 +225,8 @@ final class DashboardService {
   ({DateTime start, DateTime endInclusive}) _monthRange(DateTime month) {
     final start = DateTime(month.year, month.month, 1);
     final nextMonthStart = DateTime(month.year, month.month + 1, 1);
-    final endInclusive = nextMonthStart.subtract(const Duration(milliseconds: 1));
+    final endInclusive =
+        nextMonthStart.subtract(const Duration(milliseconds: 1));
     return (start: start, endInclusive: endInclusive);
   }
 }

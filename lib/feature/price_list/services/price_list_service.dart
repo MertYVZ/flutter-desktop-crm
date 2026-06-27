@@ -60,6 +60,9 @@ final class PriceListService {
   Future<void> archivePriceList(String id) =>
       _databaseService.priceLists.archivePriceList(id);
 
+  Future<void> deleteArchivedPriceList(String id) =>
+      _databaseService.priceLists.softDeleteArchivedPriceList(id);
+
   Future<void> updatePriceList({
     required String id,
     required String title,

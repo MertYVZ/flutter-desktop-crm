@@ -6,6 +6,7 @@ import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/note_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -73,8 +74,7 @@ class _NoteEditPageState extends BaseState<NoteEditPage> {
       onPageBuilder: (context, controller) {
         return Obx(() {
           if (controller.isLoading.value ||
-              (controller.selectedNote.value != null &&
-                  !_isFormInitialized)) {
+              (controller.selectedNote.value != null && !_isFormInitialized)) {
             return const Center(
               child: SizedBox(
                 width: 28,
@@ -100,9 +100,12 @@ class _NoteEditPageState extends BaseState<NoteEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PageHeader(
+                PanelFormPageHeader(
                   title: 'Not Düzenle',
                   subtitle: note.title,
+                  onBack: () => Get.offNamed<void>(
+                    AppRoutes.notesDetail.pathForId(_noteId),
+                  ),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 Obx(() {
@@ -168,39 +171,5 @@ class _NoteEditPageState extends BaseState<NoteEditPage> {
     if (success) {
       Get.offNamed<void>(AppRoutes.notesDetail.pathForId(_noteId));
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

@@ -3,9 +3,11 @@ import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/due_tracking/widgets/due_record_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
+import 'package:Ok/product/navigation/app_route_args.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,7 @@ class _DueTrackingCreatePageState extends BaseState<DueTrackingCreatePage> {
   @override
   void initState() {
     super.initState();
+    _selectedCustomerId = AppRouteArgs.readCustomerId();
     _amountController = TextEditingController();
     _invoiceNoController = TextEditingController();
   }
@@ -52,9 +55,10 @@ class _DueTrackingCreatePageState extends BaseState<DueTrackingCreatePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _PageHeader(
+              PanelFormPageHeader(
                 title: 'Yeni Vade Kaydı',
                 subtitle: 'Yeni vade kaydı oluşturun.',
+                onBack: () => Get.offNamed<void>(AppRoutes.dueTracking.value),
               ),
               const SizedBox(height: AppUiTokens.space16),
               Obx(() {
@@ -133,39 +137,5 @@ class _DueTrackingCreatePageState extends BaseState<DueTrackingCreatePage> {
     if (id != null) {
       Get.offNamed<void>(AppRoutes.dueTracking.value);
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

@@ -22,9 +22,7 @@ class ReminderForm extends StatelessWidget {
     required this.onCustomerChanged,
     required this.onPeriodChanged,
     required this.onStartDateChanged,
-    this.nextReminderDate,
     this.selectedStatus,
-    this.onNextReminderDateChanged,
     this.onStatusChanged,
     this.showEditFields = false,
     super.key,
@@ -35,13 +33,11 @@ class ReminderForm extends StatelessWidget {
   final TextEditingController titleController;
   final ReminderPeriod? selectedPeriod;
   final DateTime? startDate;
-  final DateTime? nextReminderDate;
   final ReminderStatus? selectedStatus;
   final TextEditingController noteController;
   final ValueChanged<String?> onCustomerChanged;
   final ValueChanged<ReminderPeriod?> onPeriodChanged;
   final ValueChanged<DateTime?> onStartDateChanged;
-  final ValueChanged<DateTime?>? onNextReminderDateChanged;
   final ValueChanged<ReminderStatus?>? onStatusChanged;
   final bool showEditFields;
 
@@ -91,22 +87,12 @@ class ReminderForm extends StatelessWidget {
             AppDatePickerField(
               key: ValueKey(
                   'reminder-start-date-${startDate?.toIso8601String()}'),
-              label: 'İlk Hatırlatma Tarihi',
+              label: 'Hatırlatma Tarihi',
               placeholder: 'Tarih seçiniz',
               selectedDate: startDate,
               onDateSelected: onStartDateChanged,
             ),
             if (showEditFields) ...[
-              const SizedBox(height: AppUiTokens.space16),
-              AppDatePickerField(
-                key: ValueKey(
-                  'reminder-next-date-${nextReminderDate?.toIso8601String()}',
-                ),
-                label: 'Bir Sonraki Hatırlatma Tarihi',
-                placeholder: 'Tarih seçiniz',
-                selectedDate: nextReminderDate,
-                onDateSelected: onNextReminderDateChanged ?? (_) {},
-              ),
               const SizedBox(height: AppUiTokens.space16),
               PanelDropdown<ReminderStatus>(
                 label: 'Durum',
@@ -118,7 +104,12 @@ class ReminderForm extends StatelessWidget {
               ),
             ],
             const SizedBox(height: AppUiTokens.space16),
-            _NoteField(controller: noteController),
+            PanelTextField(
+              controller: noteController,
+              label: 'Not',
+              minLines: 3,
+              maxLines: 5,
+            ),
           ],
         );
 
@@ -142,43 +133,6 @@ class ReminderForm extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _NoteField extends StatelessWidget {
-  const _NoteField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Not',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          minLines: 3,
-          maxLines: 5,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Not',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-            alignLabelWithHint: true,
-          ),
-        ),
-      ],
     );
   }
 }

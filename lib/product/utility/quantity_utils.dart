@@ -22,6 +22,8 @@ final class QuantityUtils {
 
   static String formatQuantity(double quantity) => _displayFormat.format(quantity);
 
+  static String formatKg(double quantity) => '${_displayFormat.format(quantity)} KG';
+
   static String formatForExport(double quantity) =>
       _exportFormat.format(quantity);
 

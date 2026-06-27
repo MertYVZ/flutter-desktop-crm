@@ -85,12 +85,13 @@ class PriceOffersTable extends StatelessWidget {
           columnSpacing: AppUiTokens.space24,
           horizontalMargin: AppUiTokens.space24,
           columns: const [
-            DataColumn(label: Text('Tarih')),
+            DataColumn(label: Text('Teklif Tarihi')),
+            DataColumn(label: Text('Geçerlilik Tarihi')),
             DataColumn(label: Text('Tip')),
             DataColumn(label: Text('Müşteri')),
             DataColumn(label: Text('İlgili Kişi')),
             DataColumn(label: Text('Yetkili Telefon')),
-            DataColumn(label: Text('Cep Telefon')),
+            DataColumn(label: Text('Yetkili Telefonu')),
             DataColumn(label: Text('Durum')),
             DataColumn(label: Text('İşlemler')),
           ],
@@ -155,6 +156,12 @@ class PriceOffersTable extends StatelessWidget {
         DataCell(
           Text(
             AppDateUtils.formatDate(offer.offerDate),
+            style: _dataStyle,
+          ),
+        ),
+        DataCell(
+          Text(
+            AppDateUtils.formatDate(offer.validityDate),
             style: _dataStyle,
           ),
         ),

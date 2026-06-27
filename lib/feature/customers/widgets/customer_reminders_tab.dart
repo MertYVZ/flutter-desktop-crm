@@ -32,7 +32,7 @@ class CustomerRemindersTab extends StatelessWidget {
         isEmpty: records.isEmpty,
         emptyMessage: CustomerDetailMessages.remindersEmpty,
         emptyActionLabel: 'Hatırlatıcı Ekle',
-        onEmptyAction: () => Get.toNamed<void>(AppRoutes.remindersNew.value),
+        onEmptyAction: () => controller.openCreateForm(AppRoutes.remindersNew),
         children: records
             .map(
               (reminder) {

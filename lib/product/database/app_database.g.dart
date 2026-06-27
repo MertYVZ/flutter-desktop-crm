@@ -3823,6 +3823,12 @@ class $ScrapQualityRecordsTable extends ScrapQualityRecords
   late final GeneratedColumn<String> customerId = GeneratedColumn<String>(
       'customer_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _customerNameSnapshotMeta =
+      const VerificationMeta('customerNameSnapshot');
+  @override
+  late final GeneratedColumn<String> customerNameSnapshot =
+      GeneratedColumn<String>('customer_name_snapshot', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _qualityMeta =
       const VerificationMeta('quality');
   @override
@@ -3840,6 +3846,51 @@ class $ScrapQualityRecordsTable extends ScrapQualityRecords
   late final GeneratedColumn<String> unit = GeneratedColumn<String>(
       'unit', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityKgMeta =
+      const VerificationMeta('quantityKg');
+  @override
+  late final GeneratedColumn<double> quantityKg = GeneratedColumn<double>(
+      'quantity_kg', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+      'city', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _salesStatusMeta =
+      const VerificationMeta('salesStatus');
+  @override
+  late final GeneratedColumn<String> salesStatus = GeneratedColumn<String>(
+      'sales_status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('unresolved'));
+  static const VerificationMeta _offerPriceMeta =
+      const VerificationMeta('offerPrice');
+  @override
+  late final GeneratedColumn<double> offerPrice = GeneratedColumn<double>(
+      'offer_price', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _targetPriceMeta =
+      const VerificationMeta('targetPrice');
+  @override
+  late final GeneratedColumn<double> targetPrice = GeneratedColumn<double>(
+      'target_price', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _lostReasonMeta =
+      const VerificationMeta('lostReason');
+  @override
+  late final GeneratedColumn<String> lostReason = GeneratedColumn<String>(
+      'lost_reason', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _followUpDateMeta =
+      const VerificationMeta('followUpDate');
+  @override
+  late final GeneratedColumn<DateTime> followUpDate = GeneratedColumn<DateTime>(
+      'follow_up_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _recordDateMeta =
       const VerificationMeta('recordDate');
   @override
@@ -3873,9 +3924,17 @@ class $ScrapQualityRecordsTable extends ScrapQualityRecords
   List<GeneratedColumn> get $columns => [
         id,
         customerId,
+        customerNameSnapshot,
         quality,
         quantity,
         unit,
+        quantityKg,
+        city,
+        salesStatus,
+        offerPrice,
+        targetPrice,
+        lostReason,
+        followUpDate,
         recordDate,
         note,
         createdAt,
@@ -3905,6 +3964,12 @@ class $ScrapQualityRecordsTable extends ScrapQualityRecords
     } else if (isInserting) {
       context.missing(_customerIdMeta);
     }
+    if (data.containsKey('customer_name_snapshot')) {
+      context.handle(
+          _customerNameSnapshotMeta,
+          customerNameSnapshot.isAcceptableOrUnknown(
+              data['customer_name_snapshot']!, _customerNameSnapshotMeta));
+    }
     if (data.containsKey('quality')) {
       context.handle(_qualityMeta,
           quality.isAcceptableOrUnknown(data['quality']!, _qualityMeta));
@@ -3922,6 +3987,46 @@ class $ScrapQualityRecordsTable extends ScrapQualityRecords
           _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
     } else if (isInserting) {
       context.missing(_unitMeta);
+    }
+    if (data.containsKey('quantity_kg')) {
+      context.handle(
+          _quantityKgMeta,
+          quantityKg.isAcceptableOrUnknown(
+              data['quantity_kg']!, _quantityKgMeta));
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+          _cityMeta, city.isAcceptableOrUnknown(data['city']!, _cityMeta));
+    }
+    if (data.containsKey('sales_status')) {
+      context.handle(
+          _salesStatusMeta,
+          salesStatus.isAcceptableOrUnknown(
+              data['sales_status']!, _salesStatusMeta));
+    }
+    if (data.containsKey('offer_price')) {
+      context.handle(
+          _offerPriceMeta,
+          offerPrice.isAcceptableOrUnknown(
+              data['offer_price']!, _offerPriceMeta));
+    }
+    if (data.containsKey('target_price')) {
+      context.handle(
+          _targetPriceMeta,
+          targetPrice.isAcceptableOrUnknown(
+              data['target_price']!, _targetPriceMeta));
+    }
+    if (data.containsKey('lost_reason')) {
+      context.handle(
+          _lostReasonMeta,
+          lostReason.isAcceptableOrUnknown(
+              data['lost_reason']!, _lostReasonMeta));
+    }
+    if (data.containsKey('follow_up_date')) {
+      context.handle(
+          _followUpDateMeta,
+          followUpDate.isAcceptableOrUnknown(
+              data['follow_up_date']!, _followUpDateMeta));
     }
     if (data.containsKey('record_date')) {
       context.handle(
@@ -3964,12 +4069,29 @@ class $ScrapQualityRecordsTable extends ScrapQualityRecords
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       customerId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
+      customerNameSnapshot: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}customer_name_snapshot']),
       quality: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}quality'])!,
       quantity: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
       unit: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+      quantityKg: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity_kg'])!,
+      city: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}city']),
+      salesStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sales_status'])!,
+      offerPrice: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}offer_price']),
+      targetPrice: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}target_price']),
+      lostReason: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}lost_reason']),
+      followUpDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}follow_up_date']),
       recordDate: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}record_date'])!,
       note: attachedDatabase.typeMapping
@@ -3993,9 +4115,17 @@ class ScrapQualityRecord extends DataClass
     implements Insertable<ScrapQualityRecord> {
   final String id;
   final String customerId;
+  final String? customerNameSnapshot;
   final String quality;
   final double quantity;
   final String unit;
+  final double quantityKg;
+  final String? city;
+  final String salesStatus;
+  final double? offerPrice;
+  final double? targetPrice;
+  final String? lostReason;
+  final DateTime? followUpDate;
   final DateTime recordDate;
   final String? note;
   final DateTime createdAt;
@@ -4004,9 +4134,17 @@ class ScrapQualityRecord extends DataClass
   const ScrapQualityRecord(
       {required this.id,
       required this.customerId,
+      this.customerNameSnapshot,
       required this.quality,
       required this.quantity,
       required this.unit,
+      required this.quantityKg,
+      this.city,
+      required this.salesStatus,
+      this.offerPrice,
+      this.targetPrice,
+      this.lostReason,
+      this.followUpDate,
       required this.recordDate,
       this.note,
       required this.createdAt,
@@ -4017,9 +4155,29 @@ class ScrapQualityRecord extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['customer_id'] = Variable<String>(customerId);
+    if (!nullToAbsent || customerNameSnapshot != null) {
+      map['customer_name_snapshot'] = Variable<String>(customerNameSnapshot);
+    }
     map['quality'] = Variable<String>(quality);
     map['quantity'] = Variable<double>(quantity);
     map['unit'] = Variable<String>(unit);
+    map['quantity_kg'] = Variable<double>(quantityKg);
+    if (!nullToAbsent || city != null) {
+      map['city'] = Variable<String>(city);
+    }
+    map['sales_status'] = Variable<String>(salesStatus);
+    if (!nullToAbsent || offerPrice != null) {
+      map['offer_price'] = Variable<double>(offerPrice);
+    }
+    if (!nullToAbsent || targetPrice != null) {
+      map['target_price'] = Variable<double>(targetPrice);
+    }
+    if (!nullToAbsent || lostReason != null) {
+      map['lost_reason'] = Variable<String>(lostReason);
+    }
+    if (!nullToAbsent || followUpDate != null) {
+      map['follow_up_date'] = Variable<DateTime>(followUpDate);
+    }
     map['record_date'] = Variable<DateTime>(recordDate);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
@@ -4036,9 +4194,27 @@ class ScrapQualityRecord extends DataClass
     return ScrapQualityRecordsCompanion(
       id: Value(id),
       customerId: Value(customerId),
+      customerNameSnapshot: customerNameSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerNameSnapshot),
       quality: Value(quality),
       quantity: Value(quantity),
       unit: Value(unit),
+      quantityKg: Value(quantityKg),
+      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
+      salesStatus: Value(salesStatus),
+      offerPrice: offerPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(offerPrice),
+      targetPrice: targetPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetPrice),
+      lostReason: lostReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lostReason),
+      followUpDate: followUpDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(followUpDate),
       recordDate: Value(recordDate),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
@@ -4055,9 +4231,18 @@ class ScrapQualityRecord extends DataClass
     return ScrapQualityRecord(
       id: serializer.fromJson<String>(json['id']),
       customerId: serializer.fromJson<String>(json['customerId']),
+      customerNameSnapshot:
+          serializer.fromJson<String?>(json['customerNameSnapshot']),
       quality: serializer.fromJson<String>(json['quality']),
       quantity: serializer.fromJson<double>(json['quantity']),
       unit: serializer.fromJson<String>(json['unit']),
+      quantityKg: serializer.fromJson<double>(json['quantityKg']),
+      city: serializer.fromJson<String?>(json['city']),
+      salesStatus: serializer.fromJson<String>(json['salesStatus']),
+      offerPrice: serializer.fromJson<double?>(json['offerPrice']),
+      targetPrice: serializer.fromJson<double?>(json['targetPrice']),
+      lostReason: serializer.fromJson<String?>(json['lostReason']),
+      followUpDate: serializer.fromJson<DateTime?>(json['followUpDate']),
       recordDate: serializer.fromJson<DateTime>(json['recordDate']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -4071,9 +4256,17 @@ class ScrapQualityRecord extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'customerId': serializer.toJson<String>(customerId),
+      'customerNameSnapshot': serializer.toJson<String?>(customerNameSnapshot),
       'quality': serializer.toJson<String>(quality),
       'quantity': serializer.toJson<double>(quantity),
       'unit': serializer.toJson<String>(unit),
+      'quantityKg': serializer.toJson<double>(quantityKg),
+      'city': serializer.toJson<String?>(city),
+      'salesStatus': serializer.toJson<String>(salesStatus),
+      'offerPrice': serializer.toJson<double?>(offerPrice),
+      'targetPrice': serializer.toJson<double?>(targetPrice),
+      'lostReason': serializer.toJson<String?>(lostReason),
+      'followUpDate': serializer.toJson<DateTime?>(followUpDate),
       'recordDate': serializer.toJson<DateTime>(recordDate),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -4085,9 +4278,17 @@ class ScrapQualityRecord extends DataClass
   ScrapQualityRecord copyWith(
           {String? id,
           String? customerId,
+          Value<String?> customerNameSnapshot = const Value.absent(),
           String? quality,
           double? quantity,
           String? unit,
+          double? quantityKg,
+          Value<String?> city = const Value.absent(),
+          String? salesStatus,
+          Value<double?> offerPrice = const Value.absent(),
+          Value<double?> targetPrice = const Value.absent(),
+          Value<String?> lostReason = const Value.absent(),
+          Value<DateTime?> followUpDate = const Value.absent(),
           DateTime? recordDate,
           Value<String?> note = const Value.absent(),
           DateTime? createdAt,
@@ -4096,9 +4297,20 @@ class ScrapQualityRecord extends DataClass
       ScrapQualityRecord(
         id: id ?? this.id,
         customerId: customerId ?? this.customerId,
+        customerNameSnapshot: customerNameSnapshot.present
+            ? customerNameSnapshot.value
+            : this.customerNameSnapshot,
         quality: quality ?? this.quality,
         quantity: quantity ?? this.quantity,
         unit: unit ?? this.unit,
+        quantityKg: quantityKg ?? this.quantityKg,
+        city: city.present ? city.value : this.city,
+        salesStatus: salesStatus ?? this.salesStatus,
+        offerPrice: offerPrice.present ? offerPrice.value : this.offerPrice,
+        targetPrice: targetPrice.present ? targetPrice.value : this.targetPrice,
+        lostReason: lostReason.present ? lostReason.value : this.lostReason,
+        followUpDate:
+            followUpDate.present ? followUpDate.value : this.followUpDate,
         recordDate: recordDate ?? this.recordDate,
         note: note.present ? note.value : this.note,
         createdAt: createdAt ?? this.createdAt,
@@ -4110,9 +4322,26 @@ class ScrapQualityRecord extends DataClass
       id: data.id.present ? data.id.value : this.id,
       customerId:
           data.customerId.present ? data.customerId.value : this.customerId,
+      customerNameSnapshot: data.customerNameSnapshot.present
+          ? data.customerNameSnapshot.value
+          : this.customerNameSnapshot,
       quality: data.quality.present ? data.quality.value : this.quality,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
       unit: data.unit.present ? data.unit.value : this.unit,
+      quantityKg:
+          data.quantityKg.present ? data.quantityKg.value : this.quantityKg,
+      city: data.city.present ? data.city.value : this.city,
+      salesStatus:
+          data.salesStatus.present ? data.salesStatus.value : this.salesStatus,
+      offerPrice:
+          data.offerPrice.present ? data.offerPrice.value : this.offerPrice,
+      targetPrice:
+          data.targetPrice.present ? data.targetPrice.value : this.targetPrice,
+      lostReason:
+          data.lostReason.present ? data.lostReason.value : this.lostReason,
+      followUpDate: data.followUpDate.present
+          ? data.followUpDate.value
+          : this.followUpDate,
       recordDate:
           data.recordDate.present ? data.recordDate.value : this.recordDate,
       note: data.note.present ? data.note.value : this.note,
@@ -4127,9 +4356,17 @@ class ScrapQualityRecord extends DataClass
     return (StringBuffer('ScrapQualityRecord(')
           ..write('id: $id, ')
           ..write('customerId: $customerId, ')
+          ..write('customerNameSnapshot: $customerNameSnapshot, ')
           ..write('quality: $quality, ')
           ..write('quantity: $quantity, ')
           ..write('unit: $unit, ')
+          ..write('quantityKg: $quantityKg, ')
+          ..write('city: $city, ')
+          ..write('salesStatus: $salesStatus, ')
+          ..write('offerPrice: $offerPrice, ')
+          ..write('targetPrice: $targetPrice, ')
+          ..write('lostReason: $lostReason, ')
+          ..write('followUpDate: $followUpDate, ')
           ..write('recordDate: $recordDate, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
@@ -4140,17 +4377,42 @@ class ScrapQualityRecord extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, customerId, quality, quantity, unit,
-      recordDate, note, createdAt, updatedAt, deletedAt);
+  int get hashCode => Object.hash(
+      id,
+      customerId,
+      customerNameSnapshot,
+      quality,
+      quantity,
+      unit,
+      quantityKg,
+      city,
+      salesStatus,
+      offerPrice,
+      targetPrice,
+      lostReason,
+      followUpDate,
+      recordDate,
+      note,
+      createdAt,
+      updatedAt,
+      deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ScrapQualityRecord &&
           other.id == this.id &&
           other.customerId == this.customerId &&
+          other.customerNameSnapshot == this.customerNameSnapshot &&
           other.quality == this.quality &&
           other.quantity == this.quantity &&
           other.unit == this.unit &&
+          other.quantityKg == this.quantityKg &&
+          other.city == this.city &&
+          other.salesStatus == this.salesStatus &&
+          other.offerPrice == this.offerPrice &&
+          other.targetPrice == this.targetPrice &&
+          other.lostReason == this.lostReason &&
+          other.followUpDate == this.followUpDate &&
           other.recordDate == this.recordDate &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
@@ -4161,9 +4423,17 @@ class ScrapQualityRecord extends DataClass
 class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
   final Value<String> id;
   final Value<String> customerId;
+  final Value<String?> customerNameSnapshot;
   final Value<String> quality;
   final Value<double> quantity;
   final Value<String> unit;
+  final Value<double> quantityKg;
+  final Value<String?> city;
+  final Value<String> salesStatus;
+  final Value<double?> offerPrice;
+  final Value<double?> targetPrice;
+  final Value<String?> lostReason;
+  final Value<DateTime?> followUpDate;
   final Value<DateTime> recordDate;
   final Value<String?> note;
   final Value<DateTime> createdAt;
@@ -4173,9 +4443,17 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
   const ScrapQualityRecordsCompanion({
     this.id = const Value.absent(),
     this.customerId = const Value.absent(),
+    this.customerNameSnapshot = const Value.absent(),
     this.quality = const Value.absent(),
     this.quantity = const Value.absent(),
     this.unit = const Value.absent(),
+    this.quantityKg = const Value.absent(),
+    this.city = const Value.absent(),
+    this.salesStatus = const Value.absent(),
+    this.offerPrice = const Value.absent(),
+    this.targetPrice = const Value.absent(),
+    this.lostReason = const Value.absent(),
+    this.followUpDate = const Value.absent(),
     this.recordDate = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -4186,9 +4464,17 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
   ScrapQualityRecordsCompanion.insert({
     required String id,
     required String customerId,
+    this.customerNameSnapshot = const Value.absent(),
     required String quality,
     required double quantity,
     required String unit,
+    this.quantityKg = const Value.absent(),
+    this.city = const Value.absent(),
+    this.salesStatus = const Value.absent(),
+    this.offerPrice = const Value.absent(),
+    this.targetPrice = const Value.absent(),
+    this.lostReason = const Value.absent(),
+    this.followUpDate = const Value.absent(),
     required DateTime recordDate,
     this.note = const Value.absent(),
     required DateTime createdAt,
@@ -4206,9 +4492,17 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
   static Insertable<ScrapQualityRecord> custom({
     Expression<String>? id,
     Expression<String>? customerId,
+    Expression<String>? customerNameSnapshot,
     Expression<String>? quality,
     Expression<double>? quantity,
     Expression<String>? unit,
+    Expression<double>? quantityKg,
+    Expression<String>? city,
+    Expression<String>? salesStatus,
+    Expression<double>? offerPrice,
+    Expression<double>? targetPrice,
+    Expression<String>? lostReason,
+    Expression<DateTime>? followUpDate,
     Expression<DateTime>? recordDate,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
@@ -4219,9 +4513,18 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (customerId != null) 'customer_id': customerId,
+      if (customerNameSnapshot != null)
+        'customer_name_snapshot': customerNameSnapshot,
       if (quality != null) 'quality': quality,
       if (quantity != null) 'quantity': quantity,
       if (unit != null) 'unit': unit,
+      if (quantityKg != null) 'quantity_kg': quantityKg,
+      if (city != null) 'city': city,
+      if (salesStatus != null) 'sales_status': salesStatus,
+      if (offerPrice != null) 'offer_price': offerPrice,
+      if (targetPrice != null) 'target_price': targetPrice,
+      if (lostReason != null) 'lost_reason': lostReason,
+      if (followUpDate != null) 'follow_up_date': followUpDate,
       if (recordDate != null) 'record_date': recordDate,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
@@ -4234,9 +4537,17 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
   ScrapQualityRecordsCompanion copyWith(
       {Value<String>? id,
       Value<String>? customerId,
+      Value<String?>? customerNameSnapshot,
       Value<String>? quality,
       Value<double>? quantity,
       Value<String>? unit,
+      Value<double>? quantityKg,
+      Value<String?>? city,
+      Value<String>? salesStatus,
+      Value<double?>? offerPrice,
+      Value<double?>? targetPrice,
+      Value<String?>? lostReason,
+      Value<DateTime?>? followUpDate,
       Value<DateTime>? recordDate,
       Value<String?>? note,
       Value<DateTime>? createdAt,
@@ -4246,9 +4557,17 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
     return ScrapQualityRecordsCompanion(
       id: id ?? this.id,
       customerId: customerId ?? this.customerId,
+      customerNameSnapshot: customerNameSnapshot ?? this.customerNameSnapshot,
       quality: quality ?? this.quality,
       quantity: quantity ?? this.quantity,
       unit: unit ?? this.unit,
+      quantityKg: quantityKg ?? this.quantityKg,
+      city: city ?? this.city,
+      salesStatus: salesStatus ?? this.salesStatus,
+      offerPrice: offerPrice ?? this.offerPrice,
+      targetPrice: targetPrice ?? this.targetPrice,
+      lostReason: lostReason ?? this.lostReason,
+      followUpDate: followUpDate ?? this.followUpDate,
       recordDate: recordDate ?? this.recordDate,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
@@ -4267,6 +4586,10 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
     if (customerId.present) {
       map['customer_id'] = Variable<String>(customerId.value);
     }
+    if (customerNameSnapshot.present) {
+      map['customer_name_snapshot'] =
+          Variable<String>(customerNameSnapshot.value);
+    }
     if (quality.present) {
       map['quality'] = Variable<String>(quality.value);
     }
@@ -4275,6 +4598,27 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
     }
     if (unit.present) {
       map['unit'] = Variable<String>(unit.value);
+    }
+    if (quantityKg.present) {
+      map['quantity_kg'] = Variable<double>(quantityKg.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (salesStatus.present) {
+      map['sales_status'] = Variable<String>(salesStatus.value);
+    }
+    if (offerPrice.present) {
+      map['offer_price'] = Variable<double>(offerPrice.value);
+    }
+    if (targetPrice.present) {
+      map['target_price'] = Variable<double>(targetPrice.value);
+    }
+    if (lostReason.present) {
+      map['lost_reason'] = Variable<String>(lostReason.value);
+    }
+    if (followUpDate.present) {
+      map['follow_up_date'] = Variable<DateTime>(followUpDate.value);
     }
     if (recordDate.present) {
       map['record_date'] = Variable<DateTime>(recordDate.value);
@@ -4302,9 +4646,17 @@ class ScrapQualityRecordsCompanion extends UpdateCompanion<ScrapQualityRecord> {
     return (StringBuffer('ScrapQualityRecordsCompanion(')
           ..write('id: $id, ')
           ..write('customerId: $customerId, ')
+          ..write('customerNameSnapshot: $customerNameSnapshot, ')
           ..write('quality: $quality, ')
           ..write('quantity: $quantity, ')
           ..write('unit: $unit, ')
+          ..write('quantityKg: $quantityKg, ')
+          ..write('city: $city, ')
+          ..write('salesStatus: $salesStatus, ')
+          ..write('offerPrice: $offerPrice, ')
+          ..write('targetPrice: $targetPrice, ')
+          ..write('lostReason: $lostReason, ')
+          ..write('followUpDate: $followUpDate, ')
           ..write('recordDate: $recordDate, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
@@ -4337,6 +4689,12 @@ class $PriceOffersTable extends PriceOffers
   @override
   late final GeneratedColumn<DateTime> offerDate = GeneratedColumn<DateTime>(
       'offer_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _validityDateMeta =
+      const VerificationMeta('validityDate');
+  @override
+  late final GeneratedColumn<DateTime> validityDate = GeneratedColumn<DateTime>(
+      'validity_date', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   static const VerificationMeta _customerIdMeta =
       const VerificationMeta('customerId');
@@ -4396,6 +4754,7 @@ class $PriceOffersTable extends PriceOffers
         id,
         type,
         offerDate,
+        validityDate,
         customerId,
         contactPerson,
         authorizedPhone,
@@ -4432,6 +4791,14 @@ class $PriceOffersTable extends PriceOffers
           offerDate.isAcceptableOrUnknown(data['offer_date']!, _offerDateMeta));
     } else if (isInserting) {
       context.missing(_offerDateMeta);
+    }
+    if (data.containsKey('validity_date')) {
+      context.handle(
+          _validityDateMeta,
+          validityDate.isAcceptableOrUnknown(
+              data['validity_date']!, _validityDateMeta));
+    } else if (isInserting) {
+      context.missing(_validityDateMeta);
     }
     if (data.containsKey('customer_id')) {
       context.handle(
@@ -4504,6 +4871,8 @@ class $PriceOffersTable extends PriceOffers
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       offerDate: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}offer_date'])!,
+      validityDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}validity_date'])!,
       customerId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
       contactPerson: attachedDatabase.typeMapping
@@ -4535,6 +4904,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
   final String id;
   final String type;
   final DateTime offerDate;
+  final DateTime validityDate;
   final String customerId;
   final String contactPerson;
   final String? authorizedPhone;
@@ -4548,6 +4918,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       {required this.id,
       required this.type,
       required this.offerDate,
+      required this.validityDate,
       required this.customerId,
       required this.contactPerson,
       this.authorizedPhone,
@@ -4563,6 +4934,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
     map['id'] = Variable<String>(id);
     map['type'] = Variable<String>(type);
     map['offer_date'] = Variable<DateTime>(offerDate);
+    map['validity_date'] = Variable<DateTime>(validityDate);
     map['customer_id'] = Variable<String>(customerId);
     map['contact_person'] = Variable<String>(contactPerson);
     if (!nullToAbsent || authorizedPhone != null) {
@@ -4586,6 +4958,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       id: Value(id),
       type: Value(type),
       offerDate: Value(offerDate),
+      validityDate: Value(validityDate),
       customerId: Value(customerId),
       contactPerson: Value(contactPerson),
       authorizedPhone: authorizedPhone == null && nullToAbsent
@@ -4611,6 +4984,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
       offerDate: serializer.fromJson<DateTime>(json['offerDate']),
+      validityDate: serializer.fromJson<DateTime>(json['validityDate']),
       customerId: serializer.fromJson<String>(json['customerId']),
       contactPerson: serializer.fromJson<String>(json['contactPerson']),
       authorizedPhone: serializer.fromJson<String?>(json['authorizedPhone']),
@@ -4629,6 +5003,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       'id': serializer.toJson<String>(id),
       'type': serializer.toJson<String>(type),
       'offerDate': serializer.toJson<DateTime>(offerDate),
+      'validityDate': serializer.toJson<DateTime>(validityDate),
       'customerId': serializer.toJson<String>(customerId),
       'contactPerson': serializer.toJson<String>(contactPerson),
       'authorizedPhone': serializer.toJson<String?>(authorizedPhone),
@@ -4645,6 +5020,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           {String? id,
           String? type,
           DateTime? offerDate,
+          DateTime? validityDate,
           String? customerId,
           String? contactPerson,
           Value<String?> authorizedPhone = const Value.absent(),
@@ -4658,6 +5034,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
         id: id ?? this.id,
         type: type ?? this.type,
         offerDate: offerDate ?? this.offerDate,
+        validityDate: validityDate ?? this.validityDate,
         customerId: customerId ?? this.customerId,
         contactPerson: contactPerson ?? this.contactPerson,
         authorizedPhone: authorizedPhone.present
@@ -4675,6 +5052,9 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       id: data.id.present ? data.id.value : this.id,
       type: data.type.present ? data.type.value : this.type,
       offerDate: data.offerDate.present ? data.offerDate.value : this.offerDate,
+      validityDate: data.validityDate.present
+          ? data.validityDate.value
+          : this.validityDate,
       customerId:
           data.customerId.present ? data.customerId.value : this.customerId,
       contactPerson: data.contactPerson.present
@@ -4699,6 +5079,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('offerDate: $offerDate, ')
+          ..write('validityDate: $validityDate, ')
           ..write('customerId: $customerId, ')
           ..write('contactPerson: $contactPerson, ')
           ..write('authorizedPhone: $authorizedPhone, ')
@@ -4717,6 +5098,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       id,
       type,
       offerDate,
+      validityDate,
       customerId,
       contactPerson,
       authorizedPhone,
@@ -4733,6 +5115,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           other.id == this.id &&
           other.type == this.type &&
           other.offerDate == this.offerDate &&
+          other.validityDate == this.validityDate &&
           other.customerId == this.customerId &&
           other.contactPerson == this.contactPerson &&
           other.authorizedPhone == this.authorizedPhone &&
@@ -4748,6 +5131,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
   final Value<String> id;
   final Value<String> type;
   final Value<DateTime> offerDate;
+  final Value<DateTime> validityDate;
   final Value<String> customerId;
   final Value<String> contactPerson;
   final Value<String?> authorizedPhone;
@@ -4762,6 +5146,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.offerDate = const Value.absent(),
+    this.validityDate = const Value.absent(),
     this.customerId = const Value.absent(),
     this.contactPerson = const Value.absent(),
     this.authorizedPhone = const Value.absent(),
@@ -4777,6 +5162,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     required String id,
     required String type,
     required DateTime offerDate,
+    required DateTime validityDate,
     required String customerId,
     required String contactPerson,
     this.authorizedPhone = const Value.absent(),
@@ -4790,6 +5176,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
   })  : id = Value(id),
         type = Value(type),
         offerDate = Value(offerDate),
+        validityDate = Value(validityDate),
         customerId = Value(customerId),
         contactPerson = Value(contactPerson),
         legalText = Value(legalText),
@@ -4800,6 +5187,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     Expression<String>? id,
     Expression<String>? type,
     Expression<DateTime>? offerDate,
+    Expression<DateTime>? validityDate,
     Expression<String>? customerId,
     Expression<String>? contactPerson,
     Expression<String>? authorizedPhone,
@@ -4815,6 +5203,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
       if (id != null) 'id': id,
       if (type != null) 'type': type,
       if (offerDate != null) 'offer_date': offerDate,
+      if (validityDate != null) 'validity_date': validityDate,
       if (customerId != null) 'customer_id': customerId,
       if (contactPerson != null) 'contact_person': contactPerson,
       if (authorizedPhone != null) 'authorized_phone': authorizedPhone,
@@ -4832,6 +5221,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
       {Value<String>? id,
       Value<String>? type,
       Value<DateTime>? offerDate,
+      Value<DateTime>? validityDate,
       Value<String>? customerId,
       Value<String>? contactPerson,
       Value<String?>? authorizedPhone,
@@ -4846,6 +5236,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
       id: id ?? this.id,
       type: type ?? this.type,
       offerDate: offerDate ?? this.offerDate,
+      validityDate: validityDate ?? this.validityDate,
       customerId: customerId ?? this.customerId,
       contactPerson: contactPerson ?? this.contactPerson,
       authorizedPhone: authorizedPhone ?? this.authorizedPhone,
@@ -4870,6 +5261,9 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     }
     if (offerDate.present) {
       map['offer_date'] = Variable<DateTime>(offerDate.value);
+    }
+    if (validityDate.present) {
+      map['validity_date'] = Variable<DateTime>(validityDate.value);
     }
     if (customerId.present) {
       map['customer_id'] = Variable<String>(customerId.value);
@@ -4910,6 +5304,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('offerDate: $offerDate, ')
+          ..write('validityDate: $validityDate, ')
           ..write('customerId: $customerId, ')
           ..write('contactPerson: $contactPerson, ')
           ..write('authorizedPhone: $authorizedPhone, ')
@@ -9404,9 +9799,17 @@ typedef $$ScrapQualityRecordsTableCreateCompanionBuilder
     = ScrapQualityRecordsCompanion Function({
   required String id,
   required String customerId,
+  Value<String?> customerNameSnapshot,
   required String quality,
   required double quantity,
   required String unit,
+  Value<double> quantityKg,
+  Value<String?> city,
+  Value<String> salesStatus,
+  Value<double?> offerPrice,
+  Value<double?> targetPrice,
+  Value<String?> lostReason,
+  Value<DateTime?> followUpDate,
   required DateTime recordDate,
   Value<String?> note,
   required DateTime createdAt,
@@ -9418,9 +9821,17 @@ typedef $$ScrapQualityRecordsTableUpdateCompanionBuilder
     = ScrapQualityRecordsCompanion Function({
   Value<String> id,
   Value<String> customerId,
+  Value<String?> customerNameSnapshot,
   Value<String> quality,
   Value<double> quantity,
   Value<String> unit,
+  Value<double> quantityKg,
+  Value<String?> city,
+  Value<String> salesStatus,
+  Value<double?> offerPrice,
+  Value<double?> targetPrice,
+  Value<String?> lostReason,
+  Value<DateTime?> followUpDate,
   Value<DateTime> recordDate,
   Value<String?> note,
   Value<DateTime> createdAt,
@@ -9444,6 +9855,10 @@ class $$ScrapQualityRecordsTableFilterComposer
   ColumnFilters<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot,
+      builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get quality => $composableBuilder(
       column: $table.quality, builder: (column) => ColumnFilters(column));
 
@@ -9452,6 +9867,27 @@ class $$ScrapQualityRecordsTableFilterComposer
 
   ColumnFilters<String> get unit => $composableBuilder(
       column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantityKg => $composableBuilder(
+      column: $table.quantityKg, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get city => $composableBuilder(
+      column: $table.city, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get salesStatus => $composableBuilder(
+      column: $table.salesStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get offerPrice => $composableBuilder(
+      column: $table.offerPrice, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get targetPrice => $composableBuilder(
+      column: $table.targetPrice, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lostReason => $composableBuilder(
+      column: $table.lostReason, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get followUpDate => $composableBuilder(
+      column: $table.followUpDate, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get recordDate => $composableBuilder(
       column: $table.recordDate, builder: (column) => ColumnFilters(column));
@@ -9484,6 +9920,10 @@ class $$ScrapQualityRecordsTableOrderingComposer
   ColumnOrderings<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get quality => $composableBuilder(
       column: $table.quality, builder: (column) => ColumnOrderings(column));
 
@@ -9492,6 +9932,28 @@ class $$ScrapQualityRecordsTableOrderingComposer
 
   ColumnOrderings<String> get unit => $composableBuilder(
       column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantityKg => $composableBuilder(
+      column: $table.quantityKg, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get city => $composableBuilder(
+      column: $table.city, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get salesStatus => $composableBuilder(
+      column: $table.salesStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get offerPrice => $composableBuilder(
+      column: $table.offerPrice, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get targetPrice => $composableBuilder(
+      column: $table.targetPrice, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lostReason => $composableBuilder(
+      column: $table.lostReason, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get followUpDate => $composableBuilder(
+      column: $table.followUpDate,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get recordDate => $composableBuilder(
       column: $table.recordDate, builder: (column) => ColumnOrderings(column));
@@ -9524,6 +9986,9 @@ class $$ScrapQualityRecordsTableAnnotationComposer
   GeneratedColumn<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => column);
 
+  GeneratedColumn<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot, builder: (column) => column);
+
   GeneratedColumn<String> get quality =>
       $composableBuilder(column: $table.quality, builder: (column) => column);
 
@@ -9532,6 +9997,27 @@ class $$ScrapQualityRecordsTableAnnotationComposer
 
   GeneratedColumn<String> get unit =>
       $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<double> get quantityKg => $composableBuilder(
+      column: $table.quantityKg, builder: (column) => column);
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<String> get salesStatus => $composableBuilder(
+      column: $table.salesStatus, builder: (column) => column);
+
+  GeneratedColumn<double> get offerPrice => $composableBuilder(
+      column: $table.offerPrice, builder: (column) => column);
+
+  GeneratedColumn<double> get targetPrice => $composableBuilder(
+      column: $table.targetPrice, builder: (column) => column);
+
+  GeneratedColumn<String> get lostReason => $composableBuilder(
+      column: $table.lostReason, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get followUpDate => $composableBuilder(
+      column: $table.followUpDate, builder: (column) => column);
 
   GeneratedColumn<DateTime> get recordDate => $composableBuilder(
       column: $table.recordDate, builder: (column) => column);
@@ -9581,9 +10067,17 @@ class $$ScrapQualityRecordsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> customerId = const Value.absent(),
+            Value<String?> customerNameSnapshot = const Value.absent(),
             Value<String> quality = const Value.absent(),
             Value<double> quantity = const Value.absent(),
             Value<String> unit = const Value.absent(),
+            Value<double> quantityKg = const Value.absent(),
+            Value<String?> city = const Value.absent(),
+            Value<String> salesStatus = const Value.absent(),
+            Value<double?> offerPrice = const Value.absent(),
+            Value<double?> targetPrice = const Value.absent(),
+            Value<String?> lostReason = const Value.absent(),
+            Value<DateTime?> followUpDate = const Value.absent(),
             Value<DateTime> recordDate = const Value.absent(),
             Value<String?> note = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -9594,9 +10088,17 @@ class $$ScrapQualityRecordsTableTableManager extends RootTableManager<
               ScrapQualityRecordsCompanion(
             id: id,
             customerId: customerId,
+            customerNameSnapshot: customerNameSnapshot,
             quality: quality,
             quantity: quantity,
             unit: unit,
+            quantityKg: quantityKg,
+            city: city,
+            salesStatus: salesStatus,
+            offerPrice: offerPrice,
+            targetPrice: targetPrice,
+            lostReason: lostReason,
+            followUpDate: followUpDate,
             recordDate: recordDate,
             note: note,
             createdAt: createdAt,
@@ -9607,9 +10109,17 @@ class $$ScrapQualityRecordsTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String customerId,
+            Value<String?> customerNameSnapshot = const Value.absent(),
             required String quality,
             required double quantity,
             required String unit,
+            Value<double> quantityKg = const Value.absent(),
+            Value<String?> city = const Value.absent(),
+            Value<String> salesStatus = const Value.absent(),
+            Value<double?> offerPrice = const Value.absent(),
+            Value<double?> targetPrice = const Value.absent(),
+            Value<String?> lostReason = const Value.absent(),
+            Value<DateTime?> followUpDate = const Value.absent(),
             required DateTime recordDate,
             Value<String?> note = const Value.absent(),
             required DateTime createdAt,
@@ -9620,9 +10130,17 @@ class $$ScrapQualityRecordsTableTableManager extends RootTableManager<
               ScrapQualityRecordsCompanion.insert(
             id: id,
             customerId: customerId,
+            customerNameSnapshot: customerNameSnapshot,
             quality: quality,
             quantity: quantity,
             unit: unit,
+            quantityKg: quantityKg,
+            city: city,
+            salesStatus: salesStatus,
+            offerPrice: offerPrice,
+            targetPrice: targetPrice,
+            lostReason: lostReason,
+            followUpDate: followUpDate,
             recordDate: recordDate,
             note: note,
             createdAt: createdAt,
@@ -9658,6 +10176,7 @@ typedef $$PriceOffersTableCreateCompanionBuilder = PriceOffersCompanion
   required String id,
   required String type,
   required DateTime offerDate,
+  required DateTime validityDate,
   required String customerId,
   required String contactPerson,
   Value<String?> authorizedPhone,
@@ -9674,6 +10193,7 @@ typedef $$PriceOffersTableUpdateCompanionBuilder = PriceOffersCompanion
   Value<String> id,
   Value<String> type,
   Value<DateTime> offerDate,
+  Value<DateTime> validityDate,
   Value<String> customerId,
   Value<String> contactPerson,
   Value<String?> authorizedPhone,
@@ -9703,6 +10223,9 @@ class $$PriceOffersTableFilterComposer
 
   ColumnFilters<DateTime> get offerDate => $composableBuilder(
       column: $table.offerDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get validityDate => $composableBuilder(
+      column: $table.validityDate, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnFilters(column));
@@ -9751,6 +10274,10 @@ class $$PriceOffersTableOrderingComposer
   ColumnOrderings<DateTime> get offerDate => $composableBuilder(
       column: $table.offerDate, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get validityDate => $composableBuilder(
+      column: $table.validityDate,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnOrderings(column));
 
@@ -9798,6 +10325,9 @@ class $$PriceOffersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get offerDate =>
       $composableBuilder(column: $table.offerDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validityDate => $composableBuilder(
+      column: $table.validityDate, builder: (column) => column);
 
   GeneratedColumn<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => column);
@@ -9853,6 +10383,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<DateTime> offerDate = const Value.absent(),
+            Value<DateTime> validityDate = const Value.absent(),
             Value<String> customerId = const Value.absent(),
             Value<String> contactPerson = const Value.absent(),
             Value<String?> authorizedPhone = const Value.absent(),
@@ -9868,6 +10399,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             id: id,
             type: type,
             offerDate: offerDate,
+            validityDate: validityDate,
             customerId: customerId,
             contactPerson: contactPerson,
             authorizedPhone: authorizedPhone,
@@ -9883,6 +10415,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             required String id,
             required String type,
             required DateTime offerDate,
+            required DateTime validityDate,
             required String customerId,
             required String contactPerson,
             Value<String?> authorizedPhone = const Value.absent(),
@@ -9898,6 +10431,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             id: id,
             type: type,
             offerDate: offerDate,
+            validityDate: validityDate,
             customerId: customerId,
             contactPerson: contactPerson,
             authorizedPhone: authorizedPhone,

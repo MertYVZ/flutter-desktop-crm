@@ -8,6 +8,7 @@ import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -120,9 +121,12 @@ class _CustomerEditPageState extends BaseState<CustomerEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PageHeader(
+                PanelFormPageHeader(
                   title: 'Müşteri Düzenle',
                   subtitle: customer.name,
+                  onBack: () => Get.offNamed<void>(
+                    AppRoutes.customersDetail.pathForId(_customerId),
+                  ),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 Obx(() {
@@ -204,39 +208,5 @@ class _CustomerEditPageState extends BaseState<CustomerEditPage> {
     if (success) {
       Get.offNamed<void>(AppRoutes.customersDetail.pathForId(_customerId));
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

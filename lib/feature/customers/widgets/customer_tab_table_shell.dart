@@ -23,27 +23,31 @@ class CustomerSectionContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading && isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: AppUiTokens.space32),
-        child: Center(
-          child: SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
-    }
-
     if (isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: AppUiTokens.space32),
         child: Center(
-          child: AppEmptyState(
-            message: emptyMessage,
-            actionLabel: emptyActionLabel,
-            onAction: onEmptyAction,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              AppEmptyState(
+                message: emptyMessage,
+                actionLabel: emptyActionLabel,
+                onAction: onEmptyAction,
+              ),
+              if (isLoading)
+                Positioned(
+                  top: 0,
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppUiTokens.textMuted.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       );

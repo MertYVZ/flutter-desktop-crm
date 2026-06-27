@@ -25,7 +25,7 @@ class CustomerNotesTab extends StatelessWidget {
         isEmpty: records.isEmpty,
         emptyMessage: CustomerDetailMessages.notesEmpty,
         emptyActionLabel: 'Not Ekle',
-        onEmptyAction: () => Get.toNamed<void>(AppRoutes.notesNew.value),
+        onEmptyAction: () => controller.openCreateForm(AppRoutes.notesNew),
         children: records
             .map(
               (note) => CustomerListRow(

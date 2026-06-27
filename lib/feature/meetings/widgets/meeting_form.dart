@@ -6,6 +6,7 @@ import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/constants/meeting_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_dropdown.dart';
+import 'package:Ok/product/widgets/panel/panel_text_field.dart';
 import 'package:Ok/shared/widgets/app_date_picker_field.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
@@ -91,7 +92,13 @@ class MeetingForm extends StatelessWidget {
               onChanged: onSubjectChanged,
             ),
             const SizedBox(height: AppUiTokens.space16),
-            _NotesField(controller: notesController),
+            PanelTextField(
+              controller: notesController,
+              label: 'Notlar',
+              hintText: 'Notlarınızı girin',
+              minLines: 3,
+              maxLines: 5,
+            ),
           ],
         );
 
@@ -115,43 +122,6 @@ class MeetingForm extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _NotesField extends StatelessWidget {
-  const _NotesField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Notlar',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          minLines: 3,
-          maxLines: 5,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Notlar',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-            alignLabelWithHint: true,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
+import 'package:Ok/feature/scrap_quality/widgets/scrap_month_picker.dart';
+import 'package:Ok/feature/scrap_quality/widgets/scrap_quality_analytics_panel.dart';
 import 'package:Ok/feature/scrap_quality/widgets/scrap_quality_filters.dart';
+import 'package:Ok/feature/scrap_quality/widgets/scrap_quality_summary_cards.dart';
 import 'package:Ok/feature/scrap_quality/widgets/scrap_quality_table.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -40,6 +43,8 @@ class _ScrapQualityListPageState extends BaseState<ScrapQualityListPage> {
     return BaseView<ScrapQualityController>(
       viewModel: Get.find<ScrapQualityController>(),
       onModelReady: (controller) {
+        controller.loadCustomersForDropdown();
+        controller.loadFilterOptions();
         controller.searchAndFilterRecords();
       },
       onPageBuilder: (context, controller) {
@@ -56,29 +61,11 @@ class _ScrapQualityListPageState extends BaseState<ScrapQualityListPage> {
                     onExportPressed: () => controller.exportToExcel(),
                   ),
                   const SizedBox(height: AppUiTokens.space16),
-                  Obx(() {
-                    final error = controller.errorMessage.value;
-                    final success = controller.successMessage.value;
-
-                    if (error == null && success == null) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (error != null) PanelMessage(message: error),
-                        if (error != null && success != null)
-                          const SizedBox(height: AppUiTokens.space8),
-                        if (success != null)
-                          PanelMessage(
-                            message: success,
-                            type: PanelMessageType.info,
-                          ),
-                        const SizedBox(height: AppUiTokens.space16),
-                      ],
-                    );
-                  }),
+                  ScrapMonthPicker(controller: controller),
+                  const SizedBox(height: AppUiTokens.space16),
+                  ScrapQualitySummaryCards(controller: controller),
+                  const SizedBox(height: AppUiTokens.space16),
+                  _FeedbackMessages(controller: controller),
                   PanelSurface(
                     padding: EdgeInsets.zero,
                     borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
@@ -90,13 +77,14 @@ class _ScrapQualityListPageState extends BaseState<ScrapQualityListPage> {
                             AppUiTokens.space24,
                             AppUiTokens.space16,
                             AppUiTokens.space24,
-                            AppUiTokens.space8,
+                            AppUiTokens.space12,
                           ),
                           child: ScrapQualityFilters(
                             controller: controller,
                             searchController: _searchController,
                           ),
                         ),
+                        const Divider(height: 1, thickness: 1),
                         ScrapQualityTable(
                           controller: controller,
                           availableWidth: constraints.maxWidth,
@@ -104,6 +92,8 @@ class _ScrapQualityListPageState extends BaseState<ScrapQualityListPage> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: AppUiTokens.space16),
+                  ScrapQualityAnalyticsPanel(controller: controller),
                 ],
               ),
             );
@@ -111,6 +101,39 @@ class _ScrapQualityListPageState extends BaseState<ScrapQualityListPage> {
         );
       },
     );
+  }
+}
+
+class _FeedbackMessages extends StatelessWidget {
+  const _FeedbackMessages({required this.controller});
+
+  final ScrapQualityController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final error = controller.errorMessage.value;
+      final success = controller.successMessage.value;
+
+      if (error == null && success == null) {
+        return const SizedBox.shrink();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (error != null) PanelMessage(message: error),
+          if (error != null && success != null)
+            const SizedBox(height: AppUiTokens.space8),
+          if (success != null)
+            PanelMessage(
+              message: success,
+              type: PanelMessageType.info,
+            ),
+          const SizedBox(height: AppUiTokens.space16),
+        ],
+      );
+    });
   }
 }
 
@@ -135,7 +158,7 @@ class _PageHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hurda Kalite',
+              'Aylık Hurda Takip',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: AppUiTokens.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -144,7 +167,7 @@ class _PageHeader extends StatelessWidget {
             ),
             const SizedBox(height: AppUiTokens.space8),
             Text(
-              'Hurda kalite kayıtlarını görüntüleyin, arayın ve yönetin.',
+              'Müşteri bazlı hurda bulgularını, satın alma fırsatlarını ve kayıpları ay ay takip edin.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppUiTokens.textSecondary,
                   ),

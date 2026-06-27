@@ -35,8 +35,6 @@ final class ReminderMessages {
   static const titleRequired = 'Başlık giriniz.';
   static const titleMinLength = 'Başlık en az 2 karakter olmalıdır.';
   static const periodRequired = 'Periyot seçiniz.';
-  static const startDateRequired = 'İlk hatırlatma tarihi seçiniz.';
-  static const nextReminderDateRequired =
-      'Bir sonraki hatırlatma tarihi seçiniz.';
+  static const startDateRequired = 'Hatırlatma tarihi seçiniz.';
   static const statusRequired = 'Durum seçiniz.';
 }

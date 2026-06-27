@@ -1,12 +1,18 @@
 import 'package:Ok/feature/due_tracking/widgets/customer_search_dropdown.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
+import 'package:Ok/feature/scrap_quality/services/scrap_kg_utils.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
-import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/constants/scrap_quality_messages.dart';
+import 'package:Ok/product/utility/formatters/turkish_amount_input_formatter.dart';
+import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
 import 'package:Ok/product/widgets/panel/panel_dropdown.dart';
 import 'package:Ok/product/widgets/panel/panel_text_field.dart';
+import 'package:Ok/shared/widgets/app_date_picker_field.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 
@@ -14,27 +20,58 @@ class ScrapQualityForm extends StatelessWidget {
   const ScrapQualityForm({
     required this.customers,
     required this.selectedCustomerId,
-    required this.qualityController,
+    required this.selectedScrapType,
+    required this.customScrapTypeController,
     required this.quantityController,
     required this.selectedUnit,
     required this.customUnitController,
+    required this.quantityKgController,
     required this.recordDate,
+    required this.cityController,
+    required this.selectedSalesStatus,
+    required this.offerPriceController,
+    required this.targetPriceController,
+    required this.selectedLostReason,
+    required this.customLostReasonController,
+    required this.followUpDate,
     required this.noteController,
     required this.onCustomerChanged,
+    required this.onScrapTypeChanged,
     required this.onUnitChanged,
+    required this.onRecordDateChanged,
+    required this.onSalesStatusChanged,
+    required this.onLostReasonChanged,
+    required this.onFollowUpDateChanged,
     super.key,
   });
 
   final List<Customer> customers;
   final String? selectedCustomerId;
-  final TextEditingController qualityController;
+  final ScrapType? selectedScrapType;
+  final TextEditingController customScrapTypeController;
   final TextEditingController quantityController;
   final ScrapQualityUnit? selectedUnit;
   final TextEditingController customUnitController;
+  final TextEditingController quantityKgController;
   final DateTime? recordDate;
+  final TextEditingController cityController;
+  final ScrapSalesStatus? selectedSalesStatus;
+  final TextEditingController offerPriceController;
+  final TextEditingController targetPriceController;
+  final ScrapLostReason? selectedLostReason;
+  final TextEditingController customLostReasonController;
+  final DateTime? followUpDate;
   final TextEditingController noteController;
   final ValueChanged<String?> onCustomerChanged;
+  final ValueChanged<ScrapType?> onScrapTypeChanged;
   final ValueChanged<ScrapQualityUnit?> onUnitChanged;
+  final ValueChanged<DateTime?> onRecordDateChanged;
+  final ValueChanged<ScrapSalesStatus?> onSalesStatusChanged;
+  final ValueChanged<ScrapLostReason?> onLostReasonChanged;
+  final ValueChanged<DateTime?> onFollowUpDateChanged;
+
+  bool get _requiresManualKg =>
+      selectedUnit != null && ScrapKgUtils.requiresManualKg(selectedUnit!);
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +86,7 @@ class ScrapQualityForm extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 800;
+        final isCompact = constraints.maxWidth < 900;
 
         final leftColumn = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,13 +97,30 @@ class ScrapQualityForm extends StatelessWidget {
               onChanged: onCustomerChanged,
             ),
             const SizedBox(height: AppUiTokens.space16),
-            _QualityField(controller: qualityController),
+            PanelDropdown<ScrapType>(
+              label: 'Hurda Türü / Kalite',
+              hint: 'Seçiniz',
+              value: selectedScrapType,
+              items: ScrapType.values,
+              itemLabel: (value) => value.label,
+              onChanged: onScrapTypeChanged,
+            ),
+            if (selectedScrapType == ScrapType.other) ...[
+              const SizedBox(height: AppUiTokens.space16),
+              PanelTextField(
+                controller: customScrapTypeController,
+                label: 'Diğer hurda türü',
+              ),
+            ],
             const SizedBox(height: AppUiTokens.space16),
             PanelTextField(
               controller: quantityController,
               label: 'Miktar',
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: const [
+                TurkishAmountInputFormatter(maxFractionDigits: 3),
+              ],
             ),
             const SizedBox(height: AppUiTokens.space16),
             PanelDropdown<ScrapQualityUnit>(
@@ -84,15 +138,86 @@ class ScrapQualityForm extends StatelessWidget {
                 label: 'Özel birim',
               ),
             ],
+            if (_requiresManualKg) ...[
+              const SizedBox(height: AppUiTokens.space16),
+              PanelTextField(
+                controller: quantityKgController,
+                label: 'KG Karşılığı',
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+              ),
+            ],
+            const SizedBox(height: AppUiTokens.space16),
+            AppDatePickerField(
+              key: ValueKey(recordDate),
+              label: 'Tarih',
+              placeholder: 'Tarih seçiniz',
+              selectedDate: recordDate,
+              onDateSelected: onRecordDateChanged,
+            ),
+            const SizedBox(height: AppUiTokens.space16),
+            AppDatePickerField(
+              key: ValueKey(followUpDate),
+              label: 'Takip Tarihi',
+              placeholder: 'Opsiyonel',
+              selectedDate: followUpDate,
+              onDateSelected: onFollowUpDateChanged,
+            ),
           ],
         );
 
         final rightColumn = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _RecordDateField(recordDate: recordDate),
+            PanelTextField(
+              controller: cityController,
+              label: 'İl',
+            ),
             const SizedBox(height: AppUiTokens.space16),
-            _NoteField(controller: noteController),
+            PanelDropdown<ScrapSalesStatus>(
+              label: 'Satış Durumu',
+              hint: 'Satış durumu seçiniz',
+              value: selectedSalesStatus,
+              items: ScrapSalesStatus.values,
+              itemLabel: (value) => value.label,
+              onChanged: onSalesStatusChanged,
+            ),
+            const SizedBox(height: AppUiTokens.space16),
+            PanelAmountField(
+              controller: offerPriceController,
+              label: 'Teklif Fiyatı (TL/KG)',
+              hintText: '0,00',
+            ),
+            const SizedBox(height: AppUiTokens.space16),
+            PanelAmountField(
+              controller: targetPriceController,
+              label: 'Hedef Fiyat (TL/KG)',
+              hintText: '0,00',
+            ),
+            const SizedBox(height: AppUiTokens.space16),
+            PanelDropdown<ScrapLostReason?>(
+              label: 'Alınmama Nedeni',
+              hint: 'Seçiniz (opsiyonel)',
+              value: selectedLostReason,
+              items: const [null, ...ScrapLostReason.values],
+              itemLabel: (value) => value?.label ?? 'Seçilmedi',
+              onChanged: onLostReasonChanged,
+            ),
+            if (selectedLostReason == ScrapLostReason.other) ...[
+              const SizedBox(height: AppUiTokens.space16),
+              PanelTextField(
+                controller: customLostReasonController,
+                label: 'Diğer neden',
+              ),
+            ],
+            const SizedBox(height: AppUiTokens.space16),
+            PanelTextField(
+              controller: noteController,
+              label: 'Notlar',
+              hintText: 'Notlarınızı girin',
+              minLines: 4,
+              maxLines: 8,
+            ),
           ],
         );
 
@@ -120,138 +245,28 @@ class ScrapQualityForm extends StatelessWidget {
   }
 }
 
-class _QualityField extends StatelessWidget {
-  const _QualityField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Kalite',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Örn: İyi, Süper, Kötü',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RecordDateField extends StatelessWidget {
-  const _RecordDateField({required this.recordDate});
-
-  final DateTime? recordDate;
-
-  @override
-  Widget build(BuildContext context) {
-    final displayText = recordDate != null
-        ? AppDateUtils.formatDate(recordDate!)
-        : AppDateUtils.formatDate(DateTime.now());
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Kayıt tarihi',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Container(
-          height: 48,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: AppUiTokens.space16),
-          decoration: BoxDecoration(
-            color: AppUiTokens.surfaceMuted,
-            borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
-            border: Border.all(color: AppUiTokens.border),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            displayText,
-            style: const TextStyle(
-              color: AppUiTokens.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _NoteField extends StatelessWidget {
-  const _NoteField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Not',
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          minLines: 3,
-          maxLines: 5,
-          style: const TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Not (isteğe bağlı)',
-            hintStyle: TextStyle(color: AppUiTokens.textMuted),
-            alignLabelWithHint: true,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class ScrapQualityFormActions extends StatelessWidget {
   const ScrapQualityFormActions({
     required this.isSaving,
     required this.onSave,
+    required this.onSaveAndNew,
     required this.onCancel,
+    this.showSaveAndNew = true,
     super.key,
   });
 
   final bool isSaving;
   final VoidCallback? onSave;
+  final VoidCallback? onSaveAndNew;
   final VoidCallback onCancel;
+  final bool showSaveAndNew;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Wrap(
+      spacing: AppUiTokens.space12,
+      runSpacing: AppUiTokens.space12,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         SizedBox(
           height: 44,
@@ -282,14 +297,36 @@ class ScrapQualityFormActions extends StatelessWidget {
                   ),
           ),
         ),
-        const SizedBox(width: AppUiTokens.space12),
+        if (showSaveAndNew)
+          SizedBox(
+            height: 44,
+            child: OutlinedButton(
+              onPressed: isSaving ? null : onSaveAndNew,
+              style: AppInteractiveTheme.outlinedButtonStyle(
+                OutlinedButton.styleFrom(
+                  foregroundColor: AppUiTokens.textPrimary,
+                  side: const BorderSide(color: AppUiTokens.border),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppUiTokens.space16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+                  ),
+                ),
+              ),
+              child: const Text(
+                'Kaydet ve Yeni Ekle',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
         SizedBox(
           height: 44,
           child: OutlinedButton(
             onPressed: isSaving ? null : onCancel,
             style: AppInteractiveTheme.outlinedButtonStyle(
               OutlinedButton.styleFrom(
-                foregroundColor: AppUiTokens.textPrimary,
+                foregroundColor: AppUiTokens.textSecondary,
                 side: const BorderSide(color: AppUiTokens.border),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppUiTokens.space24,
@@ -300,7 +337,7 @@ class ScrapQualityFormActions extends StatelessWidget {
               ),
             ),
             child: const Text(
-              'Vazgeç',
+              'İptal',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),

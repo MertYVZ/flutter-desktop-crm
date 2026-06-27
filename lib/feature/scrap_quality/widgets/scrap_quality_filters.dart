@@ -1,10 +1,9 @@
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
-import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
+import 'package:Ok/feature/scrap_quality/models/scrap_type.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/widgets/panel/panel_dropdown.dart';
-import 'package:Ok/product/widgets/panel/panel_message.dart';
-import 'package:Ok/shared/widgets/app_date_picker_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,8 +19,8 @@ class ScrapQualityFilters extends StatelessWidget {
 
   static const _fieldHeight = 38.0;
   static const _searchWidth = 290.0;
-  static const _dropdownWidth = 160.0;
-  static const _compactBreakpoint = 960.0;
+  static const _dropdownWidth = 170.0;
+  static const _compactBreakpoint = 720.0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,231 +28,127 @@ class ScrapQualityFilters extends StatelessWidget {
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < _compactBreakpoint;
 
-        final searchField = SizedBox(
-          width: isCompact ? null : _searchWidth,
-          height: _fieldHeight,
-          child: TextField(
-            controller: searchController,
-            style: const TextStyle(
-              color: AppUiTokens.textPrimary,
-              fontSize: 14,
-            ),
-            onChanged: (value) {
-              controller.searchQuery.value = value;
-              controller.searchAndFilterRecords();
-            },
-            decoration: const InputDecoration(
-              isDense: true,
-              hintText: 'Ara...',
-              hintStyle: TextStyle(
-                color: AppUiTokens.textMuted,
+        return Obx(() {
+          final searchField = SizedBox(
+            width: isCompact ? null : _searchWidth,
+            height: _fieldHeight,
+            child: TextField(
+              controller: searchController,
+              style: const TextStyle(
+                color: AppUiTokens.textPrimary,
                 fontSize: 14,
               ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                size: 18,
-                color: AppUiTokens.textMuted,
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: AppUiTokens.space12,
-                vertical: AppUiTokens.space8,
+              onChanged: (value) {
+                controller.searchQuery.value = value;
+                controller.searchAndFilterRecords();
+              },
+              decoration: const InputDecoration(
+                isDense: true,
+                hintText: 'Müşteri, tür, il, not...',
+                hintStyle: TextStyle(
+                  color: AppUiTokens.textMuted,
+                  fontSize: 14,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 18,
+                  color: AppUiTokens.textMuted,
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: AppUiTokens.space12,
+                  vertical: AppUiTokens.space8,
+                ),
               ),
             ),
-          ),
-        );
+          );
 
-        final unitFilter = Obx(
-          () => PanelDropdown<ScrapQualityUnit?>(
-            label: 'Birim',
-            hint: 'Birim',
+          final statusFilter = PanelDropdown<ScrapSalesStatus?>(
+            label: 'Satış Durumu',
+            hint: 'Tümü',
             compact: true,
-            value: controller.selectedUnitFilter.value,
-            items: const [
-              null,
-              ...ScrapQualityUnit.values,
-            ],
-            itemLabel: (value) {
-              if (value == null) {
-                return 'Tümü';
-              }
-              return value.label;
-            },
+            value: controller.selectedSalesStatusFilter.value,
+            items: const [null, ...ScrapSalesStatus.values],
+            itemLabel: (value) => value?.label ?? 'Tümü',
             onChanged: (value) {
-              controller.selectedUnitFilter.value = value;
+              controller.selectedSalesStatusFilter.value = value;
+              controller.onlyPurchasedFilter.value = false;
+              controller.onlyNotPurchasedFilter.value = false;
+              controller.onlyPendingFilter.value = false;
               controller.searchAndFilterRecords();
             },
-          ),
-        );
+          );
 
-        final dateRangeFilter = Obx(
-          () => _RecordDateRangeFilter(
-            isCompact: isCompact,
-            startDate: controller.startDateFilter.value,
-            endDate: controller.endDateFilter.value,
-            onStartDateSelected: (date) {
-              controller.startDateFilter.value = date;
-              controller.searchAndFilterRecords();
-            },
-            onEndDateSelected: (date) {
-              controller.endDateFilter.value = date;
-              controller.searchAndFilterRecords();
-            },
-          ),
-        );
-
-        final clearButton = TextButton(
-          onPressed: () {
-            searchController.clear();
-            controller.clearFilters();
-          },
-          style: AppInteractiveTheme.textButtonStyle(
-            TextButton.styleFrom(
-              foregroundColor: AppUiTokens.textSecondary,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppUiTokens.space12,
-              ),
-              minimumSize: const Size(0, _fieldHeight),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          final scrapTypeFilter = PanelDropdown<ScrapType?>(
+            label: 'Kalite / Tür',
+            hint: 'Tümü',
+            compact: true,
+            value: ScrapTypeX.fromLabel(
+              controller.selectedScrapTypeFilter.value,
             ),
-          ),
-          child: const Text(
-            'Filtreleri Temizle',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-        );
-
-        final warning = Obx(() {
-          final message = controller.filterWarningMessage.value;
-          if (message == null) {
-            return const SizedBox.shrink();
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(top: AppUiTokens.space8),
-            child: PanelMessage(message: message),
+            items: const [null, ...ScrapType.values],
+            itemLabel: (value) => value?.label ?? 'Tümü',
+            onChanged: (value) {
+              controller.selectedScrapTypeFilter.value = value?.label;
+              controller.searchAndFilterRecords();
+            },
           );
-        });
 
-        if (isCompact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              searchField,
-              const SizedBox(height: AppUiTokens.space8),
-              Wrap(
-                spacing: AppUiTokens.space8,
-                runSpacing: AppUiTokens.space8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  SizedBox(width: _dropdownWidth, child: unitFilter),
-                  clearButton,
-                ],
-              ),
-              const SizedBox(height: AppUiTokens.space8),
-              dateRangeFilter,
-              warning,
-            ],
-          );
-        }
+          final clearButton = controller.hasActiveFilters
+              ? TextButton(
+                  onPressed: () {
+                    searchController.clear();
+                    controller.clearFilters();
+                  },
+                  style: AppInteractiveTheme.textButtonStyle(
+                    TextButton.styleFrom(
+                      foregroundColor: AppUiTokens.textSecondary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppUiTokens.space12,
+                      ),
+                      minimumSize: const Size(0, _fieldHeight),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  child: const Text(
+                    'Filtreleri Temizle',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                )
+              : const SizedBox.shrink();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: AppUiTokens.space8,
-              runSpacing: AppUiTokens.space8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+          if (isCompact) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 searchField,
-                SizedBox(width: _dropdownWidth, child: unitFilter),
-                dateRangeFilter,
-                clearButton,
+                const SizedBox(height: AppUiTokens.space8),
+                Wrap(
+                  spacing: AppUiTokens.space8,
+                  runSpacing: AppUiTokens.space8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    SizedBox(width: _dropdownWidth, child: scrapTypeFilter),
+                    SizedBox(width: _dropdownWidth, child: statusFilter),
+                    clearButton,
+                  ],
+                ),
               ],
-            ),
-            warning,
-          ],
-        );
-      },
-    );
-  }
-}
+            );
+          }
 
-class _RecordDateRangeFilter extends StatelessWidget {
-  const _RecordDateRangeFilter({
-    required this.isCompact,
-    required this.startDate,
-    required this.endDate,
-    required this.onStartDateSelected,
-    required this.onEndDateSelected,
-  });
-
-  final bool isCompact;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final ValueChanged<DateTime?> onStartDateSelected;
-  final ValueChanged<DateTime?> onEndDateSelected;
-
-  static const _fieldWidth = 150.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: AppUiTokens.textPrimary,
-          fontWeight: FontWeight.w600,
-          fontSize: isCompact ? null : 13,
-        );
-
-    final startField = AppDatePickerField(
-      key: ValueKey(startDate),
-      placeholder: 'Başlangıç',
-      compact: true,
-      selectedDate: startDate,
-      onDateSelected: onStartDateSelected,
-    );
-
-    final endField = AppDatePickerField(
-      key: ValueKey(endDate),
-      placeholder: 'Bitiş',
-      compact: true,
-      selectedDate: endDate,
-      onDateSelected: onEndDateSelected,
-    );
-
-    if (isCompact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Kayıt tarihi', style: labelStyle),
-          const SizedBox(height: AppUiTokens.space8),
-          Row(
+          return Wrap(
+            spacing: AppUiTokens.space8,
+            runSpacing: AppUiTokens.space8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Expanded(child: startField),
-              const SizedBox(width: AppUiTokens.space8),
-              Expanded(child: endField),
+              searchField,
+              SizedBox(width: _dropdownWidth, child: scrapTypeFilter),
+              SizedBox(width: _dropdownWidth, child: statusFilter),
+              clearButton,
             ],
-          ),
-        ],
-      );
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text('Kayıt tarihi', style: labelStyle),
-        const SizedBox(width: AppUiTokens.space8),
-        SizedBox(width: _fieldWidth, child: startField),
-        const SizedBox(width: AppUiTokens.space8),
-        Text(
-          '—',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textMuted,
-              ),
-        ),
-        const SizedBox(width: AppUiTokens.space8),
-        SizedBox(width: _fieldWidth, child: endField),
-      ],
+          );
+        });
+      },
     );
   }
 }

@@ -11,6 +11,7 @@ abstract final class PanelInputDecoration {
     Widget? prefixIcon,
     Widget? suffixIcon,
     bool alignLabelWithHint = false,
+    bool isMultiline = false,
   }) {
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
@@ -24,9 +25,9 @@ abstract final class PanelInputDecoration {
     return InputDecoration(
       filled: true,
       fillColor: AppUiTokens.surface,
-      contentPadding: const EdgeInsets.symmetric(
+      contentPadding: EdgeInsets.symmetric(
         horizontal: AppUiTokens.space16,
-        vertical: AppUiTokens.space16,
+        vertical: isMultiline ? AppUiTokens.space12 : AppUiTokens.space16,
       ),
       hintText: hintText,
       hintStyle: const TextStyle(color: AppUiTokens.textMuted),
@@ -41,12 +42,23 @@ abstract final class PanelInputDecoration {
       disabledBorder: border,
     );
   }
+
+  /// Minimum visible height for multiline fields on desktop (Windows/macOS).
+  static double multilineMinHeight(int minLines) {
+    const fontSize = 15.0;
+    const lineHeight = 1.5;
+    const verticalPadding = AppUiTokens.space12 * 2;
+    const borderHeight = 2.0;
+
+    return fontSize * lineHeight * minLines + verticalPadding + borderHeight;
+  }
 }
 
 class PanelTextField extends StatelessWidget {
   const PanelTextField({
     required this.controller,
     required this.label,
+    this.hintText,
     this.obscureText = false,
     this.textInputAction,
     this.keyboardType,
@@ -62,6 +74,7 @@ class PanelTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String label;
+  final String? hintText;
   final bool obscureText;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
@@ -73,8 +86,42 @@ class PanelTextField extends StatelessWidget {
   final int? minLines;
   final int? maxLines;
 
+  bool get _isMultiline => minLines != null && minLines! > 1;
+
   @override
   Widget build(BuildContext context) {
+    final resolvedKeyboardType = keyboardType ??
+        (_isMultiline ? TextInputType.multiline : TextInputType.text);
+    final resolvedTextInputAction = textInputAction ??
+        (_isMultiline ? TextInputAction.newline : null);
+
+    final textField = TextField(
+      controller: controller,
+      obscureText: obscureText,
+      textInputAction: resolvedTextInputAction,
+      keyboardType: resolvedKeyboardType,
+      inputFormatters: inputFormatters,
+      onSubmitted: onSubmitted,
+      onChanged: onChanged,
+      minLines: _isMultiline ? minLines : null,
+      maxLines: maxLines,
+      style: TextStyle(
+        color: AppUiTokens.textPrimary,
+        fontSize: 15,
+        height: _isMultiline ? 1.5 : null,
+      ),
+      cursorColor: AppUiTokens.textPrimary,
+      decoration: PanelInputDecoration.build(
+        hintText: hintText ?? label,
+        prefixIcon: prefixIcon == null
+            ? null
+            : Icon(prefixIcon, size: 20, color: AppUiTokens.textMuted),
+        suffixIcon: suffixIcon,
+        alignLabelWithHint: _isMultiline,
+        isMultiline: _isMultiline,
+      ),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -86,30 +133,15 @@ class PanelTextField extends StatelessWidget {
               ),
         ),
         const SizedBox(height: AppUiTokens.space8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          textInputAction: textInputAction,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          onSubmitted: onSubmitted,
-          onChanged: onChanged,
-          minLines: minLines,
-          maxLines: maxLines,
-          style: TextStyle(
-            color: AppUiTokens.textPrimary,
-            fontSize: 15,
-            height: minLines != null && minLines! > 1 ? 1.5 : null,
-          ),
-          decoration: PanelInputDecoration.build(
-            hintText: label,
-            prefixIcon: prefixIcon == null
-                ? null
-                : Icon(prefixIcon, size: 20, color: AppUiTokens.textMuted),
-            suffixIcon: suffixIcon,
-            alignLabelWithHint: minLines != null && minLines! > 1,
-          ),
-        ),
+        if (_isMultiline)
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: PanelInputDecoration.multilineMinHeight(minLines!),
+            ),
+            child: textField,
+          )
+        else
+          textField,
       ],
     );
   }

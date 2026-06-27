@@ -1,3 +1,4 @@
+import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
@@ -34,6 +35,9 @@ final class PriceOffersController extends GetxController {
   final RxList<PriceOfferListItem> offers = <PriceOfferListItem>[].obs;
   final Rxn<PriceOfferDetail> selectedOffer = Rxn<PriceOfferDetail>();
   final RxList<Customer> customers = <Customer>[].obs;
+  final RxList<CustomerContactItem> customerContacts =
+      <CustomerContactItem>[].obs;
+  final RxBool isLoadingContacts = false.obs;
   final RxString searchQuery = ''.obs;
   final Rxn<OfferType> selectedTypeFilter = Rxn<OfferType>();
   final Rxn<PriceOfferStatus> selectedStatusFilter = Rxn<PriceOfferStatus>();
@@ -92,6 +96,27 @@ final class PriceOffersController extends GetxController {
     }
   }
 
+  Future<void> loadCustomerContacts(String? customerId) async {
+    if (customerId == null || customerId.isEmpty) {
+      customerContacts.clear();
+      return;
+    }
+
+    if (isLoadingContacts.value) {
+      return;
+    }
+
+    isLoadingContacts.value = true;
+    try {
+      final result = await _priceOffersService.getCustomerContacts(customerId);
+      customerContacts.assignAll(result);
+    } catch (_) {
+      customerContacts.clear();
+    } finally {
+      isLoadingContacts.value = false;
+    }
+  }
+
   Future<void> searchAndFilterOffers() async {
     if (isLoading.value) {
       return;
@@ -125,6 +150,7 @@ final class PriceOffersController extends GetxController {
   Future<String?> createOffer({
     required OfferType? type,
     required DateTime? offerDate,
+    required DateTime? validityDate,
     required String? customerId,
     required String contactPerson,
     required String authorizedPhone,
@@ -141,6 +167,7 @@ final class PriceOffersController extends GetxController {
     final validationError = Validators.validatePriceOfferForm(
       type: type,
       offerDate: offerDate,
+      validityDate: validityDate,
       customerId: customerId,
       contactPerson: contactPerson,
       legalText: legalText,
@@ -163,6 +190,7 @@ final class PriceOffersController extends GetxController {
       final id = await _priceOffersService.createOffer(
         type: type!,
         offerDate: offerDate!,
+        validityDate: validityDate!,
         customerId: customerId!,
         contactPerson: contactPerson,
         authorizedPhone: authorizedPhone,
@@ -211,6 +239,7 @@ final class PriceOffersController extends GetxController {
     required String id,
     required OfferType? type,
     required DateTime? offerDate,
+    required DateTime? validityDate,
     required String? customerId,
     required String contactPerson,
     required String authorizedPhone,
@@ -228,6 +257,7 @@ final class PriceOffersController extends GetxController {
     final validationError = Validators.validatePriceOfferForm(
       type: type,
       offerDate: offerDate,
+      validityDate: validityDate,
       customerId: customerId,
       contactPerson: contactPerson,
       legalText: legalText,
@@ -253,6 +283,7 @@ final class PriceOffersController extends GetxController {
         id: id,
         type: type!,
         offerDate: offerDate!,
+        validityDate: validityDate!,
         customerId: customerId!,
         contactPerson: contactPerson,
         authorizedPhone: authorizedPhone,

@@ -4,9 +4,11 @@ import 'package:Ok/feature/meetings/models/meeting_subject.dart';
 import 'package:Ok/feature/meetings/widgets/meeting_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
+import 'package:Ok/product/navigation/app_route_args.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,7 @@ class _MeetingCreatePageState extends BaseState<MeetingCreatePage> {
   @override
   void initState() {
     super.initState();
+    _selectedCustomerId = AppRouteArgs.readCustomerId();
     _notesController = TextEditingController();
   }
 
@@ -51,9 +54,10 @@ class _MeetingCreatePageState extends BaseState<MeetingCreatePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _PageHeader(
+              PanelFormPageHeader(
                 title: 'Yeni Görüşme',
                 subtitle: 'Yeni görüşme kaydı oluşturun.',
+                onBack: () => Get.offNamed<void>(AppRoutes.meetings.value),
               ),
               const SizedBox(height: AppUiTokens.space16),
               Obx(() {
@@ -132,39 +136,5 @@ class _MeetingCreatePageState extends BaseState<MeetingCreatePage> {
     if (id != null) {
       Get.offNamed<void>(AppRoutes.meetings.value);
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

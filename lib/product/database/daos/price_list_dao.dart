@@ -217,6 +217,35 @@ class PriceListDao extends DatabaseAccessor<AppDatabase>
         PriceListItemsCompanion(deletedAt: Value(DateTime.now())),
       );
 
+  Future<void> softDeleteArchivedPriceList(String id) => transaction(() async {
+        final now = DateTime.now();
+        final affected = await (update(priceLists)
+              ..where(
+                (t) =>
+                    t.id.equals(id) &
+                    t.status.equals(PriceListStatus.archived.value) &
+                    t.deletedAt.isNull(),
+              ))
+            .write(
+          PriceListsCompanion(
+            deletedAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+
+        if (affected == 0) {
+          throw StateError('Archived price list not found');
+        }
+
+        await (update(priceListItems)
+              ..where(
+                (t) => t.priceListId.equals(id) & t.deletedAt.isNull(),
+              ))
+            .write(
+          PriceListItemsCompanion(deletedAt: Value(now)),
+        );
+      });
+
   Future<PriceListItem?> getItemById(String id) => (select(priceListItems)
         ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
       .getSingleOrNull();

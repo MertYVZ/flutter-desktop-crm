@@ -10,6 +10,7 @@ import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/reminder_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,6 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
   ReminderPeriod? _selectedPeriod;
   ReminderStatus? _selectedStatus;
   DateTime? _selectedStartDate;
-  DateTime? _selectedNextReminderDate;
   bool _isFormInitialized = false;
 
   String get _reminderId => Get.parameters['id'] ?? '';
@@ -58,7 +58,6 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
     _titleController.text = reminder.title;
     _selectedPeriod = reminder.reminderPeriod;
     _selectedStartDate = reminder.startDate;
-    _selectedNextReminderDate = reminder.nextReminderDate;
     _selectedStatus = reminder.reminderStatus;
     _noteController.text = reminder.note ?? '';
     _isFormInitialized = true;
@@ -102,9 +101,10 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PageHeader(
+                PanelFormPageHeader(
                   title: 'Hatırlatma Düzenle',
                   subtitle: reminder.customerName,
+                  onBack: () => Get.offNamed<void>(AppRoutes.reminders.value),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 Obx(() {
@@ -131,7 +131,6 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
                         titleController: _titleController,
                         selectedPeriod: _selectedPeriod,
                         startDate: _selectedStartDate,
-                        nextReminderDate: _selectedNextReminderDate,
                         selectedStatus: _selectedStatus,
                         noteController: _noteController,
                         showEditFields: true,
@@ -143,9 +142,6 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
                         }),
                         onStartDateChanged: (value) => setState(() {
                           _selectedStartDate = value;
-                        }),
-                        onNextReminderDateChanged: (value) => setState(() {
-                          _selectedNextReminderDate = value;
                         }),
                         onStatusChanged: (value) => setState(() {
                           _selectedStatus = value;
@@ -196,7 +192,6 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
       title: _titleController.text,
       period: _selectedPeriod,
       startDate: _selectedStartDate,
-      nextReminderDate: _selectedNextReminderDate,
       status: _selectedStatus,
       note: _noteController.text,
     );
@@ -204,39 +199,5 @@ class _ReminderEditPageState extends BaseState<ReminderEditPage> {
     if (success) {
       await Get.offNamed<void>(AppRoutes.reminders.value);
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

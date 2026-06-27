@@ -43,4 +43,7 @@ final class AppDateUtils {
 
   static DateTime normalizeDate(DateTime date) =>
       DateTime(date.year, date.month, date.day);
+
+  static DateTime addDays(DateTime date, int days) =>
+      normalizeDate(date.add(Duration(days: days)));
 }

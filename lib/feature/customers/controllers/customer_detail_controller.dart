@@ -11,6 +11,8 @@ import 'package:Ok/feature/scrap_quality/models/scrap_quality_list_item.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
+import 'package:Ok/product/navigation/app_pages.dart';
+import 'package:Ok/product/navigation/app_route_args.dart';
 import 'package:Ok/product/utility/constants/customer_detail_messages.dart';
 import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/utility/validators.dart';
@@ -61,8 +63,21 @@ final class CustomerDetailController extends GetxController {
   final RxnString successMessage = RxnString();
 
   final Set<int> _loadedTabIndexes = <int>{};
+  int? _pendingTabLoadIndex;
 
   String? get customerId => customer.value?.id;
+
+  void openCreateForm(AppRoutes route) {
+    final id = customerId;
+    if (id == null) {
+      return;
+    }
+
+    Get.toNamed<void>(
+      route.value,
+      arguments: AppRouteArgs.withCustomerId(id),
+    );
+  }
 
   void clearMessages() {
     errorMessage.value = null;
@@ -77,6 +92,7 @@ final class CustomerDetailController extends GetxController {
     clearMessages();
     customer.value = null;
     _loadedTabIndexes.clear();
+    _pendingTabLoadIndex = null;
     _clearTabData();
 
     isLoadingCustomer.value = true;
@@ -420,6 +436,7 @@ final class CustomerDetailController extends GetxController {
     int tabIndex,
   ) async {
     if (isLoadingTabData.value) {
+      _pendingTabLoadIndex = selectedTabIndex.value;
       return;
     }
 
@@ -431,6 +448,13 @@ final class CustomerDetailController extends GetxController {
       errorMessage.value = CustomerDetailMessages.tabLoadError;
     } finally {
       isLoadingTabData.value = false;
+      final pending = _pendingTabLoadIndex;
+      _pendingTabLoadIndex = null;
+      if (pending != null &&
+          pending == selectedTabIndex.value &&
+          !_loadedTabIndexes.contains(pending)) {
+        await loadSelectedTabData();
+      }
     }
   }
 

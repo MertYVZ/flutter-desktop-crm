@@ -85,6 +85,8 @@ final class DashboardEventListItem extends StatelessWidget {
         return const Color(0xFFF59E0B);
       case DashboardCalendarEventType.reminder:
         return const Color(0xFF7C3AED);
+      case DashboardCalendarEventType.dueRecord:
+        return const Color(0xFF059669);
     }
   }
 
@@ -96,6 +98,8 @@ final class DashboardEventListItem extends StatelessWidget {
         return Icons.request_quote_outlined;
       case DashboardCalendarEventType.reminder:
         return Icons.notifications_none_rounded;
+      case DashboardCalendarEventType.dueRecord:
+        return Icons.payments_outlined;
     }
   }
 }
@@ -114,6 +118,8 @@ class _EventContent extends StatelessWidget {
         return _PriceOfferContent(event: event);
       case DashboardCalendarEventType.reminder:
         return _ReminderContent(event: event);
+      case DashboardCalendarEventType.dueRecord:
+        return _DueRecordContent(event: event);
     }
   }
 }
@@ -188,6 +194,31 @@ class _ReminderContent extends StatelessWidget {
           value: event.customerName == null || event.customerName!.isEmpty
               ? AppDateUtils.formatDate(event.date)
               : '${event.customerName} · ${AppDateUtils.formatDate(event.date)}',
+          icon: Icons.calendar_today_outlined,
+        ),
+      ],
+    );
+  }
+}
+
+class _DueRecordContent extends StatelessWidget {
+  const _DueRecordContent({required this.event});
+
+  final DashboardCalendarEvent event;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _PrimaryLine(value: event.customerName ?? '-'),
+        if (event.subtitle != null && event.subtitle!.isNotEmpty) ...[
+          const SizedBox(height: AppUiTokens.space4),
+          _SecondaryLine(event.subtitle!),
+        ],
+        const SizedBox(height: AppUiTokens.space8),
+        _MetaLine(
+          value: AppDateUtils.formatDate(event.date),
           icon: Icons.calendar_today_outlined,
         ),
       ],

@@ -17,6 +17,7 @@ enum AppRoutes {
   meetingsEdit,
   scrapQuality,
   scrapQualityNew,
+  scrapQualityDetail,
   scrapQualityEdit,
   notes,
   notesNew,
@@ -74,6 +75,8 @@ extension AppRoutesExtension on AppRoutes {
         return '/scrap-quality';
       case AppRoutes.scrapQualityNew:
         return '/scrap-quality/new';
+      case AppRoutes.scrapQualityDetail:
+        return '/scrap-quality/:id';
       case AppRoutes.scrapQualityEdit:
         return '/scrap-quality/:id/edit';
       case AppRoutes.notes:
@@ -125,6 +128,8 @@ extension AppRoutesExtension on AppRoutes {
         return '/meetings/$id/edit';
       case AppRoutes.scrapQualityEdit:
         return '/scrap-quality/$id/edit';
+      case AppRoutes.scrapQualityDetail:
+        return '/scrap-quality/$id';
       case AppRoutes.notesDetail:
         return '/notes/$id';
       case AppRoutes.notesEdit:
@@ -152,6 +157,7 @@ extension AppRoutesExtension on AppRoutes {
       case AppRoutes.meetingsNew:
       case AppRoutes.scrapQuality:
       case AppRoutes.scrapQualityNew:
+      case AppRoutes.scrapQualityDetail:
       case AppRoutes.notes:
       case AppRoutes.notesNew:
       case AppRoutes.priceOffers:

@@ -1,3 +1,4 @@
+import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/controllers/price_offers_controller.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
@@ -8,8 +9,11 @@ import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
+import 'package:Ok/product/database/app_database.dart';
+import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/constants/price_offer_messages.dart';
 import 'package:Ok/product/utility/validators.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
@@ -24,7 +28,6 @@ final class PriceOfferEditPage extends StatefulWidget {
 }
 
 class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
-  late final TextEditingController _contactPersonController;
   late final TextEditingController _authorizedPhoneController;
   late final TextEditingController _mobilePhoneController;
   late final TextEditingController _legalTextController;
@@ -32,10 +35,14 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
   late final LegalTextTemplateService _legalTextTemplateService;
 
   String? _selectedCustomerId;
+  CustomerContactItem? _selectedContact;
+  String? _savedContactPersonName;
   OfferType? _selectedType;
   DateTime? _offerDate;
+  DateTime? _validityDate;
   PriceOfferStatus? _selectedStatus;
   bool _isLegalTextDirty = true;
+  bool _isValidityDateDirty = true;
   bool _isFormInitialized = false;
 
   String get _offerId => Get.parameters['id'] ?? '';
@@ -43,7 +50,6 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
   @override
   void initState() {
     super.initState();
-    _contactPersonController = TextEditingController();
     _authorizedPhoneController = TextEditingController();
     _mobilePhoneController = TextEditingController();
     _legalTextController = TextEditingController();
@@ -53,7 +59,6 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
 
   @override
   void dispose() {
-    _contactPersonController.dispose();
     _authorizedPhoneController.dispose();
     _mobilePhoneController.dispose();
     _legalTextController.dispose();
@@ -72,8 +77,10 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
     _selectedCustomerId = offer.customerId;
     _selectedType = offer.offerType ?? OfferType.general;
     _offerDate = offer.offerDate;
+    _validityDate = offer.validityDate;
     _selectedStatus = offer.offerStatus ?? PriceOfferStatus.draft;
-    _contactPersonController.text = offer.contactPerson;
+    _savedContactPersonName = offer.contactPerson;
+    _selectedContact = null;
     _authorizedPhoneController.text = offer.authorizedPhone ?? '';
     _mobilePhoneController.text = offer.mobilePhone ?? '';
     _legalTextController.text = offer.legalText;
@@ -97,10 +104,132 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
     _isFormInitialized = true;
   }
 
+  Future<void> _loadContactsForCurrentCustomer(
+    PriceOffersController controller,
+  ) async {
+    await controller.loadCustomerContacts(_selectedCustomerId);
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _selectedContact = _findContactByName(
+        controller.customerContacts,
+        _savedContactPersonName ?? '',
+      );
+    });
+  }
+
+  Future<void> _handleCustomerChanged(
+    PriceOffersController controller,
+    String? customerId,
+  ) async {
+    setState(() {
+      _selectedCustomerId = customerId;
+      _selectedContact = null;
+      _savedContactPersonName = null;
+      _mobilePhoneController.clear();
+      _applyCustomerPhone(controller, customerId);
+    });
+
+    await controller.loadCustomerContacts(customerId);
+    if (!mounted) {
+      return;
+    }
+
+    final defaultContact = _findDefaultContact(controller.customerContacts);
+    if (defaultContact != null) {
+      setState(() {
+        _applyContactSelection(defaultContact);
+      });
+    }
+  }
+
+  void _handleContactChanged(CustomerContactItem? contact) {
+    setState(() {
+      _applyContactSelection(contact);
+    });
+  }
+
+  void _applyCustomerPhone(
+    PriceOffersController controller,
+    String? customerId,
+  ) {
+    if (customerId == null) {
+      _authorizedPhoneController.clear();
+      return;
+    }
+
+    Customer? customer;
+    for (final item in controller.customers) {
+      if (item.id == customerId) {
+        customer = item;
+        break;
+      }
+    }
+
+    final phone = customer?.phone?.trim();
+    _authorizedPhoneController.text =
+        phone != null && phone.isNotEmpty ? phone : '';
+  }
+
+  void _applyContactSelection(CustomerContactItem? contact) {
+    _selectedContact = contact;
+    _savedContactPersonName = contact?.fullName;
+    final phone = contact?.phone?.trim();
+    _mobilePhoneController.text =
+        phone != null && phone.isNotEmpty ? phone : '';
+  }
+
+  CustomerContactItem? _findContactByName(
+    List<CustomerContactItem> contacts,
+    String name,
+  ) {
+    final normalized = name.trim();
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    for (final contact in contacts) {
+      if (contact.fullName == normalized) {
+        return contact;
+      }
+    }
+
+    return null;
+  }
+
+  CustomerContactItem? _findDefaultContact(
+    List<CustomerContactItem> contacts,
+  ) {
+    for (final contact in contacts) {
+      if (contact.isPrimary) {
+        return contact;
+      }
+    }
+
+    return contacts.isEmpty ? null : contacts.first;
+  }
+
+  void _handleOfferDateChanged(DateTime? date) {
+    setState(() {
+      _offerDate = date;
+      if (!_isValidityDateDirty && date != null) {
+        _validityDate = AppDateUtils.addDays(date, 7);
+      }
+    });
+  }
+
+  void _handleValidityDateChanged(DateTime? date) {
+    setState(() {
+      _validityDate = date;
+      _isValidityDateDirty = true;
+    });
+  }
+
   Future<void> _handleTypeChanged(OfferType? type) async {
     if (!_isLegalTextDirty && type != null) {
-      final text =
-          await _legalTextTemplateService.getTemplateByOfferType(type);
+      final text = await _legalTextTemplateService.getTemplateByOfferType(type);
       if (!mounted) {
         return;
       }
@@ -136,8 +265,10 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
       id: _offerId,
       type: _selectedType,
       offerDate: _offerDate,
+      validityDate: _validityDate,
       customerId: _selectedCustomerId,
-      contactPerson: _contactPersonController.text,
+      contactPerson:
+          _selectedContact?.fullName ?? _savedContactPersonName ?? '',
       authorizedPhone: _authorizedPhoneController.text,
       mobilePhone: _mobilePhoneController.text,
       legalText: _legalTextController.text,
@@ -160,7 +291,7 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
         _isFormInitialized = false;
         controller.clearMessages();
         controller.loadCustomersForDropdown();
-        controller.getOfferById(_offerId).then((loaded) {
+        controller.getOfferById(_offerId).then((loaded) async {
           if (!loaded || !mounted) {
             return;
           }
@@ -168,6 +299,7 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
           setState(() {
             _populateForm(controller);
           });
+          await _loadContactsForCurrentCustomer(controller);
         });
       },
       onPageBuilder: (context, controller) {
@@ -208,9 +340,12 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const _PageHeader(
+                PanelFormPageHeader(
                   title: 'Fiyat Teklifi Düzenle',
                   subtitle: 'Fiyat teklifi bilgilerini güncelleyin.',
+                  onBack: () => Get.offNamed<void>(
+                    AppRoutes.priceOffersDetail.pathForId(_offerId),
+                  ),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 Obx(() {
@@ -231,31 +366,35 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      PriceOfferForm(
-                        customers: controller.customers.toList(),
-                        selectedCustomerId: _selectedCustomerId,
-                        selectedType: _selectedType,
-                        offerDate: _offerDate,
-                        contactPersonController: _contactPersonController,
-                        authorizedPhoneController: _authorizedPhoneController,
-                        mobilePhoneController: _mobilePhoneController,
-                        legalTextController: _legalTextController,
-                        itemRows: _itemRows,
-                        showStatus: true,
-                        selectedStatus: _selectedStatus,
-                        onStatusChanged: (value) => setState(() {
-                          _selectedStatus = value;
-                        }),
-                        onCustomerChanged: (value) => setState(() {
-                          _selectedCustomerId = value;
-                        }),
-                        onTypeChanged: _handleTypeChanged,
-                        onDateChanged: (value) => setState(() {
-                          _offerDate = value;
-                        }),
-                        onLegalTextChanged: (_) {
-                          _isLegalTextDirty = true;
-                        },
+                      Obx(
+                        () => PriceOfferForm(
+                          customers: controller.customers.toList(),
+                          selectedCustomerId: _selectedCustomerId,
+                          selectedType: _selectedType,
+                          offerDate: _offerDate,
+                          validityDate: _validityDate,
+                          contacts: controller.customerContacts.toList(),
+                          selectedContact: _selectedContact,
+                          isLoadingContacts: controller.isLoadingContacts.value,
+                          authorizedPhoneController: _authorizedPhoneController,
+                          mobilePhoneController: _mobilePhoneController,
+                          legalTextController: _legalTextController,
+                          itemRows: _itemRows,
+                          showStatus: true,
+                          selectedStatus: _selectedStatus,
+                          onStatusChanged: (value) => setState(() {
+                            _selectedStatus = value;
+                          }),
+                          onCustomerChanged: (value) =>
+                              _handleCustomerChanged(controller, value),
+                          onContactChanged: _handleContactChanged,
+                          onTypeChanged: _handleTypeChanged,
+                          onDateChanged: _handleOfferDateChanged,
+                          onValidityDateChanged: _handleValidityDateChanged,
+                          onLegalTextChanged: (_) {
+                            _isLegalTextDirty = true;
+                          },
+                        ),
                       ),
                       const SizedBox(height: AppUiTokens.space24),
                       PriceOfferFormActions(
@@ -279,40 +418,6 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
           );
         });
       },
-    );
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
     );
   }
 }

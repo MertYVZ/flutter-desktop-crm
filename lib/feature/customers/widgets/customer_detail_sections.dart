@@ -302,19 +302,17 @@ class _SectionContentArea extends StatelessWidget {
               final action = section.actionLabel == null
                   ? null
                   : FilledButton.icon(
-                      onPressed: controller.isLoadingTabData.value
-                          ? null
-                          : () {
-                              if (section.isContactAction) {
-                                showCustomerContactFormDialog(
-                                  controller: controller,
-                                );
-                                return;
-                              }
-                              if (section.route != null) {
-                                Get.toNamed<void>(section.route!.value);
-                              }
-                            },
+                      onPressed: () {
+                        if (section.isContactAction) {
+                          showCustomerContactFormDialog(
+                            controller: controller,
+                          );
+                          return;
+                        }
+                        if (section.route != null) {
+                          controller.openCreateForm(section.route!);
+                        }
+                      },
                       style: AppInteractiveTheme.filledButtonStyle(
                         FilledButton.styleFrom(
                           backgroundColor: ColorName.primary,

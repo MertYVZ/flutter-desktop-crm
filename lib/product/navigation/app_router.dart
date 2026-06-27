@@ -140,6 +140,13 @@ final class AppScreens {
       transition: Transition.fadeIn,
     ),
     GetPage(
+      name: AppRoutes.scrapQualityDetail.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
       name: AppRoutes.scrapQuality.value,
       page: () => const ShellView(),
       binding: ShellBinding(),

@@ -77,7 +77,6 @@ final class RemindersService {
     required String title,
     required ReminderPeriod period,
     required DateTime startDate,
-    required DateTime nextReminderDate,
     required ReminderStatus status,
     String? note,
   }) async {
@@ -86,12 +85,21 @@ final class RemindersService {
       throw StateError('Reminder not found');
     }
 
+    final normalizedStartDate =
+        ReminderScheduleService.normalizeDate(startDate);
+    final scheduleChanged = existing.period != period.value ||
+        ReminderScheduleService.normalizeDate(existing.startDate) !=
+            normalizedStartDate;
+    final nextReminderDate = scheduleChanged
+        ? normalizedStartDate
+        : ReminderScheduleService.normalizeDate(existing.nextReminderDate);
+
     final updated = existing.copyWith(
       customerId: customerId,
       title: title.trim(),
       period: period.value,
-      startDate: ReminderScheduleService.normalizeDate(startDate),
-      nextReminderDate: ReminderScheduleService.normalizeDate(nextReminderDate),
+      startDate: normalizedStartDate,
+      nextReminderDate: nextReminderDate,
       status: status.value,
       note: Value(_nullableTrim(note)),
       updatedAt: DateTime.now(),
@@ -153,7 +161,7 @@ final class RemindersService {
       }
 
       final occurrences = ReminderScheduleService.generateOccurrencesForMonth(
-        anchorDate: reminder.nextReminderDate,
+        anchorDate: reminder.startDate,
         period: period,
         month: month,
       );

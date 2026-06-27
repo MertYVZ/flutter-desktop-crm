@@ -364,6 +364,7 @@ class _ArchiveSection extends StatelessWidget {
           ),
           Obx(
             () => PriceListArchiveTable(
+              controller: controller,
               lists: controller.archivedLists.toList(),
               isLoading: controller.isLoading.value,
               hasActiveFilters: controller.hasActiveArchiveFilters,

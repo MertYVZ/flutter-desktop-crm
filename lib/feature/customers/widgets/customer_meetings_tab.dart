@@ -27,7 +27,7 @@ class CustomerMeetingsTab extends StatelessWidget {
         isEmpty: records.isEmpty,
         emptyMessage: CustomerDetailMessages.meetingsEmpty,
         emptyActionLabel: 'Görüşme Ekle',
-        onEmptyAction: () => Get.toNamed<void>(AppRoutes.meetingsNew.value),
+        onEmptyAction: () => controller.openCreateForm(AppRoutes.meetingsNew),
         children: records
             .map(
               (meeting) => CustomerListRow(

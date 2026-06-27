@@ -65,6 +65,9 @@ final class DashboardDayDetailPanel extends StatelessWidget {
       final reminders = events
           .where((event) => event.type == DashboardCalendarEventType.reminder)
           .toList();
+      final dueRecords = events
+          .where((event) => event.type == DashboardCalendarEventType.dueRecord)
+          .toList();
 
       return _buildPanelShell(
         showLeftBorder: showLeftBorder,
@@ -75,6 +78,7 @@ final class DashboardDayDetailPanel extends StatelessWidget {
           meetings: meetings,
           priceOffers: priceOffers,
           reminders: reminders,
+          dueRecords: dueRecords,
         ),
       );
     });
@@ -105,11 +109,13 @@ final class DashboardDayDetailPanel extends StatelessWidget {
     required List<DashboardCalendarEvent> meetings,
     required List<DashboardCalendarEvent> priceOffers,
     required List<DashboardCalendarEvent> reminders,
+    required List<DashboardCalendarEvent> dueRecords,
   }) {
     final eventGroups = _buildEventGroups(
       meetings: meetings,
       priceOffers: priceOffers,
       reminders: reminders,
+      dueRecords: dueRecords,
     );
 
     final contentPadding = const EdgeInsets.fromLTRB(
@@ -123,7 +129,7 @@ final class DashboardDayDetailPanel extends StatelessWidget {
         ? const AppEmptyState(
             title: 'Bu gün için kayıt yok',
             message:
-                'Seçtiğiniz tarihte görüşme, teklif veya hatırlatma bulunmuyor.',
+                'Seçtiğiniz tarihte görüşme, teklif, vade veya hatırlatma bulunmuyor.',
             icon: Icons.event_busy_outlined,
           )
         : embeddedInSplitView
@@ -167,6 +173,7 @@ final class DashboardDayDetailPanel extends StatelessWidget {
     required List<DashboardCalendarEvent> meetings,
     required List<DashboardCalendarEvent> priceOffers,
     required List<DashboardCalendarEvent> reminders,
+    required List<DashboardCalendarEvent> dueRecords,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,6 +191,14 @@ final class DashboardDayDetailPanel extends StatelessWidget {
           type: DashboardCalendarEventType.priceOffer,
           emptyMessage: 'Fiyat teklifi yok.',
           events: priceOffers,
+          onEventTap: controller.navigateToEvent,
+        ),
+        const SizedBox(height: AppUiTokens.space12),
+        _EventGroup(
+          title: 'Vadeler',
+          type: DashboardCalendarEventType.dueRecord,
+          emptyMessage: 'Vade kaydı yok.',
+          events: dueRecords,
           onEventTap: controller.navigateToEvent,
         ),
         const SizedBox(height: AppUiTokens.space12),
@@ -517,6 +532,8 @@ class _EventGroup extends StatelessWidget {
         return const Color(0xFFF59E0B);
       case DashboardCalendarEventType.reminder:
         return const Color(0xFF7C3AED);
+      case DashboardCalendarEventType.dueRecord:
+        return const Color(0xFF059669);
     }
   }
 
@@ -528,6 +545,8 @@ class _EventGroup extends StatelessWidget {
         return Icons.request_quote_outlined;
       case DashboardCalendarEventType.reminder:
         return Icons.notifications_none_rounded;
+      case DashboardCalendarEventType.dueRecord:
+        return Icons.payments_outlined;
     }
   }
 }

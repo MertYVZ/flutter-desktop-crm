@@ -9,6 +9,7 @@ import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/due_record_messages.dart';
 import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
+import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_surface.dart';
 import 'package:flutter/material.dart';
@@ -55,8 +56,8 @@ class _DueTrackingEditPageState extends BaseState<DueTrackingEditPage> {
     _selectedCustomerId = record.customerId;
     _selectedDueDate = record.dueDate;
     PanelAmountField.setAmountFromMinor(_amountController, record.amountMinor);
-    _selectedCurrency = CurrencyTypeX.fromValue(record.currency) ??
-        CurrencyType.try_;
+    _selectedCurrency =
+        CurrencyTypeX.fromValue(record.currency) ?? CurrencyType.try_;
     _invoiceNoController.text = record.invoiceNo;
     _selectedStatus =
         DueRecordStatusX.fromValue(record.status) ?? DueRecordStatus.pending;
@@ -111,9 +112,10 @@ class _DueTrackingEditPageState extends BaseState<DueTrackingEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PageHeader(
+                PanelFormPageHeader(
                   title: 'Vade Kaydı Düzenle',
                   subtitle: record.invoiceNo,
+                  onBack: () => Get.offNamed<void>(AppRoutes.dueTracking.value),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 Obx(() {
@@ -195,39 +197,5 @@ class _DueTrackingEditPageState extends BaseState<DueTrackingEditPage> {
     if (success) {
       Get.offNamed<void>(AppRoutes.dueTracking.value);
     }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  const _PageHeader({
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppUiTokens.textPrimary,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-        ),
-        const SizedBox(height: AppUiTokens.space8),
-        Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppUiTokens.textSecondary,
-              ),
-        ),
-      ],
-    );
   }
 }

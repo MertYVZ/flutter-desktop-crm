@@ -27,7 +27,7 @@ class CustomerPriceOffersTab extends StatelessWidget {
         isEmpty: offers.isEmpty,
         emptyMessage: CustomerDetailMessages.priceOffersEmpty,
         emptyActionLabel: 'Fiyat Teklifi Oluştur',
-        onEmptyAction: () => Get.toNamed<void>(AppRoutes.priceOffersNew.value),
+        onEmptyAction: () => controller.openCreateForm(AppRoutes.priceOffersNew),
         children: offers
             .map(
               (offer) => CustomerListRow(
