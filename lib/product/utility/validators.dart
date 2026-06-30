@@ -1,5 +1,6 @@
 import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
@@ -345,6 +346,10 @@ abstract final class Validators {
     required List<PriceOfferItemFormValidation> items,
     PriceOfferStatus? status,
     bool requireStatus = false,
+    PriceOfferDiscountType discountType = PriceOfferDiscountType.none,
+    String discountPercentageText = '',
+    String discountAmountText = '',
+    PriceOfferCurrencyType? discountCurrency,
   }) {
     if (type == null) {
       return PriceOfferMessages.typeRequired;
@@ -427,7 +432,61 @@ abstract final class Validators {
       }
     }
 
-    return null;
+    final availableCurrencies = <PriceOfferCurrencyType>{
+      for (final item in items)
+        if (item.currency != null) item.currency!,
+    };
+
+    return validatePriceOfferDiscount(
+      type: discountType,
+      percentageText: discountPercentageText,
+      amountText: discountAmountText,
+      currency: discountCurrency,
+      availableCurrencies: availableCurrencies,
+    );
+  }
+
+  static String? validatePriceOfferDiscount({
+    required PriceOfferDiscountType type,
+    required String percentageText,
+    required String amountText,
+    required PriceOfferCurrencyType? currency,
+    required Set<PriceOfferCurrencyType> availableCurrencies,
+  }) {
+    switch (type) {
+      case PriceOfferDiscountType.none:
+        return null;
+      case PriceOfferDiscountType.percentage:
+        final trimmed = percentageText.trim();
+        if (trimmed.isEmpty) {
+          return PriceOfferMessages.discountPercentageRequired;
+        }
+        final percentage =
+            double.tryParse(trimmed.replaceAll(',', '.'));
+        if (percentage == null || percentage <= 0) {
+          return PriceOfferMessages.discountPercentagePositive;
+        }
+        if (percentage > 100) {
+          return PriceOfferMessages.discountPercentageTooHigh;
+        }
+        return null;
+      case PriceOfferDiscountType.fixed:
+        final trimmedAmount = amountText.trim();
+        if (trimmedAmount.isEmpty) {
+          return PriceOfferMessages.discountAmountRequired;
+        }
+        final amountMinor = MoneyUtils.parseAmountToMinor(trimmedAmount);
+        if (amountMinor == null || amountMinor <= 0) {
+          return PriceOfferMessages.discountAmountPositive;
+        }
+        if (currency == null) {
+          return PriceOfferMessages.discountCurrencyRequired;
+        }
+        if (!availableCurrencies.contains(currency)) {
+          return PriceOfferMessages.discountCurrencyNotInItems;
+        }
+        return null;
+    }
   }
 
   static String? validatePriceListForm({

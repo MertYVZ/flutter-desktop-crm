@@ -1,6 +1,8 @@
 import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/controllers/price_offers_controller.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/services/legal_text_template_service.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_form.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_items_editor.dart';
@@ -30,6 +32,8 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
   late final TextEditingController _authorizedPhoneController;
   late final TextEditingController _mobilePhoneController;
   late final TextEditingController _legalTextController;
+  late final TextEditingController _discountPercentageController;
+  late final TextEditingController _discountAmountController;
   late final List<PriceOfferItemFormRow> _itemRows;
   late final LegalTextTemplateService _legalTextTemplateService;
 
@@ -38,6 +42,8 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
   OfferType? _selectedType;
   DateTime? _offerDate;
   DateTime? _validityDate;
+  PriceOfferDiscountType _discountType = PriceOfferDiscountType.none;
+  PriceOfferCurrencyType? _discountCurrency;
   bool _isLegalTextDirty = false;
   bool _isValidityDateDirty = false;
 
@@ -52,6 +58,8 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
     _offerDate = AppDateUtils.normalizeDate(DateTime.now());
     _validityDate = AppDateUtils.addDays(_offerDate!, 7);
     _legalTextController = TextEditingController();
+    _discountPercentageController = TextEditingController();
+    _discountAmountController = TextEditingController();
     _itemRows = [PriceOfferItemFormRow()];
     _loadInitialLegalText();
   }
@@ -74,10 +82,55 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
     _authorizedPhoneController.dispose();
     _mobilePhoneController.dispose();
     _legalTextController.dispose();
+    _discountPercentageController.dispose();
+    _discountAmountController.dispose();
     for (final row in _itemRows) {
       row.dispose();
     }
     super.dispose();
+  }
+
+  List<PriceOfferCurrencyType> get _availableDiscountCurrencies {
+    final present = <PriceOfferCurrencyType>{
+      for (final row in _itemRows) row.currency,
+    };
+    return [
+      for (final currency in PriceOfferCurrencyType.values)
+        if (present.contains(currency)) currency,
+    ];
+  }
+
+  void _handleItemsChanged() {
+    setState(() {
+      if (_discountType != PriceOfferDiscountType.fixed) {
+        return;
+      }
+      final available = _availableDiscountCurrencies;
+      if (available.isEmpty) {
+        _discountCurrency = null;
+      } else if (_discountCurrency == null ||
+          !available.contains(_discountCurrency)) {
+        _discountCurrency = available.first;
+      }
+    });
+  }
+
+  void _handleDiscountTypeChanged(PriceOfferDiscountType type) {
+    setState(() {
+      _discountType = type;
+      if (type == PriceOfferDiscountType.fixed && _discountCurrency == null) {
+        final available = _availableDiscountCurrencies;
+        if (available.isNotEmpty) {
+          _discountCurrency = available.first;
+        }
+      }
+    });
+  }
+
+  void _handleDiscountCurrencyChanged(PriceOfferCurrencyType? currency) {
+    setState(() {
+      _discountCurrency = currency;
+    });
   }
 
   Future<void> _handleTypeChanged(OfferType? type) async {
@@ -211,6 +264,10 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
       mobilePhone: _mobilePhoneController.text,
       legalText: _legalTextController.text,
       itemValidations: _buildItemValidations(),
+      discountType: _discountType,
+      discountPercentageText: _discountPercentageController.text,
+      discountAmountText: _discountAmountController.text,
+      discountCurrency: _discountCurrency,
     );
 
     if (id != null) {
@@ -292,6 +349,11 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
                         mobilePhoneController: _mobilePhoneController,
                         legalTextController: _legalTextController,
                         itemRows: _itemRows,
+                        discountType: _discountType,
+                        discountPercentageController:
+                            _discountPercentageController,
+                        discountAmountController: _discountAmountController,
+                        discountCurrency: _discountCurrency,
                         onCustomerChanged: (value) =>
                             _handleCustomerChanged(controller, value),
                         onContactChanged: _handleContactChanged,
@@ -301,6 +363,10 @@ class _PriceOfferCreatePageState extends BaseState<PriceOfferCreatePage> {
                         onLegalTextChanged: (_) {
                           _isLegalTextDirty = true;
                         },
+                        onItemsChanged: _handleItemsChanged,
+                        onDiscountTypeChanged: _handleDiscountTypeChanged,
+                        onDiscountCurrencyChanged:
+                            _handleDiscountCurrencyChanged,
                       ),
                     ),
                     const SizedBox(height: AppUiTokens.space24),

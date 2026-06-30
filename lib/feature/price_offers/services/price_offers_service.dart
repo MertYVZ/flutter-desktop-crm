@@ -1,6 +1,8 @@
 import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:Ok/product/database/app_database.dart';
@@ -55,10 +57,11 @@ final class PriceOffersService {
     required DateTime validityDate,
     required String customerId,
     required String contactPerson,
+    required String legalText,
+    required PriceOfferDiscount discount,
+    required List<PriceOfferItemInput> items,
     String? authorizedPhone,
     String? mobilePhone,
-    required String legalText,
-    required List<PriceOfferItemInput> items,
   }) async {
     final now = DateTime.now();
     final offerId = _uuid.v4();
@@ -74,6 +77,10 @@ final class PriceOffersService {
       mobilePhone: Value(_nullableTrim(mobilePhone)),
       legalText: legalText.trim(),
       status: PriceOfferStatus.draft.value,
+      discountType: Value(discount.type.value),
+      discountPercentage: Value(discount.percentage),
+      discountAmountMinor: Value(discount.amountMinor),
+      discountCurrency: Value(discount.currency?.value),
       createdAt: now,
       updatedAt: now,
     );
@@ -97,11 +104,12 @@ final class PriceOffersService {
     required DateTime validityDate,
     required String customerId,
     required String contactPerson,
-    String? authorizedPhone,
-    String? mobilePhone,
     required String legalText,
     required PriceOfferStatus status,
+    required PriceOfferDiscount discount,
     required List<PriceOfferItemInput> items,
+    String? authorizedPhone,
+    String? mobilePhone,
   }) async {
     final existing = await getOfferById(id);
     if (existing == null) {
@@ -120,6 +128,10 @@ final class PriceOffersService {
       mobilePhone: _nullableTrim(mobilePhone),
       legalText: legalText.trim(),
       status: status.value,
+      discountType: discount.type.value,
+      discountPercentage: discount.percentage,
+      discountAmountMinor: discount.amountMinor,
+      discountCurrency: discount.currency?.value,
       createdAt: existing.createdAt,
       updatedAt: now,
       deletedAt: null,

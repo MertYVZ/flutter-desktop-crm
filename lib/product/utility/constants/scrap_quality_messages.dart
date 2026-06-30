@@ -28,9 +28,9 @@ final class ScrapQualityMessages {
       'Kriterlere uygun hurda kaydı bulunamadı.';
 
   static const customerRequired = 'Müşteri seçiniz.';
-  static const scrapTypeRequired = 'Hurda türü / kalite giriniz.';
+  static const scrapTypeRequired = 'Hurda türü giriniz.';
   static const scrapTypeMinLength =
-      'Hurda türü / kalite en az 2 karakter olmalıdır.';
+      'Hurda türü en az 2 karakter olmalıdır.';
   static const quantityRequired = 'Miktar zorunludur.';
   static const quantityPositive = 'Miktar 0\'dan büyük olmalıdır.';
   static const quantityKgRequired = 'KG karşılığı giriniz.';

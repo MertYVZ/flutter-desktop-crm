@@ -3,8 +3,11 @@ import 'package:Ok/feature/due_tracking/models/currency_type.dart'
 import 'package:Ok/feature/price_offers/controllers/price_offers_controller.dart';
 import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_totals.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_badges.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -138,11 +141,12 @@ class _PriceOfferDetailPageState extends BaseState<PriceOfferDetailPage> {
                   mobilePhone: offer.displayMobilePhone,
                   offerStatus: offer.offerStatus,
                   statusFallback: offer.status,
+                  discountLabel: _discountLabel(offer.discount),
                   createdAt: dateFormat.format(offer.createdAt),
                   updatedAt: dateFormat.format(offer.updatedAt),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
-                _ItemsCard(items: offer.items),
+                _ItemsCard(items: offer.items, discount: offer.discount),
                 const SizedBox(height: AppUiTokens.space16),
                 _LegalTextCard(legalText: offer.legalText),
               ],
@@ -326,6 +330,7 @@ class _OfferInfoCard extends StatelessWidget {
     required this.mobilePhone,
     required this.offerStatus,
     required this.statusFallback,
+    required this.discountLabel,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -340,6 +345,7 @@ class _OfferInfoCard extends StatelessWidget {
   final String mobilePhone;
   final PriceOfferStatus? offerStatus;
   final String statusFallback;
+  final String discountLabel;
   final String createdAt;
   final String updatedAt;
 
@@ -375,6 +381,7 @@ class _OfferInfoCard extends StatelessWidget {
                 fallbackLabel: statusFallback,
               ),
             ),
+            (label: 'İndirim', value: discountLabel, child: null),
           ];
 
           final recordInfoLeft = [
@@ -517,13 +524,17 @@ class _ResponsiveInfoColumns extends StatelessWidget {
 }
 
 class _ItemsCard extends StatelessWidget {
-  const _ItemsCard({required this.items});
+  const _ItemsCard({required this.items, required this.discount});
 
   final List<PriceOfferItemData> items;
+  final PriceOfferDiscount discount;
 
   @override
   Widget build(BuildContext context) {
-    final currencyTotals = _computeCurrencyTotals(items);
+    final currencyTotals = PriceOfferTotalsCalculator.fromItems(
+      items: items,
+      discount: discount,
+    );
 
     return PanelSurface(
       padding: const EdgeInsets.all(AppUiTokens.space24),
@@ -619,39 +630,15 @@ class _ItemsCard extends StatelessWidget {
   }
 }
 
-Map<PriceOfferCurrencyType, int> _computeCurrencyTotals(
-  List<PriceOfferItemData> items,
-) {
-  final totals = <PriceOfferCurrencyType, double>{};
-
-  for (final item in items) {
-    final currency =
-        item.currencyType ?? PriceOfferCurrencyTypeX.fromValue(item.currency);
-    if (currency == null) {
-      continue;
-    }
-
-    totals[currency] = (totals[currency] ?? 0) + item.rowTotalMinor;
-  }
-
-  return {
-    for (final entry in totals.entries) entry.key: entry.value.round(),
-  };
-}
-
 class _CurrencyTotalsSummary extends StatelessWidget {
   const _CurrencyTotalsSummary({required this.totals});
 
-  final Map<PriceOfferCurrencyType, int> totals;
+  final List<PriceOfferCurrencyTotal> totals;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final entries = [
-      for (final currency in PriceOfferCurrencyType.values)
-        if (totals.containsKey(currency))
-          (currency: currency, totalMinor: totals[currency]!),
-    ];
+    final hasAnyDiscount = totals.any((total) => total.hasDiscount);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -667,35 +654,114 @@ class _CurrencyTotalsSummary extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var i = 0; i < entries.length; i++) ...[
-              if (i > 0) const SizedBox(height: AppUiTokens.space8),
-              Row(
-                children: [
-                  Text(
-                    'Toplam (${entries[i].currency.label}):',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: AppUiTokens.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    MoneyUtils.formatAmountMinor(
-                      entries[i].totalMinor,
-                      _mapOfferCurrency(entries[i].currency),
-                    ),
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: AppUiTokens.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
+            for (var i = 0; i < totals.length; i++) ...[
+              if (i > 0) ...[
+                const SizedBox(height: AppUiTokens.space12),
+                const Divider(height: 1, color: AppUiTokens.border),
+                const SizedBox(height: AppUiTokens.space12),
+              ],
+              _buildCurrencyBlock(textTheme, totals[i], hasAnyDiscount),
             ],
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCurrencyBlock(
+    TextTheme textTheme,
+    PriceOfferCurrencyTotal total,
+    bool showSubtotalRows,
+  ) {
+    final currency = _mapOfferCurrency(total.currency);
+
+    if (!showSubtotalRows) {
+      return _summaryRow(
+        textTheme,
+        label: 'Toplam (${total.currency.label}):',
+        value: MoneyUtils.formatAmountMinor(total.netMinor, currency),
+        emphasize: true,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _summaryRow(
+          textTheme,
+          label: 'Ara Toplam (${total.currency.label}):',
+          value: MoneyUtils.formatAmountMinor(total.grossMinor, currency),
+        ),
+        if (total.hasDiscount) ...[
+          const SizedBox(height: AppUiTokens.space8),
+          _summaryRow(
+            textTheme,
+            label: 'İndirim:',
+            value:
+                '- ${MoneyUtils.formatAmountMinor(total.discountMinor, currency)}',
+            valueColor: ColorName.error,
+          ),
+        ],
+        const SizedBox(height: AppUiTokens.space8),
+        _summaryRow(
+          textTheme,
+          label: 'Genel Toplam (${total.currency.label}):',
+          value: MoneyUtils.formatAmountMinor(total.netMinor, currency),
+          emphasize: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _summaryRow(
+    TextTheme textTheme, {
+    required String label,
+    required String value,
+    bool emphasize = false,
+    Color? valueColor,
+  }) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppUiTokens.textSecondary,
+            fontWeight: emphasize ? FontWeight.w700 : FontWeight.w600,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: textTheme.bodyMedium?.copyWith(
+            color: valueColor ?? AppUiTokens.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _discountLabel(PriceOfferDiscount discount) {
+  switch (discount.type) {
+    case PriceOfferDiscountType.none:
+      return 'İndirim yok';
+    case PriceOfferDiscountType.percentage:
+      final percentage = discount.percentage;
+      if (percentage == null) {
+        return 'İndirim yok';
+      }
+      return '%${QuantityUtils.formatQuantity(percentage)} (tüm para birimleri)';
+    case PriceOfferDiscountType.fixed:
+      final amountMinor = discount.amountMinor;
+      final currency = discount.currency;
+      if (amountMinor == null || currency == null) {
+        return 'İndirim yok';
+      }
+      return MoneyUtils.formatAmountMinor(
+        amountMinor,
+        _mapOfferCurrency(currency),
+      );
   }
 }
 

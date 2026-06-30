@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
@@ -66,6 +67,10 @@ class _ScrapQualityDetailPageState extends BaseState<ScrapQualityDetailPage> {
           final customerName = _resolveCustomerName(controller, record);
           final salesStatus = ScrapSalesStatusX.fromValue(record.salesStatus);
           final lostReason = _resolveLostReasonLabel(record.lostReason);
+          final currencyLabel =
+              (CurrencyTypeX.fromValue(record.currency) ?? CurrencyType.try_)
+                  .label;
+          final qualityGrade = record.qualityGrade?.trim();
 
           return PanelFormScrollView(
             child: Column(
@@ -112,8 +117,14 @@ class _ScrapQualityDetailPageState extends BaseState<ScrapQualityDetailPage> {
                           value: QuantityUtils.formatKg(record.quantityKg),
                         ),
                         _DetailField(
-                          label: 'Hurda Türü / Kalite',
+                          label: 'Hurda Türü',
                           value: record.quality,
+                        ),
+                        _DetailField(
+                          label: 'Kalite',
+                          value: (qualityGrade == null || qualityGrade.isEmpty)
+                              ? '—'
+                              : qualityGrade,
                         ),
                         _DetailField(
                           label: 'Tarih',
@@ -128,16 +139,20 @@ class _ScrapQualityDetailPageState extends BaseState<ScrapQualityDetailPage> {
                           child: ScrapSalesStatusBadge(status: salesStatus),
                         ),
                         _DetailField(
+                          label: 'Para Birimi',
+                          value: currencyLabel,
+                        ),
+                        _DetailField(
                           label: 'Teklif Fiyatı',
                           value: record.offerPrice == null
                               ? '—'
-                              : '${MoneyUtils.formatAmountInput(record.offerPrice!)} TL/KG',
+                              : '${MoneyUtils.formatAmountInput(record.offerPrice!)} $currencyLabel/KG',
                         ),
                         _DetailField(
                           label: 'Hedef Fiyat',
                           value: record.targetPrice == null
                               ? '—'
-                              : '${MoneyUtils.formatAmountInput(record.targetPrice!)} TL/KG',
+                              : '${MoneyUtils.formatAmountInput(record.targetPrice!)} $currencyLabel/KG',
                         ),
                         _DetailField(
                           label: 'Alınmama Nedeni',

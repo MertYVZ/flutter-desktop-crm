@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_analytics.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_list_item.dart';
@@ -192,6 +193,7 @@ final class ScrapQualityController extends GetxController {
   Future<String?> createRecord({
     required String? customerId,
     required String scrapType,
+    required String qualityGrade,
     required String quantityText,
     required ScrapQualityUnit? unit,
     required String customUnitText,
@@ -201,6 +203,7 @@ final class ScrapQualityController extends GetxController {
     required String city,
     required String offerPriceText,
     required String targetPriceText,
+    required CurrencyType? currency,
     required ScrapLostReason? lostReason,
     required String customLostReasonText,
     required DateTime? followUpDate,
@@ -243,6 +246,7 @@ final class ScrapQualityController extends GetxController {
         customerId: customerId,
         customerName: customer?.name ?? '',
         scrapType: scrapType,
+        qualityGrade: qualityGrade,
         quantity: quantity,
         unit: resolvedUnit,
         unitEnum: unit,
@@ -252,6 +256,7 @@ final class ScrapQualityController extends GetxController {
         city: city,
         offerPrice: _parseOptionalPrice(offerPriceText),
         targetPrice: _parseOptionalPrice(targetPriceText),
+        currency: currency,
         lostReason: lostReason,
         customLostReason: customLostReasonText,
         followUpDate: followUpDate,
@@ -272,6 +277,7 @@ final class ScrapQualityController extends GetxController {
     required String id,
     required String? customerId,
     required String scrapType,
+    required String qualityGrade,
     required String quantityText,
     required ScrapQualityUnit? unit,
     required String customUnitText,
@@ -281,6 +287,7 @@ final class ScrapQualityController extends GetxController {
     required String city,
     required String offerPriceText,
     required String targetPriceText,
+    required CurrencyType? currency,
     required ScrapLostReason? lostReason,
     required String customLostReasonText,
     required DateTime? followUpDate,
@@ -324,6 +331,7 @@ final class ScrapQualityController extends GetxController {
         customerId: customerId,
         customerName: customer?.name ?? '',
         scrapType: scrapType,
+        qualityGrade: qualityGrade,
         quantity: quantity,
         unit: resolvedUnit,
         unitEnum: unit,
@@ -333,6 +341,7 @@ final class ScrapQualityController extends GetxController {
         city: city,
         offerPrice: _parseOptionalPrice(offerPriceText),
         targetPrice: _parseOptionalPrice(targetPriceText),
+        currency: currency,
         lostReason: lostReason,
         customLostReason: customLostReasonText,
         followUpDate: followUpDate,

@@ -1,7 +1,10 @@
 import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/due_tracking/widgets/customer_search_dropdown.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
+import 'package:Ok/feature/price_offers/widgets/price_offer_discount_section.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_items_editor.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
@@ -27,12 +30,19 @@ class PriceOfferForm extends StatelessWidget {
     required this.mobilePhoneController,
     required this.legalTextController,
     required this.itemRows,
+    required this.discountType,
+    required this.discountPercentageController,
+    required this.discountAmountController,
+    required this.discountCurrency,
     required this.onCustomerChanged,
     required this.onContactChanged,
     required this.onTypeChanged,
     required this.onDateChanged,
     required this.onValidityDateChanged,
     required this.onLegalTextChanged,
+    required this.onItemsChanged,
+    required this.onDiscountTypeChanged,
+    required this.onDiscountCurrencyChanged,
     this.selectedStatus,
     this.onStatusChanged,
     this.showStatus = false,
@@ -51,12 +61,19 @@ class PriceOfferForm extends StatelessWidget {
   final TextEditingController mobilePhoneController;
   final TextEditingController legalTextController;
   final List<PriceOfferItemFormRow> itemRows;
+  final PriceOfferDiscountType discountType;
+  final TextEditingController discountPercentageController;
+  final TextEditingController discountAmountController;
+  final PriceOfferCurrencyType? discountCurrency;
   final ValueChanged<String?> onCustomerChanged;
   final ValueChanged<CustomerContactItem?> onContactChanged;
   final ValueChanged<OfferType?> onTypeChanged;
   final ValueChanged<DateTime?> onDateChanged;
   final ValueChanged<DateTime?> onValidityDateChanged;
   final ValueChanged<String> onLegalTextChanged;
+  final VoidCallback onItemsChanged;
+  final ValueChanged<PriceOfferDiscountType> onDiscountTypeChanged;
+  final ValueChanged<PriceOfferCurrencyType?> onDiscountCurrencyChanged;
   final PriceOfferStatus? selectedStatus;
   final ValueChanged<PriceOfferStatus?>? onStatusChanged;
   final bool showStatus;
@@ -97,7 +114,7 @@ class PriceOfferForm extends StatelessWidget {
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 AppDatePickerField(
-                  key: ValueKey(offerDate),
+                  key: ValueKey('offer-$offerDate'),
                   label: 'Teklif Tarihi',
                   placeholder: 'Teklif tarihi seçiniz',
                   selectedDate: offerDate,
@@ -105,7 +122,7 @@ class PriceOfferForm extends StatelessWidget {
                 ),
                 const SizedBox(height: AppUiTokens.space16),
                 AppDatePickerField(
-                  key: ValueKey(validityDate),
+                  key: ValueKey('validity-$validityDate'),
                   label: 'Geçerlilik Tarihi',
                   placeholder: 'Geçerlilik tarihi seçiniz',
                   selectedDate: validityDate,
@@ -187,6 +204,22 @@ class PriceOfferForm extends StatelessWidget {
         const SizedBox(height: AppUiTokens.space16),
         PriceOfferItemsEditor(
           rows: itemRows,
+          onChanged: onItemsChanged,
+        ),
+        const SizedBox(height: AppUiTokens.space32),
+        _SectionTitle(
+          title: 'İndirim',
+          icon: Icons.percent_rounded,
+        ),
+        const SizedBox(height: AppUiTokens.space16),
+        PriceOfferDiscountSection(
+          itemRows: itemRows,
+          discountType: discountType,
+          percentageController: discountPercentageController,
+          amountController: discountAmountController,
+          selectedCurrency: discountCurrency,
+          onTypeChanged: onDiscountTypeChanged,
+          onCurrencyChanged: onDiscountCurrencyChanged,
         ),
         const SizedBox(height: AppUiTokens.space32),
         _SectionTitle(

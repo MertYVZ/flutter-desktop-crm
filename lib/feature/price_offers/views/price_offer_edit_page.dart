@@ -1,8 +1,11 @@
 import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/price_offers/controllers/price_offers_controller.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:Ok/feature/price_offers/services/legal_text_template_service.dart';
+import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_form.dart';
 import 'package:Ok/feature/price_offers/widgets/price_offer_items_editor.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -31,6 +34,8 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
   late final TextEditingController _authorizedPhoneController;
   late final TextEditingController _mobilePhoneController;
   late final TextEditingController _legalTextController;
+  late final TextEditingController _discountPercentageController;
+  late final TextEditingController _discountAmountController;
   late final List<PriceOfferItemFormRow> _itemRows;
   late final LegalTextTemplateService _legalTextTemplateService;
 
@@ -41,6 +46,8 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
   DateTime? _offerDate;
   DateTime? _validityDate;
   PriceOfferStatus? _selectedStatus;
+  PriceOfferDiscountType _discountType = PriceOfferDiscountType.none;
+  PriceOfferCurrencyType? _discountCurrency;
   bool _isLegalTextDirty = true;
   bool _isValidityDateDirty = true;
   bool _isFormInitialized = false;
@@ -53,6 +60,8 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
     _authorizedPhoneController = TextEditingController();
     _mobilePhoneController = TextEditingController();
     _legalTextController = TextEditingController();
+    _discountPercentageController = TextEditingController();
+    _discountAmountController = TextEditingController();
     _legalTextTemplateService = Get.find<LegalTextTemplateService>();
     _itemRows = [];
   }
@@ -62,10 +71,55 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
     _authorizedPhoneController.dispose();
     _mobilePhoneController.dispose();
     _legalTextController.dispose();
+    _discountPercentageController.dispose();
+    _discountAmountController.dispose();
     for (final row in _itemRows) {
       row.dispose();
     }
     super.dispose();
+  }
+
+  List<PriceOfferCurrencyType> get _availableDiscountCurrencies {
+    final present = <PriceOfferCurrencyType>{
+      for (final row in _itemRows) row.currency,
+    };
+    return [
+      for (final currency in PriceOfferCurrencyType.values)
+        if (present.contains(currency)) currency,
+    ];
+  }
+
+  void _handleItemsChanged() {
+    setState(() {
+      if (_discountType != PriceOfferDiscountType.fixed) {
+        return;
+      }
+      final available = _availableDiscountCurrencies;
+      if (available.isEmpty) {
+        _discountCurrency = null;
+      } else if (_discountCurrency == null ||
+          !available.contains(_discountCurrency)) {
+        _discountCurrency = available.first;
+      }
+    });
+  }
+
+  void _handleDiscountTypeChanged(PriceOfferDiscountType type) {
+    setState(() {
+      _discountType = type;
+      if (type == PriceOfferDiscountType.fixed && _discountCurrency == null) {
+        final available = _availableDiscountCurrencies;
+        if (available.isNotEmpty) {
+          _discountCurrency = available.first;
+        }
+      }
+    });
+  }
+
+  void _handleDiscountCurrencyChanged(PriceOfferCurrencyType? currency) {
+    setState(() {
+      _discountCurrency = currency;
+    });
   }
 
   void _populateForm(PriceOffersController controller) {
@@ -85,6 +139,21 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
     _mobilePhoneController.text = offer.mobilePhone ?? '';
     _legalTextController.text = offer.legalText;
     _isLegalTextDirty = true;
+
+    final discount = offer.discount;
+    _discountType = discount.type;
+    _discountCurrency = discount.currency;
+    _discountPercentageController.text = discount.percentage == null
+        ? ''
+        : discount.percentage!.round().toString();
+    if (discount.amountMinor != null) {
+      PanelAmountField.setAmountFromMinor(
+        _discountAmountController,
+        discount.amountMinor!,
+      );
+    } else {
+      _discountAmountController.clear();
+    }
 
     for (final row in _itemRows) {
       row.dispose();
@@ -274,6 +343,10 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
       legalText: _legalTextController.text,
       status: _selectedStatus,
       itemValidations: _buildItemValidations(),
+      discountType: _discountType,
+      discountPercentageText: _discountPercentageController.text,
+      discountAmountText: _discountAmountController.text,
+      discountCurrency: _discountCurrency,
     );
 
     if (updated) {
@@ -380,6 +453,11 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
                           mobilePhoneController: _mobilePhoneController,
                           legalTextController: _legalTextController,
                           itemRows: _itemRows,
+                          discountType: _discountType,
+                          discountPercentageController:
+                              _discountPercentageController,
+                          discountAmountController: _discountAmountController,
+                          discountCurrency: _discountCurrency,
                           showStatus: true,
                           selectedStatus: _selectedStatus,
                           onStatusChanged: (value) => setState(() {
@@ -394,6 +472,10 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
                           onLegalTextChanged: (_) {
                             _isLegalTextDirty = true;
                           },
+                          onItemsChanged: _handleItemsChanged,
+                          onDiscountTypeChanged: _handleDiscountTypeChanged,
+                          onDiscountCurrencyChanged:
+                              _handleDiscountCurrencyChanged,
                         ),
                       ),
                       const SizedBox(height: AppUiTokens.space24),

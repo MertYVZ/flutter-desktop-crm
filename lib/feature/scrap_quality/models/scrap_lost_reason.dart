@@ -1,5 +1,5 @@
 enum ScrapLostReason {
-  priceHigh('price_high', 'Fiyat yüksek kaldı'),
+  priceHigh('price_high', 'Fiyat düşük kaldı'),
   competitorWon('competitor_won', 'Rakip aldı'),
   remoteLocation('remote_location', 'Uzak lokasyon'),
   lowQuantity('low_quantity', 'Miktar az'),

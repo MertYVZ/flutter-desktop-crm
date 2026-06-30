@@ -72,7 +72,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -203,6 +203,40 @@ class AppDatabase extends _$AppDatabase {
               )
               WHERE customer_name_snapshot IS NULL
             ''');
+          }
+          if (from < 15) {
+            await _addColumnIfNotExists(
+              'price_offers',
+              'discount_type',
+              'TEXT',
+            );
+            await _addColumnIfNotExists(
+              'price_offers',
+              'discount_percentage',
+              'REAL',
+            );
+            await _addColumnIfNotExists(
+              'price_offers',
+              'discount_amount_minor',
+              'INTEGER',
+            );
+            await _addColumnIfNotExists(
+              'price_offers',
+              'discount_currency',
+              'TEXT',
+            );
+          }
+          if (from < 16) {
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'quality_grade',
+              'TEXT',
+            );
+            await _addColumnIfNotExists(
+              'scrap_quality_records',
+              'currency',
+              'TEXT',
+            );
           }
         },
       );

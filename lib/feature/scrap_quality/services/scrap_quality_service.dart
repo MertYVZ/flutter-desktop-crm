@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_list_item.dart';
@@ -66,12 +67,14 @@ final class ScrapQualityService {
     required String customerId,
     required String customerName,
     required String scrapType,
+    required String qualityGrade,
     required double quantity,
     required String unit,
     required ScrapQualityUnit? unitEnum,
     required double quantityKg,
     required DateTime recordDate,
     required ScrapSalesStatus salesStatus,
+    CurrencyType? currency,
     String? city,
     double? offerPrice,
     double? targetPrice,
@@ -90,6 +93,7 @@ final class ScrapQualityService {
         customerId: customerId,
         customerNameSnapshot: Value(customerName.trim()),
         quality: scrapType.trim(),
+        qualityGrade: Value(_nullableTrim(qualityGrade)),
         quantity: quantity,
         unit: unit.trim(),
         quantityKg: Value(quantityKg),
@@ -97,6 +101,7 @@ final class ScrapQualityService {
         salesStatus: Value(salesStatus.value),
         offerPrice: Value(offerPrice),
         targetPrice: Value(targetPrice),
+        currency: Value((currency ?? CurrencyType.try_).value),
         lostReason: Value(
           _resolveLostReason(lostReason, customLostReason),
         ),
@@ -118,12 +123,14 @@ final class ScrapQualityService {
     required String customerId,
     required String customerName,
     required String scrapType,
+    required String qualityGrade,
     required double quantity,
     required String unit,
     required ScrapQualityUnit? unitEnum,
     required double quantityKg,
     required DateTime recordDate,
     required ScrapSalesStatus salesStatus,
+    CurrencyType? currency,
     String? city,
     double? offerPrice,
     double? targetPrice,
@@ -141,6 +148,7 @@ final class ScrapQualityService {
       customerId: customerId,
       customerNameSnapshot: Value(customerName.trim()),
       quality: scrapType.trim(),
+      qualityGrade: Value(_nullableTrim(qualityGrade)),
       quantity: quantity,
       unit: unit.trim(),
       quantityKg: quantityKg,
@@ -148,6 +156,7 @@ final class ScrapQualityService {
       salesStatus: salesStatus.value,
       offerPrice: Value(offerPrice),
       targetPrice: Value(targetPrice),
+      currency: Value((currency ?? CurrencyType.try_).value),
       lostReason: Value(
         _resolveLostReason(lostReason, customLostReason),
       ),

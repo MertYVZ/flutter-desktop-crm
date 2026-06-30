@@ -3,6 +3,7 @@ import 'package:Ok/feature/due_tracking/models/currency_type.dart'
 import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_pdf_settings.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_totals.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/money_utils.dart';
 import 'package:flutter/services.dart';
@@ -387,43 +388,69 @@ final class PriceOfferPdfBuilder {
   }
 
   List<pw.Widget> _buildCurrencyTotals(pw.Font regularFont, pw.Font boldFont) {
-    final totals = _computeCurrencyTotals(offer.items);
+    final totals = PriceOfferTotalsCalculator.fromItems(
+      items: offer.items,
+      discount: offer.discount,
+    );
     if (totals.isEmpty) {
       return const [];
     }
 
+    final hasAnyDiscount = totals.any((total) => total.hasDiscount);
     final rows = <pw.Widget>[];
-    for (final currency in PriceOfferCurrencyType.values) {
-      final totalMinor = totals[currency];
-      if (totalMinor == null) {
+
+    for (var i = 0; i < totals.length; i++) {
+      final total = totals[i];
+      if (i > 0) {
+        rows.add(
+          pw.Container(
+            margin: const pw.EdgeInsets.symmetric(vertical: 4),
+            height: 0.5,
+            color: _borderColor,
+          ),
+        );
+      }
+
+      if (!hasAnyDiscount) {
+        rows.add(
+          _totalRow(
+            label: 'Toplam (${total.currency.label})',
+            value: _formatTotalAmount(total.netMinor, total.currency),
+            regularFont: regularFont,
+            boldFont: boldFont,
+            emphasize: true,
+          ),
+        );
         continue;
       }
 
       rows.add(
-        pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(vertical: 4),
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Text(
-                _currencyTotalLabel(currency),
-                style: pw.TextStyle(
-                  font: regularFont,
-                  fontSize: 9,
-                  color: _textSecondary,
-                ),
-              ),
-              pw.Text(
-                _formatTotalAmount(totalMinor, currency),
-                style: pw.TextStyle(
-                  font: boldFont,
-                  fontSize: 10,
-                  fontWeight: pw.FontWeight.bold,
-                  color: _textPrimary,
-                ),
-              ),
-            ],
+        _totalRow(
+          label: 'Ara Toplam (${total.currency.label})',
+          value: _formatTotalAmount(total.grossMinor, total.currency),
+          regularFont: regularFont,
+          boldFont: boldFont,
+        ),
+      );
+      if (total.hasDiscount) {
+        rows.add(
+          _totalRow(
+            label: 'İndirim',
+            value:
+                '- ${_formatTotalAmount(total.discountMinor, total.currency)}',
+            regularFont: regularFont,
+            boldFont: boldFont,
+            valueColor: _brandPrimary,
           ),
+        );
+      }
+      rows.add(
+        _totalRow(
+          label: 'Genel Toplam (${total.currency.label})',
+          value: _formatTotalAmount(total.netMinor, total.currency),
+          regularFont: regularFont,
+          boldFont: boldFont,
+          emphasize: true,
         ),
       );
     }
@@ -446,6 +473,42 @@ final class PriceOfferPdfBuilder {
         ),
       ),
     ];
+  }
+
+  pw.Widget _totalRow({
+    required String label,
+    required String value,
+    required pw.Font regularFont,
+    required pw.Font boldFont,
+    bool emphasize = false,
+    PdfColor? valueColor,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 3),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              font: emphasize ? boldFont : regularFont,
+              fontSize: 9,
+              fontWeight: emphasize ? pw.FontWeight.bold : null,
+              color: emphasize ? _textPrimary : _textSecondary,
+            ),
+          ),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              font: boldFont,
+              fontSize: emphasize ? 10 : 9,
+              fontWeight: pw.FontWeight.bold,
+              color: valueColor ?? _textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   List<pw.Widget> _buildCompanyFooter(pw.Font regularFont) {
@@ -549,37 +612,6 @@ final class PriceOfferPdfBuilder {
       totalMinor,
       _mapOfferCurrency(currency),
     );
-  }
-
-  String _currencyTotalLabel(PriceOfferCurrencyType currency) {
-    switch (currency) {
-      case PriceOfferCurrencyType.eur:
-        return 'Toplam (EUR)';
-      case PriceOfferCurrencyType.try_:
-        return 'Toplam (TRY)';
-      case PriceOfferCurrencyType.usd:
-        return 'Toplam (USD)';
-    }
-  }
-
-  Map<PriceOfferCurrencyType, int> _computeCurrencyTotals(
-    List<PriceOfferItemData> items,
-  ) {
-    final totals = <PriceOfferCurrencyType, double>{};
-
-    for (final item in items) {
-      final currency =
-          item.currencyType ?? PriceOfferCurrencyTypeX.fromValue(item.currency);
-      if (currency == null) {
-        continue;
-      }
-
-      totals[currency] = (totals[currency] ?? 0) + item.rowTotalMinor;
-    }
-
-    return {
-      for (final entry in totals.entries) entry.key: entry.value.round(),
-    };
   }
 
   due_currency.CurrencyType _mapOfferCurrency(

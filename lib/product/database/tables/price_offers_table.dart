@@ -11,6 +11,10 @@ class PriceOffers extends Table {
   TextColumn get mobilePhone => text().nullable()();
   TextColumn get legalText => text()();
   TextColumn get status => text()();
+  TextColumn get discountType => text().nullable()();
+  RealColumn get discountPercentage => real().nullable()();
+  IntColumn get discountAmountMinor => integer().nullable()();
+  TextColumn get discountCurrency => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

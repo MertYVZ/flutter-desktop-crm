@@ -51,4 +51,16 @@ final class PriceOfferMessages {
   static const priceNonNegative = 'Fiyat 0\'dan küçük olamaz.';
   static const currencyRequired = 'Para birimi seçiniz.';
   static const phoneTooShort = 'Telefon numarası çok kısa.';
+
+  static const discountPercentageRequired = 'İndirim yüzdesi giriniz.';
+  static const discountPercentagePositive =
+      'İndirim yüzdesi 0\'dan büyük olmalıdır.';
+  static const discountPercentageTooHigh =
+      'İndirim yüzdesi 100\'den büyük olamaz.';
+  static const discountAmountRequired = 'İndirim tutarı giriniz.';
+  static const discountAmountPositive =
+      'İndirim tutarı 0\'dan büyük olmalıdır.';
+  static const discountCurrencyRequired = 'İndirim para birimi seçiniz.';
+  static const discountCurrencyNotInItems =
+      'İndirim para birimi, ürünlerde kullanılan bir para birimi olmalıdır.';
 }

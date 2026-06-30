@@ -1,5 +1,6 @@
 import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:equatable/equatable.dart';
 
@@ -112,6 +113,7 @@ final class PriceOfferDetail extends Equatable {
     required this.mobilePhone,
     required this.legalText,
     required this.status,
+    required this.discount,
     required this.createdAt,
     required this.updatedAt,
     required this.items,
@@ -128,6 +130,7 @@ final class PriceOfferDetail extends Equatable {
   final String? mobilePhone;
   final String legalText;
   final String status;
+  final PriceOfferDiscount discount;
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<PriceOfferItemData> items;
@@ -159,6 +162,7 @@ final class PriceOfferDetail extends Equatable {
         mobilePhone,
         legalText,
         status,
+        discount,
         createdAt,
         updatedAt,
         items,

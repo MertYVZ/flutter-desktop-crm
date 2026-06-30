@@ -5,6 +5,7 @@ class ScrapQualityRecords extends Table {
   TextColumn get customerId => text()();
   TextColumn get customerNameSnapshot => text().nullable()();
   TextColumn get quality => text()();
+  TextColumn get qualityGrade => text().nullable()();
   RealColumn get quantity => real()();
   TextColumn get unit => text()();
   RealColumn get quantityKg => real().withDefault(const Constant(0))();
@@ -13,6 +14,7 @@ class ScrapQualityRecords extends Table {
       text().withDefault(const Constant('unresolved'))();
   RealColumn get offerPrice => real().nullable()();
   RealColumn get targetPrice => real().nullable()();
+  TextColumn get currency => text().nullable()();
   TextColumn get lostReason => text().nullable()();
   DateTimeColumn get followUpDate => dateTime().nullable()();
   DateTimeColumn get recordDate => dateTime()();

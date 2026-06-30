@@ -1,7 +1,7 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
-import 'package:Ok/feature/scrap_quality/models/scrap_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
 import 'package:Ok/feature/scrap_quality/widgets/scrap_quality_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -25,7 +25,8 @@ final class ScrapQualityCreatePage extends StatefulWidget {
 }
 
 class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
-  late final TextEditingController _customScrapTypeController;
+  late final TextEditingController _scrapTypeController;
+  late final TextEditingController _qualityController;
   late final TextEditingController _quantityController;
   late final TextEditingController _customUnitController;
   late final TextEditingController _quantityKgController;
@@ -36,9 +37,9 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
   late final TextEditingController _noteController;
 
   String? _selectedCustomerId;
-  ScrapType? _selectedScrapType;
   ScrapQualityUnit? _selectedUnit = ScrapQualityUnit.defaultUnit;
   ScrapSalesStatus? _selectedSalesStatus = ScrapSalesStatus.unresolved;
+  CurrencyType? _selectedCurrency = CurrencyType.try_;
   ScrapLostReason? _selectedLostReason;
   DateTime? _recordDate;
   DateTime? _followUpDate;
@@ -48,7 +49,8 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
     super.initState();
     _selectedCustomerId = AppRouteArgs.readCustomerId();
     _recordDate = AppDateUtils.normalizeDate(DateTime.now());
-    _customScrapTypeController = TextEditingController();
+    _scrapTypeController = TextEditingController();
+    _qualityController = TextEditingController();
     _quantityController = TextEditingController();
     _customUnitController = TextEditingController();
     _quantityKgController = TextEditingController();
@@ -61,7 +63,8 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
 
   @override
   void dispose() {
-    _customScrapTypeController.dispose();
+    _scrapTypeController.dispose();
+    _qualityController.dispose();
     _quantityController.dispose();
     _customUnitController.dispose();
     _quantityKgController.dispose();
@@ -123,8 +126,8 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
                       () => ScrapQualityForm(
                         customers: controller.customers.toList(),
                         selectedCustomerId: _selectedCustomerId,
-                        selectedScrapType: _selectedScrapType,
-                        customScrapTypeController: _customScrapTypeController,
+                        scrapTypeController: _scrapTypeController,
+                        qualityController: _qualityController,
                         quantityController: _quantityController,
                         selectedUnit: _selectedUnit,
                         customUnitController: _customUnitController,
@@ -134,18 +137,13 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
                         selectedSalesStatus: _selectedSalesStatus,
                         offerPriceController: _offerPriceController,
                         targetPriceController: _targetPriceController,
+                        selectedCurrency: _selectedCurrency,
                         selectedLostReason: _selectedLostReason,
                         customLostReasonController: _customLostReasonController,
                         followUpDate: _followUpDate,
                         noteController: _noteController,
                         onCustomerChanged: (value) => setState(() {
                           _selectedCustomerId = value;
-                        }),
-                        onScrapTypeChanged: (value) => setState(() {
-                          _selectedScrapType = value;
-                          if (value != ScrapType.other) {
-                            _customScrapTypeController.clear();
-                          }
                         }),
                         onUnitChanged: (value) => setState(() {
                           _selectedUnit = value;
@@ -155,6 +153,9 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
                         }),
                         onSalesStatusChanged: (value) => setState(() {
                           _selectedSalesStatus = value;
+                        }),
+                        onCurrencyChanged: (value) => setState(() {
+                          _selectedCurrency = value;
                         }),
                         onLostReasonChanged: (value) => setState(() {
                           _selectedLostReason = value;
@@ -199,10 +200,8 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
   }) async {
     final id = await controller.createRecord(
       customerId: _selectedCustomerId,
-      scrapType: ScrapTypeX.resolve(
-        _selectedScrapType,
-        _customScrapTypeController.text,
-      ),
+      scrapType: _scrapTypeController.text,
+      qualityGrade: _qualityController.text,
       quantityText: _quantityController.text,
       unit: _selectedUnit,
       customUnitText: _customUnitController.text,
@@ -212,6 +211,7 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
       city: _cityController.text,
       offerPriceText: _offerPriceController.text,
       targetPriceText: _targetPriceController.text,
+      currency: _selectedCurrency,
       lostReason: _selectedLostReason,
       customLostReasonText: _customLostReasonController.text,
       followUpDate: _followUpDate,
@@ -229,9 +229,10 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
 
     final preservedDate = _recordDate;
     final preservedCity = _cityController.text;
-    final preservedScrapType = _selectedScrapType;
-    final preservedCustomScrapType = _customScrapTypeController.text;
+    final preservedScrapType = _scrapTypeController.text;
+    final preservedQuality = _qualityController.text;
     final preservedStatus = _selectedSalesStatus;
+    final preservedCurrency = _selectedCurrency;
 
     setState(() {
       _selectedCustomerId = null;
@@ -241,15 +242,15 @@ class _ScrapQualityCreatePageState extends BaseState<ScrapQualityCreatePage> {
       _offerPriceController.clear();
       _targetPriceController.clear();
       _customLostReasonController.clear();
-      _customScrapTypeController.clear();
       _noteController.clear();
       _selectedLostReason = null;
       _followUpDate = null;
       _recordDate = preservedDate;
       _cityController.text = preservedCity;
-      _selectedScrapType = preservedScrapType;
-      _customScrapTypeController.text = preservedCustomScrapType;
+      _scrapTypeController.text = preservedScrapType;
+      _qualityController.text = preservedQuality;
       _selectedSalesStatus = preservedStatus;
+      _selectedCurrency = preservedCurrency;
     });
   }
 }

@@ -1,7 +1,7 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/due_tracking/widgets/customer_search_dropdown.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
-import 'package:Ok/feature/scrap_quality/models/scrap_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_unit.dart';
 import 'package:Ok/feature/scrap_quality/services/scrap_kg_utils.dart';
 import 'package:Ok/product/database/app_database.dart';
@@ -20,8 +20,8 @@ class ScrapQualityForm extends StatelessWidget {
   const ScrapQualityForm({
     required this.customers,
     required this.selectedCustomerId,
-    required this.selectedScrapType,
-    required this.customScrapTypeController,
+    required this.scrapTypeController,
+    required this.qualityController,
     required this.quantityController,
     required this.selectedUnit,
     required this.customUnitController,
@@ -31,15 +31,16 @@ class ScrapQualityForm extends StatelessWidget {
     required this.selectedSalesStatus,
     required this.offerPriceController,
     required this.targetPriceController,
+    required this.selectedCurrency,
     required this.selectedLostReason,
     required this.customLostReasonController,
     required this.followUpDate,
     required this.noteController,
     required this.onCustomerChanged,
-    required this.onScrapTypeChanged,
     required this.onUnitChanged,
     required this.onRecordDateChanged,
     required this.onSalesStatusChanged,
+    required this.onCurrencyChanged,
     required this.onLostReasonChanged,
     required this.onFollowUpDateChanged,
     super.key,
@@ -47,8 +48,8 @@ class ScrapQualityForm extends StatelessWidget {
 
   final List<Customer> customers;
   final String? selectedCustomerId;
-  final ScrapType? selectedScrapType;
-  final TextEditingController customScrapTypeController;
+  final TextEditingController scrapTypeController;
+  final TextEditingController qualityController;
   final TextEditingController quantityController;
   final ScrapQualityUnit? selectedUnit;
   final TextEditingController customUnitController;
@@ -58,15 +59,16 @@ class ScrapQualityForm extends StatelessWidget {
   final ScrapSalesStatus? selectedSalesStatus;
   final TextEditingController offerPriceController;
   final TextEditingController targetPriceController;
+  final CurrencyType? selectedCurrency;
   final ScrapLostReason? selectedLostReason;
   final TextEditingController customLostReasonController;
   final DateTime? followUpDate;
   final TextEditingController noteController;
   final ValueChanged<String?> onCustomerChanged;
-  final ValueChanged<ScrapType?> onScrapTypeChanged;
   final ValueChanged<ScrapQualityUnit?> onUnitChanged;
   final ValueChanged<DateTime?> onRecordDateChanged;
   final ValueChanged<ScrapSalesStatus?> onSalesStatusChanged;
+  final ValueChanged<CurrencyType?> onCurrencyChanged;
   final ValueChanged<ScrapLostReason?> onLostReasonChanged;
   final ValueChanged<DateTime?> onFollowUpDateChanged;
 
@@ -97,21 +99,17 @@ class ScrapQualityForm extends StatelessWidget {
               onChanged: onCustomerChanged,
             ),
             const SizedBox(height: AppUiTokens.space16),
-            PanelDropdown<ScrapType>(
-              label: 'Hurda Türü / Kalite',
-              hint: 'Seçiniz',
-              value: selectedScrapType,
-              items: ScrapType.values,
-              itemLabel: (value) => value.label,
-              onChanged: onScrapTypeChanged,
+            PanelTextField(
+              controller: scrapTypeController,
+              label: 'Hurda Türü',
+              hintText: 'Örn. Bakır, Demir, HSS',
             ),
-            if (selectedScrapType == ScrapType.other) ...[
-              const SizedBox(height: AppUiTokens.space16),
-              PanelTextField(
-                controller: customScrapTypeController,
-                label: 'Diğer hurda türü',
-              ),
-            ],
+            const SizedBox(height: AppUiTokens.space16),
+            PanelTextField(
+              controller: qualityController,
+              label: 'Kalite',
+              hintText: 'Örn. 1. kalite, temiz',
+            ),
             const SizedBox(height: AppUiTokens.space16),
             PanelTextField(
               controller: quantityController,
@@ -149,7 +147,7 @@ class ScrapQualityForm extends StatelessWidget {
             ],
             const SizedBox(height: AppUiTokens.space16),
             AppDatePickerField(
-              key: ValueKey(recordDate),
+              key: ValueKey('record-$recordDate'),
               label: 'Tarih',
               placeholder: 'Tarih seçiniz',
               selectedDate: recordDate,
@@ -157,7 +155,7 @@ class ScrapQualityForm extends StatelessWidget {
             ),
             const SizedBox(height: AppUiTokens.space16),
             AppDatePickerField(
-              key: ValueKey(followUpDate),
+              key: ValueKey('followup-$followUpDate'),
               label: 'Takip Tarihi',
               placeholder: 'Opsiyonel',
               selectedDate: followUpDate,
@@ -183,15 +181,24 @@ class ScrapQualityForm extends StatelessWidget {
               onChanged: onSalesStatusChanged,
             ),
             const SizedBox(height: AppUiTokens.space16),
+            PanelDropdown<CurrencyType>(
+              label: 'Para Birimi',
+              hint: 'Para birimi seçiniz',
+              value: selectedCurrency,
+              items: CurrencyType.values,
+              itemLabel: (value) => value.label,
+              onChanged: onCurrencyChanged,
+            ),
+            const SizedBox(height: AppUiTokens.space16),
             PanelAmountField(
               controller: offerPriceController,
-              label: 'Teklif Fiyatı (TL/KG)',
+              label: 'Teklif Fiyatı (/KG)',
               hintText: '0,00',
             ),
             const SizedBox(height: AppUiTokens.space16),
             PanelAmountField(
               controller: targetPriceController,
-              label: 'Hedef Fiyat (TL/KG)',
+              label: 'Hedef Fiyat (/KG)',
               hintText: '0,00',
             ),
             const SizedBox(height: AppUiTokens.space16),

@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_lost_reason.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_sales_status.dart';
 import 'package:equatable/equatable.dart';
@@ -9,6 +10,7 @@ final class ScrapQualityListItem extends Equatable {
     required this.customerName,
     required this.customerNameSnapshot,
     required this.quality,
+    required this.qualityGrade,
     required this.quantity,
     required this.unit,
     required this.quantityKg,
@@ -16,6 +18,7 @@ final class ScrapQualityListItem extends Equatable {
     required this.salesStatus,
     required this.offerPrice,
     required this.targetPrice,
+    required this.currency,
     required this.lostReason,
     required this.followUpDate,
     required this.recordDate,
@@ -29,6 +32,7 @@ final class ScrapQualityListItem extends Equatable {
   final String customerName;
   final String? customerNameSnapshot;
   final String quality;
+  final String? qualityGrade;
   final double quantity;
   final String unit;
   final double quantityKg;
@@ -36,6 +40,7 @@ final class ScrapQualityListItem extends Equatable {
   final String salesStatus;
   final double? offerPrice;
   final double? targetPrice;
+  final String? currency;
   final String? lostReason;
   final DateTime? followUpDate;
   final DateTime recordDate;
@@ -44,6 +49,16 @@ final class ScrapQualityListItem extends Equatable {
   final DateTime updatedAt;
 
   String get scrapType => quality;
+
+  String? get qualityGradeDisplay {
+    final value = qualityGrade?.trim();
+    return value == null || value.isEmpty ? null : value;
+  }
+
+  CurrencyType get currencyType =>
+      CurrencyTypeX.fromValue(currency) ?? CurrencyType.try_;
+
+  String get currencyLabel => currencyType.label;
 
   ScrapSalesStatus? get salesStatusEnum =>
       ScrapSalesStatusX.fromValue(salesStatus);
@@ -79,6 +94,7 @@ final class ScrapQualityListItem extends Equatable {
         customerName,
         customerNameSnapshot,
         quality,
+        qualityGrade,
         quantity,
         unit,
         quantityKg,
@@ -86,6 +102,7 @@ final class ScrapQualityListItem extends Equatable {
         salesStatus,
         offerPrice,
         targetPrice,
+        currency,
         lostReason,
         followUpDate,
         recordDate,

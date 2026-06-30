@@ -1,5 +1,8 @@
 import 'package:Ok/feature/customers/models/customer_contact.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount_type.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:Ok/feature/price_offers/services/price_offer_pdf_service.dart';
@@ -157,6 +160,10 @@ final class PriceOffersController extends GetxController {
     required String mobilePhone,
     required String legalText,
     required List<PriceOfferItemFormValidation> itemValidations,
+    PriceOfferDiscountType discountType = PriceOfferDiscountType.none,
+    String discountPercentageText = '',
+    String discountAmountText = '',
+    PriceOfferCurrencyType? discountCurrency,
   }) async {
     if (isSaving.value) {
       return null;
@@ -174,6 +181,10 @@ final class PriceOffersController extends GetxController {
       authorizedPhone: authorizedPhone,
       mobilePhone: mobilePhone,
       items: itemValidations,
+      discountType: discountType,
+      discountPercentageText: discountPercentageText,
+      discountAmountText: discountAmountText,
+      discountCurrency: discountCurrency,
     );
     if (validationError != null) {
       errorMessage.value = validationError;
@@ -184,6 +195,13 @@ final class PriceOffersController extends GetxController {
     if (items == null) {
       return null;
     }
+
+    final discount = _buildDiscount(
+      type: discountType,
+      percentageText: discountPercentageText,
+      amountText: discountAmountText,
+      currency: discountCurrency,
+    );
 
     isSaving.value = true;
     try {
@@ -196,6 +214,7 @@ final class PriceOffersController extends GetxController {
         authorizedPhone: authorizedPhone,
         mobilePhone: mobilePhone,
         legalText: legalText,
+        discount: discount,
         items: items,
       );
       successMessage.value = PriceOfferMessages.createSuccess;
@@ -247,6 +266,10 @@ final class PriceOffersController extends GetxController {
     required String legalText,
     required PriceOfferStatus? status,
     required List<PriceOfferItemFormValidation> itemValidations,
+    PriceOfferDiscountType discountType = PriceOfferDiscountType.none,
+    String discountPercentageText = '',
+    String discountAmountText = '',
+    PriceOfferCurrencyType? discountCurrency,
   }) async {
     if (isSaving.value) {
       return false;
@@ -266,6 +289,10 @@ final class PriceOffersController extends GetxController {
       items: itemValidations,
       status: status,
       requireStatus: true,
+      discountType: discountType,
+      discountPercentageText: discountPercentageText,
+      discountAmountText: discountAmountText,
+      discountCurrency: discountCurrency,
     );
     if (validationError != null) {
       errorMessage.value = validationError;
@@ -276,6 +303,13 @@ final class PriceOffersController extends GetxController {
     if (items == null) {
       return false;
     }
+
+    final discount = _buildDiscount(
+      type: discountType,
+      percentageText: discountPercentageText,
+      amountText: discountAmountText,
+      currency: discountCurrency,
+    );
 
     isSaving.value = true;
     try {
@@ -290,6 +324,7 @@ final class PriceOffersController extends GetxController {
         mobilePhone: mobilePhone,
         legalText: legalText,
         status: status!,
+        discount: discount,
         items: items,
       );
       successMessage.value = PriceOfferMessages.updateSuccess;
@@ -406,6 +441,31 @@ final class PriceOffersController extends GetxController {
     endDateFilter.value = null;
     filterWarningMessage.value = null;
     searchAndFilterOffers();
+  }
+
+  PriceOfferDiscount _buildDiscount({
+    required PriceOfferDiscountType type,
+    required String percentageText,
+    required String amountText,
+    required PriceOfferCurrencyType? currency,
+  }) {
+    switch (type) {
+      case PriceOfferDiscountType.none:
+        return const PriceOfferDiscount.none();
+      case PriceOfferDiscountType.percentage:
+        final percentage =
+            double.tryParse(percentageText.trim().replaceAll(',', '.'));
+        return PriceOfferDiscount(
+          type: PriceOfferDiscountType.percentage,
+          percentage: percentage,
+        );
+      case PriceOfferDiscountType.fixed:
+        return PriceOfferDiscount(
+          type: PriceOfferDiscountType.fixed,
+          amountMinor: MoneyUtils.parseAmountToMinor(amountText),
+          currency: currency,
+        );
+    }
   }
 
   List<PriceOfferItemInput>? _mapItemInputs(

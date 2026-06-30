@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import 'package:Ok/feature/price_offers/models/offer_type.dart';
+import 'package:Ok/feature/price_offers/models/price_offer_discount.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_status.dart';
 import 'package:Ok/product/database/app_database.dart';
@@ -147,6 +148,12 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
       mobilePhone: offer.mobilePhone,
       legalText: offer.legalText,
       status: offer.status,
+      discount: PriceOfferDiscount.fromStored(
+        type: offer.discountType,
+        percentage: offer.discountPercentage,
+        amountMinor: offer.discountAmountMinor,
+        currency: offer.discountCurrency,
+      ),
       createdAt: offer.createdAt,
       updatedAt: offer.updatedAt,
       items: items

@@ -26,8 +26,8 @@ final class PriceListExportService {
     sheet.appendRow([
       TextCellValue('Ürün Adı'),
       TextCellValue('Para Birimi'),
-      TextCellValue('Min Fiyat'),
-      TextCellValue('Max Fiyat'),
+      TextCellValue('Min. Fiyat (kg)'),
+      TextCellValue('Max. Fiyat (kg)'),
     ]);
 
     for (final item in items) {

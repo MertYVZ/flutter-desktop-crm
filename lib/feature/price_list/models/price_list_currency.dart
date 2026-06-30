@@ -23,7 +23,7 @@ extension PriceListCurrencyX on PriceListCurrency {
       case PriceListCurrency.usd:
         return 'USD';
       case PriceListCurrency.eur:
-        return 'EURO';
+        return 'EUR';
     }
   }
 

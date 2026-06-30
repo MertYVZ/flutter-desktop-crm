@@ -4,6 +4,7 @@ import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_unit_type.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
+import 'package:Ok/product/utility/formatters/decimal_text_input_formatter.dart';
 import 'package:Ok/product/utility/money_utils.dart';
 import 'package:Ok/product/utility/quantity_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
@@ -48,10 +49,16 @@ class PriceOfferItemFormRow {
 class PriceOfferItemsEditor extends StatefulWidget {
   const PriceOfferItemsEditor({
     required this.rows,
+    this.onChanged,
     super.key,
   });
 
   final List<PriceOfferItemFormRow> rows;
+
+  /// Herhangi bir satır verisi (ürün, miktar, fiyat, para birimi) değiştiğinde
+  /// veya satır eklenip silindiğinde tetiklenir. İndirim bölümünün kullanılabilir
+  /// para birimlerini ve toplam önizlemesini güncel tutmak için kullanılır.
+  final VoidCallback? onChanged;
 
   @override
   State<PriceOfferItemsEditor> createState() => _PriceOfferItemsEditorState();
@@ -78,6 +85,7 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
                     isCompact: isCompact,
                     canRemove: widget.rows.length > 1,
                     onRemove: () => _removeRow(i),
+                    onChanged: widget.onChanged,
                   ),
                   if (i < widget.rows.length - 1)
                     const SizedBox(height: AppUiTokens.space16),
@@ -126,6 +134,7 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
   void _addRow() {
     widget.rows.add(PriceOfferItemFormRow());
     setState(() {});
+    widget.onChanged?.call();
   }
 
   void _removeRow(int index) {
@@ -136,6 +145,7 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
     widget.rows[index].dispose();
     widget.rows.removeAt(index);
     setState(() {});
+    widget.onChanged?.call();
   }
 
 }
@@ -147,6 +157,7 @@ class _ItemRow extends StatefulWidget {
     required this.isCompact,
     required this.canRemove,
     required this.onRemove,
+    this.onChanged,
     super.key,
   });
 
@@ -155,6 +166,7 @@ class _ItemRow extends StatefulWidget {
   final bool isCompact;
   final bool canRemove;
   final VoidCallback onRemove;
+  final VoidCallback? onChanged;
 
   @override
   State<_ItemRow> createState() => _ItemRowState();
@@ -182,6 +194,7 @@ class _ItemRowState extends State<_ItemRow> {
       return;
     }
     setState(() {});
+    widget.onChanged?.call();
   }
 
   @override
@@ -254,6 +267,7 @@ class _ItemRowState extends State<_ItemRow> {
                     label: 'Miktar',
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: const [DecimalTextInputFormatter()],
                   ),
                   const SizedBox(height: AppUiTokens.space12),
                   PanelAmountField(
@@ -271,6 +285,7 @@ class _ItemRowState extends State<_ItemRow> {
                       if (value != null) {
                         row.currency = value;
                         setState(() {});
+                        widget.onChanged?.call();
                       }
                     },
                   ),
@@ -312,6 +327,7 @@ class _ItemRowState extends State<_ItemRow> {
                       label: 'Miktar',
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: const [DecimalTextInputFormatter()],
                     ),
                   ),
                   const SizedBox(width: AppUiTokens.space12),

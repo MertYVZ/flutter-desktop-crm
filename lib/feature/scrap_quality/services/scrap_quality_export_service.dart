@@ -26,10 +26,12 @@ final class ScrapQualityExportService {
       TextCellValue('Miktar'),
       TextCellValue('Birim'),
       TextCellValue('KG Karşılığı'),
-      TextCellValue('Hurda Türü / Kalite'),
+      TextCellValue('Hurda Türü'),
+      TextCellValue('Kalite'),
       TextCellValue('Tarih'),
       TextCellValue('İl'),
       TextCellValue('Satış Durumu'),
+      TextCellValue('Para Birimi'),
       TextCellValue('Teklif Fiyatı'),
       TextCellValue('Hedef Fiyat'),
       TextCellValue('Alınmama Nedeni'),
@@ -43,9 +45,11 @@ final class ScrapQualityExportService {
         TextCellValue(record.unit),
         TextCellValue(QuantityUtils.formatForExport(record.quantityKg)),
         TextCellValue(record.scrapType),
+        TextCellValue(record.qualityGradeDisplay ?? ''),
         TextCellValue(AppDateUtils.formatDate(record.recordDate)),
         TextCellValue(record.city ?? ''),
         TextCellValue(record.salesStatusEnum?.label ?? record.salesStatus),
+        TextCellValue(record.currencyLabel),
         TextCellValue(
           record.offerPrice == null
               ? ''

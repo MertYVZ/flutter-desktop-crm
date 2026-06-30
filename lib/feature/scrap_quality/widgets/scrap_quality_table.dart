@@ -234,13 +234,13 @@ class _ScrapQualityTableState extends State<ScrapQualityTable> {
         _dataCell(
           record.offerPrice == null
               ? '—'
-              : '${MoneyUtils.formatAmountInput(record.offerPrice!)} TL/KG',
+              : '${MoneyUtils.formatAmountInput(record.offerPrice!)} ${record.currencyLabel}/KG',
           columnIndex: 8,
         ),
         _dataCell(
           record.targetPrice == null
               ? '—'
-              : '${MoneyUtils.formatAmountInput(record.targetPrice!)} TL/KG',
+              : '${MoneyUtils.formatAmountInput(record.targetPrice!)} ${record.currencyLabel}/KG',
           columnIndex: 9,
         ),
         _dataCell(record.lostReasonLabel ?? '—', columnIndex: 10),
