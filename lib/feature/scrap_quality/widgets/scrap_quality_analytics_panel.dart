@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/money_utils.dart';
@@ -19,6 +20,7 @@ class ScrapQualityAnalyticsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final analytics = controller.analytics.value;
+      final currencyLabel = analytics.currency.label;
 
       final items = [
         _AnalyticsCardData(
@@ -50,14 +52,14 @@ class ScrapQualityAnalyticsPanel extends StatelessWidget {
           label: 'En yüksek teklif fiyatı',
           value: analytics.highestOfferPrice == null
               ? null
-              : '${MoneyUtils.formatAmountInput(analytics.highestOfferPrice!)} TL/KG',
+              : '${MoneyUtils.formatAmountInput(analytics.highestOfferPrice!)} $currencyLabel/KG',
           icon: Icons.arrow_upward_rounded,
         ),
         _AnalyticsCardData(
           label: 'En düşük teklif fiyatı',
           value: analytics.lowestOfferPrice == null
               ? null
-              : '${MoneyUtils.formatAmountInput(analytics.lowestOfferPrice!)} TL/KG',
+              : '${MoneyUtils.formatAmountInput(analytics.lowestOfferPrice!)} $currencyLabel/KG',
           icon: Icons.arrow_downward_rounded,
         ),
       ];
@@ -81,7 +83,9 @@ class ScrapQualityAnalyticsPanel extends StatelessWidget {
             children: items
                 .map(
                   (item) => SizedBox(
-                    width: cardWidth < _cardMinWidth ? constraints.maxWidth : cardWidth,
+                    width: cardWidth < _cardMinWidth
+                        ? constraints.maxWidth
+                        : cardWidth,
                     child: _AnalyticsCard(data: item),
                   ),
                 )

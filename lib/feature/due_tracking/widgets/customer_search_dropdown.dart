@@ -17,6 +17,9 @@ class CustomerSearchDropdown extends StatefulWidget {
     required this.onChanged,
     this.enabled = true,
     this.allowNullSelection = false,
+    this.allowCustomEntry = false,
+    this.customName,
+    this.onCustomNameChanged,
     this.placeholder = 'Müşteri seçiniz',
     super.key,
   });
@@ -26,6 +29,9 @@ class CustomerSearchDropdown extends StatefulWidget {
   final ValueChanged<String?> onChanged;
   final bool enabled;
   final bool allowNullSelection;
+  final bool allowCustomEntry;
+  final String? customName;
+  final ValueChanged<String>? onCustomNameChanged;
   final String placeholder;
 
   @override
@@ -108,7 +114,11 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
     _overlayEntry = OverlayEntry(
       builder: (overlayContext) {
         final filtered = _filteredCustomers;
-        final itemCount = filtered.length + (widget.allowNullSelection ? 1 : 0);
+        final showNullRow = widget.allowNullSelection && !widget.allowCustomEntry;
+        final showCustomRow = _shouldShowCustomRow(filtered);
+        final itemCount = filtered.length +
+            (showNullRow ? 1 : 0) +
+            (showCustomRow ? 1 : 0);
         final listContentHeight = itemCount == 0
             ? _emptyListHeight
             : itemCount * _itemHeight;
@@ -160,10 +170,12 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
                         color: AppUiTokens.textPrimary,
                         fontSize: 14,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         isDense: true,
-                        hintText: 'Müşteri ara...',
-                        hintStyle: TextStyle(
+                        hintText: widget.allowCustomEntry
+                            ? 'Ara veya yeni ad yazın...'
+                            : 'Müşteri ara...',
+                        hintStyle: const TextStyle(
                           color: AppUiTokens.textMuted,
                           fontSize: 14,
                         ),
@@ -182,12 +194,23 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
                         _hoveredIndex = null;
                         _overlayEntry?.markNeedsBuild();
                       },
+                      onSubmitted: (value) {
+                        if (widget.allowCustomEntry) {
+                          _commitCustomName(value);
+                          return;
+                        }
+
+                        final matches = _filteredCustomers;
+                        if (matches.isNotEmpty) {
+                          _selectCustomer(matches.first);
+                        }
+                      },
                     ),
                   ),
                   const Divider(height: _dividerHeight, color: AppUiTokens.border),
                   SizedBox(
                     height: listAreaHeight,
-                    child: filtered.isEmpty && !widget.allowNullSelection
+                    child: itemCount == 0
                         ? const Center(
                             child: Text(
                               'Müşteri bulunamadı.',
@@ -202,39 +225,58 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
                             itemCount: itemCount,
                             itemExtent: _itemHeight,
                             itemBuilder: (context, index) {
-                              if (widget.allowNullSelection && index == 0) {
+                              var offset = 0;
+                              if (showNullRow) {
+                                if (index == 0) {
+                                  final isSelected =
+                                      widget.selectedCustomerId == null;
+                                  final isHovered = _hoveredIndex == index;
+
+                                  return _CustomerMenuItemTile(
+                                    label: 'Müşteri seçilmedi',
+                                    isSelected: isSelected,
+                                    isHovered: isHovered,
+                                    onHover: (hovering) {
+                                      _hoveredIndex = hovering ? index : null;
+                                      _overlayEntry?.markNeedsBuild();
+                                    },
+                                    onTap: () => _selectCustomer(null),
+                                  );
+                                }
+                                offset += 1;
+                              }
+
+                              final customerIndex = index - offset;
+                              if (customerIndex >= 0 &&
+                                  customerIndex < filtered.length) {
+                                final customer = filtered[customerIndex];
                                 final isSelected =
-                                    widget.selectedCustomerId == null;
+                                    customer.id == widget.selectedCustomerId;
                                 final isHovered = _hoveredIndex == index;
 
                                 return _CustomerMenuItemTile(
-                                  label: 'Müşteri seçilmedi',
+                                  label: customer.name,
                                   isSelected: isSelected,
                                   isHovered: isHovered,
                                   onHover: (hovering) {
                                     _hoveredIndex = hovering ? index : null;
                                     _overlayEntry?.markNeedsBuild();
                                   },
-                                  onTap: () => _selectCustomer(null),
+                                  onTap: () => _selectCustomer(customer),
                                 );
                               }
 
-                              final customerIndex =
-                                  widget.allowNullSelection ? index - 1 : index;
-                              final customer = filtered[customerIndex];
-                              final isSelected =
-                                  customer.id == widget.selectedCustomerId;
+                              final query = _searchQuery.trim();
                               final isHovered = _hoveredIndex == index;
-
                               return _CustomerMenuItemTile(
-                                label: customer.name,
-                                isSelected: isSelected,
+                                label: '"$query" olarak kullan',
+                                isSelected: false,
                                 isHovered: isHovered,
                                 onHover: (hovering) {
                                   _hoveredIndex = hovering ? index : null;
                                   _overlayEntry?.markNeedsBuild();
                                 },
-                                onTap: () => _selectCustomer(customer),
+                                onTap: () => _commitCustomName(query),
                               );
                             },
                           ),
@@ -251,6 +293,29 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
     setState(() => _isOpen = true);
   }
 
+  bool _shouldShowCustomRow(List<Customer> filtered) {
+    if (!widget.allowCustomEntry) {
+      return false;
+    }
+
+    final query = _searchQuery.trim();
+    if (query.isEmpty) {
+      return false;
+    }
+
+    return !_hasExactNameMatch(filtered, query);
+  }
+
+  bool _hasExactNameMatch(List<Customer> customers, String query) {
+    final normalized = query.toLowerCase();
+    for (final customer in customers) {
+      if (customer.name.toLowerCase() == normalized) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
@@ -263,15 +328,43 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
     }
   }
 
-  void _selectCustomer(Customer? customer) {
+  void _commitCustomName(String raw) {
+    final name = raw.trim();
+    if (name.isEmpty) {
+      _removeOverlay();
+      return;
+    }
+
+    for (final customer in widget.customers) {
+      if (customer.name.toLowerCase() == name.toLowerCase()) {
+        _applyCustomer(customer);
+        _removeOverlay();
+        return;
+      }
+    }
+
+    widget.onChanged(null);
+    widget.onCustomNameChanged?.call(name);
+    _removeOverlay();
+  }
+
+  void _applyCustomer(Customer? customer) {
     widget.onChanged(customer?.id);
+    widget.onCustomNameChanged?.call('');
+  }
+
+  void _selectCustomer(Customer? customer) {
+    _applyCustomer(customer);
     _removeOverlay();
   }
 
   @override
   Widget build(BuildContext context) {
     final selected = _selectedCustomer;
-    final displayText = selected?.name ?? widget.placeholder;
+    final customName = widget.customName?.trim() ?? '';
+    final displayText = selected?.name ??
+        (customName.isNotEmpty ? customName : widget.placeholder);
+    final hasValue = selected != null || customName.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,9 +408,9 @@ class _CustomerSearchDropdownState extends State<CustomerSearchDropdown> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: selected == null
-                            ? AppUiTokens.textMuted
-                            : AppUiTokens.textPrimary,
+                        color: hasValue
+                            ? AppUiTokens.textPrimary
+                            : AppUiTokens.textMuted,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),

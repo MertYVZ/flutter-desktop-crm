@@ -15,6 +15,8 @@ import 'package:Ok/product/utility/constants/customer_detail_messages.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/constants/customer_messages.dart';
 import 'package:Ok/product/utility/constants/due_record_messages.dart';
+import 'package:Ok/product/utility/constants/export_messages.dart';
+import 'package:Ok/product/utility/constants/import_messages.dart';
 import 'package:Ok/product/utility/constants/meeting_messages.dart';
 import 'package:Ok/product/utility/constants/note_messages.dart';
 import 'package:Ok/feature/reminders/models/reminder_period.dart';
@@ -189,6 +191,169 @@ abstract final class Validators {
     return null;
   }
 
+  static String? validateExportForm({
+    required String title,
+    required String? customerId,
+    required String guestCustomerName,
+    required String? selectedProductId,
+    required bool isCustomProduct,
+    required String customProductName,
+    required String quantityTonText,
+    required String unitPriceText,
+    String firstPaymentAmountText = '',
+    String lastPaymentAmountText = '',
+    String wasteKgText = '',
+    String netTotalAmountText = '',
+    String logisticsCostText = '',
+    String customsCostText = '',
+    String insuranceCostText = '',
+  }) {
+    final trimmedTitle = title.trim();
+    if (trimmedTitle.isEmpty) {
+      return ExportMessages.titleRequired;
+    }
+
+    if (trimmedTitle.length < 2) {
+      return ExportMessages.titleMinLength;
+    }
+
+    final hasSelectedCustomer = customerId != null && customerId.isNotEmpty;
+    if (!hasSelectedCustomer && guestCustomerName.trim().isEmpty) {
+      return ExportMessages.customerRequired;
+    }
+
+    if (selectedProductId == null || selectedProductId.isEmpty) {
+      return ExportMessages.productRequired;
+    }
+
+    if (isCustomProduct && customProductName.trim().isEmpty) {
+      return ExportMessages.customProductRequired;
+    }
+
+    final trimmedQuantity = quantityTonText.trim();
+    if (trimmedQuantity.isEmpty) {
+      return ExportMessages.quantityRequired;
+    }
+
+    final quantity = QuantityUtils.parseQuantity(trimmedQuantity);
+    if (quantity == null || quantity <= 0) {
+      return ExportMessages.quantityPositive;
+    }
+
+    final trimmedUnitPrice = unitPriceText.trim();
+    if (trimmedUnitPrice.isEmpty) {
+      return ExportMessages.unitPriceRequired;
+    }
+
+    final unitPriceMinor = MoneyUtils.parseAmountToMinor(trimmedUnitPrice);
+    if (unitPriceMinor == null || unitPriceMinor <= 0) {
+      return ExportMessages.unitPricePositive;
+    }
+
+    final optionalAmountError =
+        _validateOptionalAmount(
+          firstPaymentAmountText,
+          ExportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          lastPaymentAmountText,
+          ExportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          netTotalAmountText,
+          ExportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          logisticsCostText,
+          ExportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          customsCostText,
+          ExportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          insuranceCostText,
+          ExportMessages.amountInvalid,
+        );
+    if (optionalAmountError != null) {
+      return optionalAmountError;
+    }
+
+    final trimmedWaste = wasteKgText.trim();
+    if (trimmedWaste.isNotEmpty) {
+      final waste = QuantityUtils.parseQuantity(trimmedWaste);
+      if (waste == null || waste < 0) {
+        return ExportMessages.wasteInvalid;
+      }
+    }
+
+    return null;
+  }
+
+  static String? validateImportForm({
+    required String title,
+    required String supplierName,
+    required String products,
+    required String totalAmountText,
+    String logisticsCostText = '',
+    String customsCostText = '',
+    String insuranceCostText = '',
+  }) {
+    final trimmedTitle = title.trim();
+    if (trimmedTitle.isEmpty) {
+      return ImportMessages.titleRequired;
+    }
+
+    if (trimmedTitle.length < 2) {
+      return ImportMessages.titleMinLength;
+    }
+
+    if (supplierName.trim().isEmpty) {
+      return ImportMessages.supplierRequired;
+    }
+
+    if (products.trim().isEmpty) {
+      return ImportMessages.productsRequired;
+    }
+
+    final trimmedTotal = totalAmountText.trim();
+    if (trimmedTotal.isEmpty) {
+      return ImportMessages.totalAmountRequired;
+    }
+
+    final totalMinor = MoneyUtils.parseAmountToMinor(trimmedTotal);
+    if (totalMinor == null || totalMinor <= 0) {
+      return ImportMessages.totalAmountPositive;
+    }
+
+    return _validateOptionalAmount(
+          logisticsCostText,
+          ImportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          customsCostText,
+          ImportMessages.amountInvalid,
+        ) ??
+        _validateOptionalAmount(
+          insuranceCostText,
+          ImportMessages.amountInvalid,
+        );
+  }
+
+  static String? _validateOptionalAmount(String text, String invalidMessage) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    final amountMinor = MoneyUtils.parseAmountToMinor(trimmed);
+    if (amountMinor == null || amountMinor < 0) {
+      return invalidMessage;
+    }
+
+    return null;
+  }
+
   static String? validateMeetingForm({
     required String? customerId,
     required DateTime? date,
@@ -350,6 +515,7 @@ abstract final class Validators {
     String discountPercentageText = '',
     String discountAmountText = '',
     PriceOfferCurrencyType? discountCurrency,
+    String guestCustomerName = '',
   }) {
     if (type == null) {
       return PriceOfferMessages.typeRequired;
@@ -367,12 +533,12 @@ abstract final class Validators {
       return PriceOfferMessages.validityDateBeforeOfferDate;
     }
 
-    if (customerId == null || customerId.isEmpty) {
-      return PriceOfferMessages.customerRequired;
-    }
-
-    if (contactPerson.trim().isEmpty) {
-      return PriceOfferMessages.contactPersonRequired;
+    if (type.requiresCustomer) {
+      if (customerId == null || customerId.isEmpty) {
+        return PriceOfferMessages.customerRequired;
+      }
+    } else if (guestCustomerName.trim().isEmpty) {
+      return PriceOfferMessages.guestCustomerNameRequired;
     }
 
     if (legalText.trim().isEmpty) {
@@ -461,8 +627,7 @@ abstract final class Validators {
         if (trimmed.isEmpty) {
           return PriceOfferMessages.discountPercentageRequired;
         }
-        final percentage =
-            double.tryParse(trimmed.replaceAll(',', '.'));
+        final percentage = double.tryParse(trimmed.replaceAll(',', '.'));
         if (percentage == null || percentage <= 0) {
           return PriceOfferMessages.discountPercentagePositive;
         }

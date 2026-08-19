@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_analytics.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_list_item.dart';
 import 'package:Ok/feature/scrap_quality/models/scrap_quality_summary.dart';
@@ -7,10 +8,20 @@ final class ScrapQualityCalculationService {
   ScrapQualityCalculationService._();
 
   static ScrapQualitySummary calculateSummary(
-    List<ScrapQualityListItem> records,
-  ) {
+    List<ScrapQualityListItem> records, {
+    CurrencyType currency = CurrencyType.try_,
+  }) {
     if (records.isEmpty) {
-      return ScrapQualitySummary.empty;
+      return ScrapQualitySummary(
+        totalFoundKg: 0,
+        totalPurchasedKg: 0,
+        totalLostKg: 0,
+        totalPendingKg: 0,
+        totalNotPurchasedKg: 0,
+        averageOfferPrice: 0,
+        purchaseRatePercent: 0,
+        currency: currency,
+      );
     }
 
     var totalFoundKg = 0.0;
@@ -36,7 +47,9 @@ final class ScrapQualityCalculationService {
       }
 
       final offerPrice = record.offerPrice;
-      if (offerPrice != null && offerPrice > 0) {
+      if (offerPrice != null &&
+          offerPrice > 0 &&
+          record.currencyType == currency) {
         offerTotal += offerPrice;
         offerCount++;
       }
@@ -45,9 +58,8 @@ final class ScrapQualityCalculationService {
     // Kaybedilen = yalnızca "Alınmadı"; bekleyen/sonuçlanmamış ayrı kartta.
     final totalLostKg = totalNotPurchasedKg;
     final averageOfferPrice = offerCount == 0 ? 0.0 : offerTotal / offerCount;
-    final purchaseRatePercent = totalFoundKg == 0
-        ? 0.0
-        : (totalPurchasedKg / totalFoundKg) * 100.0;
+    final purchaseRatePercent =
+        totalFoundKg == 0 ? 0.0 : (totalPurchasedKg / totalFoundKg) * 100.0;
 
     return ScrapQualitySummary(
       totalFoundKg: totalFoundKg,
@@ -57,14 +69,16 @@ final class ScrapQualityCalculationService {
       totalNotPurchasedKg: totalNotPurchasedKg,
       averageOfferPrice: averageOfferPrice,
       purchaseRatePercent: purchaseRatePercent,
+      currency: currency,
     );
   }
 
   static ScrapQualityAnalytics calculateAnalytics(
-    List<ScrapQualityListItem> records,
-  ) {
+    List<ScrapQualityListItem> records, {
+    CurrencyType currency = CurrencyType.try_,
+  }) {
     if (records.isEmpty) {
-      return const ScrapQualityAnalytics();
+      return ScrapQualityAnalytics(currency: currency);
     }
 
     final foundByCustomer = <String, double>{};
@@ -100,7 +114,7 @@ final class ScrapQualityCalculationService {
       }
 
       final offer = record.offerPrice;
-      if (offer != null && offer > 0) {
+      if (offer != null && offer > 0 && record.currencyType == currency) {
         highestOffer = highestOffer == null
             ? offer
             : (offer > highestOffer ? offer : highestOffer);
@@ -118,6 +132,7 @@ final class ScrapQualityCalculationService {
       topCity: _topKeyByCount(cityCounts),
       highestOfferPrice: highestOffer,
       lowestOfferPrice: lowestOffer,
+      currency: currency,
     );
   }
 

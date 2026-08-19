@@ -43,6 +43,8 @@ class PriceOfferForm extends StatelessWidget {
     required this.onItemsChanged,
     required this.onDiscountTypeChanged,
     required this.onDiscountCurrencyChanged,
+    required this.guestCustomerNameController,
+    required this.guestContactPersonController,
     this.selectedStatus,
     this.onStatusChanged,
     this.showStatus = false,
@@ -74,13 +76,17 @@ class PriceOfferForm extends StatelessWidget {
   final VoidCallback onItemsChanged;
   final ValueChanged<PriceOfferDiscountType> onDiscountTypeChanged;
   final ValueChanged<PriceOfferCurrencyType?> onDiscountCurrencyChanged;
+  final TextEditingController guestCustomerNameController;
+  final TextEditingController guestContactPersonController;
   final PriceOfferStatus? selectedStatus;
   final ValueChanged<PriceOfferStatus?>? onStatusChanged;
   final bool showStatus;
 
+  bool get _isGuestOffer => selectedType == OfferType.general;
+
   @override
   Widget build(BuildContext context) {
-    if (customers.isEmpty) {
+    if (customers.isEmpty && !_isGuestOffer) {
       return Text(
         PriceOfferMessages.noCustomersForForm,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -107,11 +113,18 @@ class PriceOfferForm extends StatelessWidget {
             final leftColumn = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                CustomerSearchDropdown(
-                  customers: customers,
-                  selectedCustomerId: selectedCustomerId,
-                  onChanged: onCustomerChanged,
-                ),
+                if (_isGuestOffer)
+                  PanelTextField(
+                    controller: guestCustomerNameController,
+                    label: 'Firma / Müşteri Adı',
+                    hintText: 'Teklif hazırlanacak firma veya kişi',
+                  )
+                else
+                  CustomerSearchDropdown(
+                    customers: customers,
+                    selectedCustomerId: selectedCustomerId,
+                    onChanged: onCustomerChanged,
+                  ),
                 const SizedBox(height: AppUiTokens.space16),
                 AppDatePickerField(
                   key: ValueKey('offer-$offerDate'),
@@ -134,21 +147,26 @@ class PriceOfferForm extends StatelessWidget {
             final rightColumn = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                PanelDropdown<CustomerContactItem>(
-                  label: 'Yetkili Kişi',
-                  hint: _contactHint(
-                    selectedCustomerId: selectedCustomerId,
-                    isLoadingContacts: isLoadingContacts,
-                    hasContacts: contacts.isNotEmpty,
+                if (_isGuestOffer)
+                  PanelTextField(
+                    controller: guestContactPersonController,
+                    label: 'Yetkili Kişi',
+                    hintText: 'İsteğe bağlı',
+                  )
+                else
+                  PanelDropdown<CustomerContactItem?>(
+                    label: 'Yetkili Kişi',
+                    hint: _contactHint(
+                      selectedCustomerId: selectedCustomerId,
+                      isLoadingContacts: isLoadingContacts,
+                      hasContacts: contacts.isNotEmpty,
+                    ),
+                    value: selectedContact,
+                    items: [null, ...contacts],
+                    itemLabel: _optionalContactLabel,
+                    enabled: selectedCustomerId != null && !isLoadingContacts,
+                    onChanged: onContactChanged,
                   ),
-                  value: selectedContact,
-                  items: contacts,
-                  itemLabel: _contactLabel,
-                  enabled: selectedCustomerId != null &&
-                      !isLoadingContacts &&
-                      contacts.isNotEmpty,
-                  onChanged: onContactChanged,
-                ),
                 const SizedBox(height: AppUiTokens.space16),
                 PanelTextField(
                   controller: authorizedPhoneController,
@@ -204,6 +222,7 @@ class PriceOfferForm extends StatelessWidget {
         const SizedBox(height: AppUiTokens.space16),
         PriceOfferItemsEditor(
           rows: itemRows,
+          defaultUnitType: selectedType?.defaultUnitType,
           onChanged: onItemsChanged,
         ),
         const SizedBox(height: AppUiTokens.space32),
@@ -240,7 +259,11 @@ class PriceOfferForm extends StatelessWidget {
   }
 }
 
-String _contactLabel(CustomerContactItem contact) {
+String _optionalContactLabel(CustomerContactItem? contact) {
+  if (contact == null) {
+    return 'Seçilmedi';
+  }
+
   final title = contact.title?.trim();
   if (title != null && title.isNotEmpty) {
     return '${contact.fullName} · $title';
@@ -266,7 +289,7 @@ String _contactHint({
     return PriceOfferMessages.noContactsForSelectedCustomer;
   }
 
-  return 'Yetkili kişi seçiniz';
+  return 'İsteğe bağlı';
 }
 
 class PriceOfferFormActions extends StatelessWidget {

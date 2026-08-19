@@ -4,6 +4,8 @@ import 'package:Ok/product/database/daos/auth_session_dao.dart';
 import 'package:Ok/product/database/daos/customer_contact_dao.dart';
 import 'package:Ok/product/database/daos/customer_dao.dart';
 import 'package:Ok/product/database/daos/due_record_dao.dart';
+import 'package:Ok/product/database/daos/export_record_dao.dart';
+import 'package:Ok/product/database/daos/import_record_dao.dart';
 import 'package:Ok/product/database/daos/legal_text_template_dao.dart';
 import 'package:Ok/product/database/daos/meeting_dao.dart';
 import 'package:Ok/product/database/daos/note_dao.dart';
@@ -30,6 +32,10 @@ final class DatabaseService {
   CustomerContactDao get customerContacts => _database.customerContactDao;
 
   DueRecordDao get dueRecords => _database.dueRecordDao;
+
+  ExportRecordDao get exports => _database.exportRecordDao;
+
+  ImportRecordDao get imports => _database.importRecordDao;
 
   MeetingDao get meetings => _database.meetingDao;
 

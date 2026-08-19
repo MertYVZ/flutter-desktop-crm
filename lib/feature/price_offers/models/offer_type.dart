@@ -1,3 +1,5 @@
+import 'package:Ok/feature/price_offers/models/price_offer_unit_type.dart';
+
 enum OfferType {
   okTeknik,
   dengTools,
@@ -29,6 +31,20 @@ extension OfferTypeX on OfferType {
         return 'VızVız';
       case OfferType.general:
         return 'Genel';
+    }
+  }
+
+  bool get requiresCustomer => this != OfferType.general;
+
+  PriceOfferUnitType? get defaultUnitType {
+    switch (this) {
+      case OfferType.okTeknik:
+        return PriceOfferUnitType.kg;
+      case OfferType.dengTools:
+      case OfferType.vizviz:
+        return PriceOfferUnitType.adet;
+      case OfferType.general:
+        return null;
     }
   }
 

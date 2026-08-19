@@ -134,8 +134,35 @@ fi
 if [[ "$AD_HOC_SIGN" -eq 1 ]]; then
   sign_identity="${CODESIGN_IDENTITY:--}"
   echo "==> Ad-hoc codesigning with identity: $sign_identity"
-  codesign --force --deep --sign "$sign_identity" --options runtime "$APP_PATH"
-  codesign --verify --deep --strict "$APP_PATH"
+
+  sign_codesign_item() {
+    local item="$1"
+    codesign --force --sign "$sign_identity" --timestamp=none "$item"
+  }
+
+  if [[ -d "$APP_PATH/Contents/Frameworks" ]]; then
+    echo "==> Signing embedded frameworks..."
+    while IFS= read -r -d '' item; do
+      sign_codesign_item "$item"
+    done < <(find "$APP_PATH/Contents/Frameworks" \( -name "*.dylib" -o -name "*.framework" \) -print0)
+  fi
+
+  if [[ -d "$APP_PATH/Contents/PlugIns" ]]; then
+    echo "==> Signing plugins..."
+    while IFS= read -r -d '' item; do
+      sign_codesign_item "$item"
+    done < <(find "$APP_PATH/Contents/PlugIns" \( -name "*.dylib" -o -name "*.framework" -o -name "*.appex" \) -print0)
+  fi
+
+  echo "==> Signing app bundle..."
+  if [[ "$sign_identity" == "-" ]]; then
+    # Hardened runtime breaks ad-hoc signed nested frameworks (Team ID mismatch).
+    codesign --force --sign "$sign_identity" "$APP_PATH"
+  else
+    codesign --force --sign "$sign_identity" --options runtime --timestamp "$APP_PATH"
+  fi
+
+  codesign --verify --strict "$APP_PATH"
 fi
 
 mkdir -p "$DIST_DIR"

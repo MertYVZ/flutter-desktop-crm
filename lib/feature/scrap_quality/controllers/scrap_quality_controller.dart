@@ -53,8 +53,8 @@ final class ScrapQualityController extends GetxController {
   final Rx<DateTime> selectedMonth =
       AppDateUtils.normalizeDate(DateTime.now()).obs;
   final Rx<ScrapQualitySummary> summary = ScrapQualitySummary.empty.obs;
-  final Rx<ScrapQualityAnalytics> analytics =
-      const ScrapQualityAnalytics().obs;
+  final Rx<ScrapQualityAnalytics> analytics = const ScrapQualityAnalytics().obs;
+  final Rx<CurrencyType> selectedKpiCurrency = CurrencyType.try_.obs;
   final RxnString errorMessage = RxnString();
   final RxnString successMessage = RxnString();
   final RxnString filterWarningMessage = RxnString();
@@ -156,10 +156,7 @@ final class ScrapQualityController extends GetxController {
         onlyPending: onlyPendingFilter.value,
       );
       records.assignAll(result);
-      summary.value =
-          ScrapQualityCalculationService.calculateSummary(result);
-      analytics.value =
-          ScrapQualityCalculationService.calculateAnalytics(result);
+      _refreshDerivedMetrics();
     } catch (_) {
       errorMessage.value = ScrapQualityMessages.loadError;
     } finally {
@@ -188,6 +185,27 @@ final class ScrapQualityController extends GetxController {
   void setSelectedMonth(DateTime month) {
     selectedMonth.value = DateTime(month.year, month.month, 1);
     searchAndFilterRecords();
+  }
+
+  void selectKpiCurrency(CurrencyType currency) {
+    if (selectedKpiCurrency.value == currency) {
+      return;
+    }
+    selectedKpiCurrency.value = currency;
+    _refreshDerivedMetrics();
+  }
+
+  void _refreshDerivedMetrics() {
+    final currentRecords = records.toList();
+    final currency = selectedKpiCurrency.value;
+    summary.value = ScrapQualityCalculationService.calculateSummary(
+      currentRecords,
+      currency: currency,
+    );
+    analytics.value = ScrapQualityCalculationService.calculateAnalytics(
+      currentRecords,
+      currency: currency,
+    );
   }
 
   Future<String?> createRecord({
@@ -401,10 +419,7 @@ final class ScrapQualityController extends GetxController {
     try {
       await _scrapQualityService.deleteRecord(id);
       records.removeWhere((record) => record.id == id);
-      summary.value =
-          ScrapQualityCalculationService.calculateSummary(records.toList());
-      analytics.value =
-          ScrapQualityCalculationService.calculateAnalytics(records.toList());
+      _refreshDerivedMetrics();
       successMessage.value = ScrapQualityMessages.deleteSuccess;
       return true;
     } catch (_) {

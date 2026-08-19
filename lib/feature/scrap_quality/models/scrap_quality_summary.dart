@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:equatable/equatable.dart';
 
 final class ScrapQualitySummary extends Equatable {
@@ -9,6 +10,7 @@ final class ScrapQualitySummary extends Equatable {
     required this.totalNotPurchasedKg,
     required this.averageOfferPrice,
     required this.purchaseRatePercent,
+    this.currency = CurrencyType.try_,
   });
 
   static const empty = ScrapQualitySummary(
@@ -28,6 +30,7 @@ final class ScrapQualitySummary extends Equatable {
   final double totalNotPurchasedKg;
   final double averageOfferPrice;
   final double purchaseRatePercent;
+  final CurrencyType currency;
 
   @override
   List<Object?> get props => [
@@ -38,5 +41,6 @@ final class ScrapQualitySummary extends Equatable {
         totalNotPurchasedKg,
         averageOfferPrice,
         purchaseRatePercent,
+        currency,
       ];
 }

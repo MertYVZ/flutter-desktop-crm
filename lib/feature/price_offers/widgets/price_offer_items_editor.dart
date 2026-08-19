@@ -18,6 +18,7 @@ class PriceOfferItemFormRow {
   PriceOfferItemFormRow({
     String? id,
     PriceOfferCurrencyType currency = PriceOfferCurrencyType.try_,
+    this.unitType,
   })  : id = id ?? const Uuid().v4(),
         productNameController = TextEditingController(),
         quantityController = TextEditingController(),
@@ -49,11 +50,13 @@ class PriceOfferItemFormRow {
 class PriceOfferItemsEditor extends StatefulWidget {
   const PriceOfferItemsEditor({
     required this.rows,
+    this.defaultUnitType,
     this.onChanged,
     super.key,
   });
 
   final List<PriceOfferItemFormRow> rows;
+  final PriceOfferUnitType? defaultUnitType;
 
   /// Herhangi bir satır verisi (ürün, miktar, fiyat, para birimi) değiştiğinde
   /// veya satır eklenip silindiğinde tetiklenir. İndirim bölümünün kullanılabilir
@@ -65,6 +68,27 @@ class PriceOfferItemsEditor extends StatefulWidget {
 }
 
 class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
+  @override
+  void didUpdateWidget(covariant PriceOfferItemsEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final defaultUnit = widget.defaultUnitType;
+    if (defaultUnit == null || defaultUnit == oldWidget.defaultUnitType) {
+      return;
+    }
+
+    var didChange = false;
+    for (final row in widget.rows) {
+      if (row.unitType != defaultUnit) {
+        row.unitType = defaultUnit;
+        didChange = true;
+      }
+    }
+
+    if (didChange) {
+      widget.onChanged?.call();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -132,7 +156,9 @@ class _PriceOfferItemsEditorState extends State<PriceOfferItemsEditor> {
   }
 
   void _addRow() {
-    widget.rows.add(PriceOfferItemFormRow());
+    widget.rows.add(
+      PriceOfferItemFormRow(unitType: widget.defaultUnitType),
+    );
     setState(() {});
     widget.onChanged?.call();
   }

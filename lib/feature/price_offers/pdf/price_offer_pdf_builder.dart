@@ -187,7 +187,12 @@ final class PriceOfferPdfBuilder {
               boldFont: boldFont,
               rows: [
                 _PartyRow('Firma', offer.customerName),
-                _PartyRow('Yetkili', offer.contactPerson),
+                _PartyRow(
+                  'Yetkili',
+                  offer.contactPerson.trim().isEmpty
+                      ? '—'
+                      : offer.contactPerson,
+                ),
                 _PartyRow('Telefon', offer.displayAuthorizedPhone),
                 _PartyRow('Yetkili Telefonu', offer.displayMobilePhone),
               ],

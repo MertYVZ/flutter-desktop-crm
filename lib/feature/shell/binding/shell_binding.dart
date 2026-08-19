@@ -1,6 +1,8 @@
 import 'package:Ok/feature/customers/bindings/customers_binding.dart';
 import 'package:Ok/feature/dashboard/bindings/dashboard_binding.dart';
 import 'package:Ok/feature/due_tracking/bindings/due_tracking_binding.dart';
+import 'package:Ok/feature/export/bindings/export_binding.dart';
+import 'package:Ok/feature/import/bindings/import_binding.dart';
 import 'package:Ok/feature/meetings/bindings/meetings_binding.dart';
 import 'package:Ok/feature/notes/bindings/notes_binding.dart';
 import 'package:Ok/feature/price_list/bindings/price_list_binding.dart';
@@ -22,6 +24,8 @@ final class ShellBinding extends Bindings {
     DueTrackingBinding().dependencies();
     MeetingsBinding().dependencies();
     ScrapQualityBinding().dependencies();
+    ExportBinding().dependencies();
+    ImportBinding().dependencies();
     NotesBinding().dependencies();
     PriceOffersBinding().dependencies();
     PriceListBinding().dependencies();

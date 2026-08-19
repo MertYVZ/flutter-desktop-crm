@@ -155,6 +155,7 @@ final class PriceOffersController extends GetxController {
     required DateTime? offerDate,
     required DateTime? validityDate,
     required String? customerId,
+    String guestCustomerName = '',
     required String contactPerson,
     required String authorizedPhone,
     required String mobilePhone,
@@ -176,6 +177,7 @@ final class PriceOffersController extends GetxController {
       offerDate: offerDate,
       validityDate: validityDate,
       customerId: customerId,
+      guestCustomerName: guestCustomerName,
       contactPerson: contactPerson,
       legalText: legalText,
       authorizedPhone: authorizedPhone,
@@ -209,7 +211,12 @@ final class PriceOffersController extends GetxController {
         type: type!,
         offerDate: offerDate!,
         validityDate: validityDate!,
-        customerId: customerId!,
+        customerId: _resolveCustomerId(type, customerId),
+        customerNameSnapshot: _resolveCustomerNameSnapshot(
+          type: type,
+          customerId: customerId,
+          guestCustomerName: guestCustomerName,
+        ),
         contactPerson: contactPerson,
         authorizedPhone: authorizedPhone,
         mobilePhone: mobilePhone,
@@ -260,6 +267,7 @@ final class PriceOffersController extends GetxController {
     required DateTime? offerDate,
     required DateTime? validityDate,
     required String? customerId,
+    String guestCustomerName = '',
     required String contactPerson,
     required String authorizedPhone,
     required String mobilePhone,
@@ -282,6 +290,7 @@ final class PriceOffersController extends GetxController {
       offerDate: offerDate,
       validityDate: validityDate,
       customerId: customerId,
+      guestCustomerName: guestCustomerName,
       contactPerson: contactPerson,
       legalText: legalText,
       authorizedPhone: authorizedPhone,
@@ -318,7 +327,12 @@ final class PriceOffersController extends GetxController {
         type: type!,
         offerDate: offerDate!,
         validityDate: validityDate!,
-        customerId: customerId!,
+        customerId: _resolveCustomerId(type, customerId),
+        customerNameSnapshot: _resolveCustomerNameSnapshot(
+          type: type,
+          customerId: customerId,
+          guestCustomerName: guestCustomerName,
+        ),
         contactPerson: contactPerson,
         authorizedPhone: authorizedPhone,
         mobilePhone: mobilePhone,
@@ -431,6 +445,31 @@ final class PriceOffersController extends GetxController {
     } finally {
       isGeneratingPdf.value = false;
     }
+  }
+
+  String _resolveCustomerId(OfferType type, String? customerId) {
+    if (!type.requiresCustomer) {
+      return '';
+    }
+    return customerId ?? '';
+  }
+
+  String _resolveCustomerNameSnapshot({
+    required OfferType type,
+    required String? customerId,
+    required String guestCustomerName,
+  }) {
+    if (!type.requiresCustomer) {
+      return guestCustomerName.trim();
+    }
+
+    for (final customer in customers) {
+      if (customer.id == customerId) {
+        return customer.name.trim();
+      }
+    }
+
+    return guestCustomerName.trim();
   }
 
   void clearFilters() {

@@ -258,5 +258,47 @@ final class AppScreens {
       middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
     ),
+    GetPage(
+      name: AppRoutes.exportsNew.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.exportsEdit.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.exports.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.importsNew.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.importsEdit.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.imports.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
   ];
 }

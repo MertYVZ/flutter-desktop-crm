@@ -10,6 +10,8 @@ enum ShellMenuItem {
   dueDateTracking,
   meetings,
   scrapQuality,
+  exports,
+  imports,
   notebook,
   priceList,
   settings,
@@ -36,6 +38,10 @@ extension ShellMenuItemX on ShellMenuItem {
         return 'Görüşmeler';
       case ShellMenuItem.scrapQuality:
         return 'Hurda Kalite';
+      case ShellMenuItem.exports:
+        return 'İhracat';
+      case ShellMenuItem.imports:
+        return 'İthalat';
       case ShellMenuItem.notebook:
         return 'Not Defteri';
       case ShellMenuItem.priceList:
@@ -61,6 +67,10 @@ extension ShellMenuItemX on ShellMenuItem {
         return Icons.forum_outlined;
       case ShellMenuItem.scrapQuality:
         return Icons.fact_check_outlined;
+      case ShellMenuItem.exports:
+        return Icons.local_shipping_outlined;
+      case ShellMenuItem.imports:
+        return Icons.inventory_2_outlined;
       case ShellMenuItem.notebook:
         return Icons.book_outlined;
       case ShellMenuItem.priceList:
@@ -140,6 +150,16 @@ final class ShellController extends GetxController {
       return;
     }
 
+    if (route.startsWith('/exports')) {
+      selectedMenu.value = ShellMenuItem.exports;
+      return;
+    }
+
+    if (route.startsWith('/imports')) {
+      selectedMenu.value = ShellMenuItem.imports;
+      return;
+    }
+
     if (route.startsWith('/notes')) {
       selectedMenu.value = ShellMenuItem.notebook;
       return;
@@ -176,6 +196,12 @@ final class ShellController extends GetxController {
     }
     if (item == ShellMenuItem.scrapQuality) {
       return AppRoutes.scrapQuality.value;
+    }
+    if (item == ShellMenuItem.exports) {
+      return AppRoutes.exports.value;
+    }
+    if (item == ShellMenuItem.imports) {
+      return AppRoutes.imports.value;
     }
     if (item == ShellMenuItem.notebook) {
       return AppRoutes.notes.value;

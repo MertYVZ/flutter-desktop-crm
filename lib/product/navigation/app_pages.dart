@@ -34,6 +34,12 @@ enum AppRoutes {
   priceListNew,
   priceListDetail,
   priceListEdit,
+  exports,
+  exportsNew,
+  exportsEdit,
+  imports,
+  importsNew,
+  importsEdit,
 }
 
 extension AppRoutesExtension on AppRoutes {
@@ -109,6 +115,18 @@ extension AppRoutesExtension on AppRoutes {
         return '/price-list/:id';
       case AppRoutes.priceListEdit:
         return '/price-list/:id/edit';
+      case AppRoutes.exports:
+        return '/exports';
+      case AppRoutes.exportsNew:
+        return '/exports/new';
+      case AppRoutes.exportsEdit:
+        return '/exports/:id/edit';
+      case AppRoutes.imports:
+        return '/imports';
+      case AppRoutes.importsNew:
+        return '/imports/new';
+      case AppRoutes.importsEdit:
+        return '/imports/:id/edit';
     }
   }
 
@@ -144,6 +162,10 @@ extension AppRoutesExtension on AppRoutes {
         return '/price-list/$id';
       case AppRoutes.priceListEdit:
         return '/price-list/$id/edit';
+      case AppRoutes.exportsEdit:
+        return '/exports/$id/edit';
+      case AppRoutes.importsEdit:
+        return '/imports/$id/edit';
       case AppRoutes.splash:
       case AppRoutes.login:
       case AppRoutes.changePassword:
@@ -166,6 +188,10 @@ extension AppRoutesExtension on AppRoutes {
       case AppRoutes.remindersNew:
       case AppRoutes.priceList:
       case AppRoutes.priceListNew:
+      case AppRoutes.exports:
+      case AppRoutes.exportsNew:
+      case AppRoutes.imports:
+      case AppRoutes.importsNew:
         return value;
     }
   }

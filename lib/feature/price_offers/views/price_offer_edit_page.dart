@@ -31,6 +31,8 @@ final class PriceOfferEditPage extends StatefulWidget {
 }
 
 class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
+  late final TextEditingController _guestCustomerNameController;
+  late final TextEditingController _guestContactPersonController;
   late final TextEditingController _authorizedPhoneController;
   late final TextEditingController _mobilePhoneController;
   late final TextEditingController _legalTextController;
@@ -57,6 +59,8 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
   @override
   void initState() {
     super.initState();
+    _guestCustomerNameController = TextEditingController();
+    _guestContactPersonController = TextEditingController();
     _authorizedPhoneController = TextEditingController();
     _mobilePhoneController = TextEditingController();
     _legalTextController = TextEditingController();
@@ -68,6 +72,8 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
 
   @override
   void dispose() {
+    _guestCustomerNameController.dispose();
+    _guestContactPersonController.dispose();
     _authorizedPhoneController.dispose();
     _mobilePhoneController.dispose();
     _legalTextController.dispose();
@@ -128,8 +134,11 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
       return;
     }
 
-    _selectedCustomerId = offer.customerId;
+    _selectedCustomerId =
+        offer.customerId.trim().isEmpty ? null : offer.customerId;
     _selectedType = offer.offerType ?? OfferType.general;
+    _guestCustomerNameController.text = offer.customerName;
+    _guestContactPersonController.text = offer.contactPerson;
     _offerDate = offer.offerDate;
     _validityDate = offer.validityDate;
     _selectedStatus = offer.offerStatus ?? PriceOfferStatus.draft;
@@ -297,6 +306,18 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
   }
 
   Future<void> _handleTypeChanged(OfferType? type) async {
+    void applyType(OfferType? nextType) {
+      _selectedType = nextType;
+      _applyUnitDefaults(nextType);
+      if (nextType == OfferType.general) {
+        _selectedCustomerId = null;
+        _selectedContact = null;
+        if (_guestCustomerNameController.text.trim().isEmpty) {
+          _guestCustomerNameController.text = '';
+        }
+      }
+    }
+
     if (!_isLegalTextDirty && type != null) {
       final text = await _legalTextTemplateService.getTemplateByOfferType(type);
       if (!mounted) {
@@ -304,15 +325,26 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
       }
 
       setState(() {
-        _selectedType = type;
+        applyType(type);
         _legalTextController.text = text;
       });
       return;
     }
 
     setState(() {
-      _selectedType = type;
+      applyType(type);
     });
+  }
+
+  void _applyUnitDefaults(OfferType? type) {
+    final defaultUnit = type?.defaultUnitType;
+    if (defaultUnit == null) {
+      return;
+    }
+
+    for (final row in _itemRows) {
+      row.unitType = defaultUnit;
+    }
   }
 
   List<PriceOfferItemFormValidation> _buildItemValidations() {
@@ -336,8 +368,10 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
       offerDate: _offerDate,
       validityDate: _validityDate,
       customerId: _selectedCustomerId,
-      contactPerson:
-          _selectedContact?.fullName ?? _savedContactPersonName ?? '',
+      guestCustomerName: _guestCustomerNameController.text,
+      contactPerson: _selectedType == OfferType.general
+          ? _guestContactPersonController.text
+          : _selectedContact?.fullName ?? _savedContactPersonName ?? '',
       authorizedPhone: _authorizedPhoneController.text,
       mobilePhone: _mobilePhoneController.text,
       legalText: _legalTextController.text,
@@ -442,6 +476,10 @@ class _PriceOfferEditPageState extends BaseState<PriceOfferEditPage> {
                       Obx(
                         () => PriceOfferForm(
                           customers: controller.customers.toList(),
+                          guestCustomerNameController:
+                              _guestCustomerNameController,
+                          guestContactPersonController:
+                              _guestContactPersonController,
                           selectedCustomerId: _selectedCustomerId,
                           selectedType: _selectedType,
                           offerDate: _offerDate,

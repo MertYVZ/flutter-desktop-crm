@@ -2,6 +2,7 @@ import 'package:Ok/feature/customers/controllers/customer_detail_controller.dart
 import 'package:Ok/feature/customers/widgets/customer_contact_form_dialog.dart';
 import 'package:Ok/feature/customers/widgets/customer_contacts_tab.dart';
 import 'package:Ok/feature/customers/widgets/customer_due_records_tab.dart';
+import 'package:Ok/feature/customers/widgets/customer_export_tab.dart';
 import 'package:Ok/feature/customers/widgets/customer_meetings_tab.dart';
 import 'package:Ok/feature/customers/widgets/customer_notes_tab.dart';
 import 'package:Ok/feature/customers/widgets/customer_price_offers_tab.dart';
@@ -59,6 +60,12 @@ class CustomerDetailSections extends StatelessWidget {
       icon: Icons.recycling_outlined,
       actionLabel: 'Hurda Kaydı Ekle',
       route: AppRoutes.scrapQualityNew,
+    ),
+    _SectionDef(
+      label: 'İhracat',
+      icon: Icons.local_shipping_outlined,
+      actionLabel: 'İhracat Ekle',
+      route: AppRoutes.exportsNew,
     ),
     _SectionDef(
       label: 'Yetkili Kişiler',
@@ -132,7 +139,8 @@ class _SectionNav extends StatelessWidget {
       3 => controller.reminders.length,
       4 => controller.notes.length,
       5 => controller.scrapQualityRecords.length,
-      6 => controller.contacts.length,
+      6 => controller.exportRecords.length,
+      7 => controller.contacts.length,
       _ => 0,
     };
   }
@@ -145,7 +153,8 @@ class _SectionNav extends StatelessWidget {
         3 => controller.reminders.isNotEmpty,
         4 => controller.notes.isNotEmpty,
         5 => controller.scrapQualityRecords.isNotEmpty,
-        6 => controller.contacts.isNotEmpty,
+        6 => controller.exportRecords.isNotEmpty,
+        7 => controller.contacts.isNotEmpty,
         _ => false,
       };
 
@@ -376,7 +385,8 @@ class _SectionContentArea extends StatelessWidget {
       3 => CustomerRemindersTab(controller: controller),
       4 => CustomerNotesTab(controller: controller),
       5 => CustomerScrapQualityTab(controller: controller),
-      6 => CustomerContactsTab(controller: controller),
+      6 => CustomerExportTab(controller: controller),
+      7 => CustomerContactsTab(controller: controller),
       _ => const SizedBox.shrink(),
     };
   }

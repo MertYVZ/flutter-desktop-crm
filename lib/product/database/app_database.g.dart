@@ -4787,6 +4787,12 @@ class $PriceOffersTable extends PriceOffers
   late final GeneratedColumn<String> customerId = GeneratedColumn<String>(
       'customer_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _customerNameSnapshotMeta =
+      const VerificationMeta('customerNameSnapshot');
+  @override
+  late final GeneratedColumn<String> customerNameSnapshot =
+      GeneratedColumn<String>('customer_name_snapshot', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _contactPersonMeta =
       const VerificationMeta('contactPerson');
   @override
@@ -4865,6 +4871,7 @@ class $PriceOffersTable extends PriceOffers
         offerDate,
         validityDate,
         customerId,
+        customerNameSnapshot,
         contactPerson,
         authorizedPhone,
         mobilePhone,
@@ -4920,6 +4927,12 @@ class $PriceOffersTable extends PriceOffers
               data['customer_id']!, _customerIdMeta));
     } else if (isInserting) {
       context.missing(_customerIdMeta);
+    }
+    if (data.containsKey('customer_name_snapshot')) {
+      context.handle(
+          _customerNameSnapshotMeta,
+          customerNameSnapshot.isAcceptableOrUnknown(
+              data['customer_name_snapshot']!, _customerNameSnapshotMeta));
     }
     if (data.containsKey('contact_person')) {
       context.handle(
@@ -5012,6 +5025,9 @@ class $PriceOffersTable extends PriceOffers
           DriftSqlType.dateTime, data['${effectivePrefix}validity_date'])!,
       customerId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
+      customerNameSnapshot: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}customer_name_snapshot']),
       contactPerson: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}contact_person'])!,
       authorizedPhone: attachedDatabase.typeMapping.read(
@@ -5051,6 +5067,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
   final DateTime offerDate;
   final DateTime validityDate;
   final String customerId;
+  final String? customerNameSnapshot;
   final String contactPerson;
   final String? authorizedPhone;
   final String? mobilePhone;
@@ -5069,6 +5086,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       required this.offerDate,
       required this.validityDate,
       required this.customerId,
+      this.customerNameSnapshot,
       required this.contactPerson,
       this.authorizedPhone,
       this.mobilePhone,
@@ -5089,6 +5107,9 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
     map['offer_date'] = Variable<DateTime>(offerDate);
     map['validity_date'] = Variable<DateTime>(validityDate);
     map['customer_id'] = Variable<String>(customerId);
+    if (!nullToAbsent || customerNameSnapshot != null) {
+      map['customer_name_snapshot'] = Variable<String>(customerNameSnapshot);
+    }
     map['contact_person'] = Variable<String>(contactPerson);
     if (!nullToAbsent || authorizedPhone != null) {
       map['authorized_phone'] = Variable<String>(authorizedPhone);
@@ -5125,6 +5146,9 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       offerDate: Value(offerDate),
       validityDate: Value(validityDate),
       customerId: Value(customerId),
+      customerNameSnapshot: customerNameSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerNameSnapshot),
       contactPerson: Value(contactPerson),
       authorizedPhone: authorizedPhone == null && nullToAbsent
           ? const Value.absent()
@@ -5163,6 +5187,8 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       offerDate: serializer.fromJson<DateTime>(json['offerDate']),
       validityDate: serializer.fromJson<DateTime>(json['validityDate']),
       customerId: serializer.fromJson<String>(json['customerId']),
+      customerNameSnapshot:
+          serializer.fromJson<String?>(json['customerNameSnapshot']),
       contactPerson: serializer.fromJson<String>(json['contactPerson']),
       authorizedPhone: serializer.fromJson<String?>(json['authorizedPhone']),
       mobilePhone: serializer.fromJson<String?>(json['mobilePhone']),
@@ -5188,6 +5214,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       'offerDate': serializer.toJson<DateTime>(offerDate),
       'validityDate': serializer.toJson<DateTime>(validityDate),
       'customerId': serializer.toJson<String>(customerId),
+      'customerNameSnapshot': serializer.toJson<String?>(customerNameSnapshot),
       'contactPerson': serializer.toJson<String>(contactPerson),
       'authorizedPhone': serializer.toJson<String?>(authorizedPhone),
       'mobilePhone': serializer.toJson<String?>(mobilePhone),
@@ -5209,6 +5236,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           DateTime? offerDate,
           DateTime? validityDate,
           String? customerId,
+          Value<String?> customerNameSnapshot = const Value.absent(),
           String? contactPerson,
           Value<String?> authorizedPhone = const Value.absent(),
           Value<String?> mobilePhone = const Value.absent(),
@@ -5227,6 +5255,9 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
         offerDate: offerDate ?? this.offerDate,
         validityDate: validityDate ?? this.validityDate,
         customerId: customerId ?? this.customerId,
+        customerNameSnapshot: customerNameSnapshot.present
+            ? customerNameSnapshot.value
+            : this.customerNameSnapshot,
         contactPerson: contactPerson ?? this.contactPerson,
         authorizedPhone: authorizedPhone.present
             ? authorizedPhone.value
@@ -5259,6 +5290,9 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           : this.validityDate,
       customerId:
           data.customerId.present ? data.customerId.value : this.customerId,
+      customerNameSnapshot: data.customerNameSnapshot.present
+          ? data.customerNameSnapshot.value
+          : this.customerNameSnapshot,
       contactPerson: data.contactPerson.present
           ? data.contactPerson.value
           : this.contactPerson,
@@ -5295,6 +5329,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           ..write('offerDate: $offerDate, ')
           ..write('validityDate: $validityDate, ')
           ..write('customerId: $customerId, ')
+          ..write('customerNameSnapshot: $customerNameSnapshot, ')
           ..write('contactPerson: $contactPerson, ')
           ..write('authorizedPhone: $authorizedPhone, ')
           ..write('mobilePhone: $mobilePhone, ')
@@ -5318,6 +5353,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
       offerDate,
       validityDate,
       customerId,
+      customerNameSnapshot,
       contactPerson,
       authorizedPhone,
       mobilePhone,
@@ -5339,6 +5375,7 @@ class PriceOffer extends DataClass implements Insertable<PriceOffer> {
           other.offerDate == this.offerDate &&
           other.validityDate == this.validityDate &&
           other.customerId == this.customerId &&
+          other.customerNameSnapshot == this.customerNameSnapshot &&
           other.contactPerson == this.contactPerson &&
           other.authorizedPhone == this.authorizedPhone &&
           other.mobilePhone == this.mobilePhone &&
@@ -5359,6 +5396,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
   final Value<DateTime> offerDate;
   final Value<DateTime> validityDate;
   final Value<String> customerId;
+  final Value<String?> customerNameSnapshot;
   final Value<String> contactPerson;
   final Value<String?> authorizedPhone;
   final Value<String?> mobilePhone;
@@ -5378,6 +5416,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     this.offerDate = const Value.absent(),
     this.validityDate = const Value.absent(),
     this.customerId = const Value.absent(),
+    this.customerNameSnapshot = const Value.absent(),
     this.contactPerson = const Value.absent(),
     this.authorizedPhone = const Value.absent(),
     this.mobilePhone = const Value.absent(),
@@ -5398,6 +5437,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     required DateTime offerDate,
     required DateTime validityDate,
     required String customerId,
+    this.customerNameSnapshot = const Value.absent(),
     required String contactPerson,
     this.authorizedPhone = const Value.absent(),
     this.mobilePhone = const Value.absent(),
@@ -5427,6 +5467,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     Expression<DateTime>? offerDate,
     Expression<DateTime>? validityDate,
     Expression<String>? customerId,
+    Expression<String>? customerNameSnapshot,
     Expression<String>? contactPerson,
     Expression<String>? authorizedPhone,
     Expression<String>? mobilePhone,
@@ -5447,6 +5488,8 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
       if (offerDate != null) 'offer_date': offerDate,
       if (validityDate != null) 'validity_date': validityDate,
       if (customerId != null) 'customer_id': customerId,
+      if (customerNameSnapshot != null)
+        'customer_name_snapshot': customerNameSnapshot,
       if (contactPerson != null) 'contact_person': contactPerson,
       if (authorizedPhone != null) 'authorized_phone': authorizedPhone,
       if (mobilePhone != null) 'mobile_phone': mobilePhone,
@@ -5470,6 +5513,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
       Value<DateTime>? offerDate,
       Value<DateTime>? validityDate,
       Value<String>? customerId,
+      Value<String?>? customerNameSnapshot,
       Value<String>? contactPerson,
       Value<String?>? authorizedPhone,
       Value<String?>? mobilePhone,
@@ -5489,6 +5533,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
       offerDate: offerDate ?? this.offerDate,
       validityDate: validityDate ?? this.validityDate,
       customerId: customerId ?? this.customerId,
+      customerNameSnapshot: customerNameSnapshot ?? this.customerNameSnapshot,
       contactPerson: contactPerson ?? this.contactPerson,
       authorizedPhone: authorizedPhone ?? this.authorizedPhone,
       mobilePhone: mobilePhone ?? this.mobilePhone,
@@ -5522,6 +5567,10 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
     }
     if (customerId.present) {
       map['customer_id'] = Variable<String>(customerId.value);
+    }
+    if (customerNameSnapshot.present) {
+      map['customer_name_snapshot'] =
+          Variable<String>(customerNameSnapshot.value);
     }
     if (contactPerson.present) {
       map['contact_person'] = Variable<String>(contactPerson.value);
@@ -5573,6 +5622,7 @@ class PriceOffersCompanion extends UpdateCompanion<PriceOffer> {
           ..write('offerDate: $offerDate, ')
           ..write('validityDate: $validityDate, ')
           ..write('customerId: $customerId, ')
+          ..write('customerNameSnapshot: $customerNameSnapshot, ')
           ..write('contactPerson: $contactPerson, ')
           ..write('authorizedPhone: $authorizedPhone, ')
           ..write('mobilePhone: $mobilePhone, ')
@@ -7978,6 +8028,2066 @@ class PriceListItemsCompanion extends UpdateCompanion<PriceListItem> {
   }
 }
 
+class $ExportRecordsTable extends ExportRecords
+    with TableInfo<$ExportRecordsTable, ExportRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExportRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _customerIdMeta =
+      const VerificationMeta('customerId');
+  @override
+  late final GeneratedColumn<String> customerId = GeneratedColumn<String>(
+      'customer_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _customerNameSnapshotMeta =
+      const VerificationMeta('customerNameSnapshot');
+  @override
+  late final GeneratedColumn<String> customerNameSnapshot =
+      GeneratedColumn<String>('customer_name_snapshot', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _productNameMeta =
+      const VerificationMeta('productName');
+  @override
+  late final GeneratedColumn<String> productName = GeneratedColumn<String>(
+      'product_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productIdMeta =
+      const VerificationMeta('productId');
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+      'product_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _quantityTonMeta =
+      const VerificationMeta('quantityTon');
+  @override
+  late final GeneratedColumn<double> quantityTon = GeneratedColumn<double>(
+      'quantity_ton', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _unitPriceMinorMeta =
+      const VerificationMeta('unitPriceMinor');
+  @override
+  late final GeneratedColumn<int> unitPriceMinor = GeneratedColumn<int>(
+      'unit_price_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _totalPriceMinorMeta =
+      const VerificationMeta('totalPriceMinor');
+  @override
+  late final GeneratedColumn<int> totalPriceMinor = GeneratedColumn<int>(
+      'total_price_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _paymentMethodMeta =
+      const VerificationMeta('paymentMethod');
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+      'payment_method', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _bankMeta = const VerificationMeta('bank');
+  @override
+  late final GeneratedColumn<String> bank = GeneratedColumn<String>(
+      'bank', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _firstPaymentDateMeta =
+      const VerificationMeta('firstPaymentDate');
+  @override
+  late final GeneratedColumn<DateTime> firstPaymentDate =
+      GeneratedColumn<DateTime>('first_payment_date', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _firstPaymentAmountMinorMeta =
+      const VerificationMeta('firstPaymentAmountMinor');
+  @override
+  late final GeneratedColumn<int> firstPaymentAmountMinor =
+      GeneratedColumn<int>('first_payment_amount_minor', aliasedName, true,
+          type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _lastPaymentDateMeta =
+      const VerificationMeta('lastPaymentDate');
+  @override
+  late final GeneratedColumn<DateTime> lastPaymentDate =
+      GeneratedColumn<DateTime>('last_payment_date', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _lastPaymentAmountMinorMeta =
+      const VerificationMeta('lastPaymentAmountMinor');
+  @override
+  late final GeneratedColumn<int> lastPaymentAmountMinor = GeneratedColumn<int>(
+      'last_payment_amount_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _wasteKgMeta =
+      const VerificationMeta('wasteKg');
+  @override
+  late final GeneratedColumn<double> wasteKg = GeneratedColumn<double>(
+      'waste_kg', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _netTotalAmountMinorMeta =
+      const VerificationMeta('netTotalAmountMinor');
+  @override
+  late final GeneratedColumn<int> netTotalAmountMinor = GeneratedColumn<int>(
+      'net_total_amount_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _logisticsNameMeta =
+      const VerificationMeta('logisticsName');
+  @override
+  late final GeneratedColumn<String> logisticsName = GeneratedColumn<String>(
+      'logistics_name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _shipmentDateMeta =
+      const VerificationMeta('shipmentDate');
+  @override
+  late final GeneratedColumn<DateTime> shipmentDate = GeneratedColumn<DateTime>(
+      'shipment_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _deliveryDateMeta =
+      const VerificationMeta('deliveryDate');
+  @override
+  late final GeneratedColumn<DateTime> deliveryDate = GeneratedColumn<DateTime>(
+      'delivery_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _logisticsCostMinorMeta =
+      const VerificationMeta('logisticsCostMinor');
+  @override
+  late final GeneratedColumn<int> logisticsCostMinor = GeneratedColumn<int>(
+      'logistics_cost_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _customsCostMinorMeta =
+      const VerificationMeta('customsCostMinor');
+  @override
+  late final GeneratedColumn<int> customsCostMinor = GeneratedColumn<int>(
+      'customs_cost_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _insuranceCostMinorMeta =
+      const VerificationMeta('insuranceCostMinor');
+  @override
+  late final GeneratedColumn<int> insuranceCostMinor = GeneratedColumn<int>(
+      'insurance_cost_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        customerId,
+        customerNameSnapshot,
+        productName,
+        productId,
+        quantityTon,
+        unitPriceMinor,
+        totalPriceMinor,
+        paymentMethod,
+        bank,
+        firstPaymentDate,
+        firstPaymentAmountMinor,
+        lastPaymentDate,
+        lastPaymentAmountMinor,
+        wasteKg,
+        netTotalAmountMinor,
+        logisticsName,
+        shipmentDate,
+        deliveryDate,
+        logisticsCostMinor,
+        customsCostMinor,
+        insuranceCostMinor,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'export_records';
+  @override
+  VerificationContext validateIntegrity(Insertable<ExportRecord> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('customer_id')) {
+      context.handle(
+          _customerIdMeta,
+          customerId.isAcceptableOrUnknown(
+              data['customer_id']!, _customerIdMeta));
+    } else if (isInserting) {
+      context.missing(_customerIdMeta);
+    }
+    if (data.containsKey('customer_name_snapshot')) {
+      context.handle(
+          _customerNameSnapshotMeta,
+          customerNameSnapshot.isAcceptableOrUnknown(
+              data['customer_name_snapshot']!, _customerNameSnapshotMeta));
+    }
+    if (data.containsKey('product_name')) {
+      context.handle(
+          _productNameMeta,
+          productName.isAcceptableOrUnknown(
+              data['product_name']!, _productNameMeta));
+    } else if (isInserting) {
+      context.missing(_productNameMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(_productIdMeta,
+          productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta));
+    }
+    if (data.containsKey('quantity_ton')) {
+      context.handle(
+          _quantityTonMeta,
+          quantityTon.isAcceptableOrUnknown(
+              data['quantity_ton']!, _quantityTonMeta));
+    } else if (isInserting) {
+      context.missing(_quantityTonMeta);
+    }
+    if (data.containsKey('unit_price_minor')) {
+      context.handle(
+          _unitPriceMinorMeta,
+          unitPriceMinor.isAcceptableOrUnknown(
+              data['unit_price_minor']!, _unitPriceMinorMeta));
+    } else if (isInserting) {
+      context.missing(_unitPriceMinorMeta);
+    }
+    if (data.containsKey('total_price_minor')) {
+      context.handle(
+          _totalPriceMinorMeta,
+          totalPriceMinor.isAcceptableOrUnknown(
+              data['total_price_minor']!, _totalPriceMinorMeta));
+    } else if (isInserting) {
+      context.missing(_totalPriceMinorMeta);
+    }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+          _paymentMethodMeta,
+          paymentMethod.isAcceptableOrUnknown(
+              data['payment_method']!, _paymentMethodMeta));
+    }
+    if (data.containsKey('bank')) {
+      context.handle(
+          _bankMeta, bank.isAcceptableOrUnknown(data['bank']!, _bankMeta));
+    }
+    if (data.containsKey('first_payment_date')) {
+      context.handle(
+          _firstPaymentDateMeta,
+          firstPaymentDate.isAcceptableOrUnknown(
+              data['first_payment_date']!, _firstPaymentDateMeta));
+    }
+    if (data.containsKey('first_payment_amount_minor')) {
+      context.handle(
+          _firstPaymentAmountMinorMeta,
+          firstPaymentAmountMinor.isAcceptableOrUnknown(
+              data['first_payment_amount_minor']!,
+              _firstPaymentAmountMinorMeta));
+    }
+    if (data.containsKey('last_payment_date')) {
+      context.handle(
+          _lastPaymentDateMeta,
+          lastPaymentDate.isAcceptableOrUnknown(
+              data['last_payment_date']!, _lastPaymentDateMeta));
+    }
+    if (data.containsKey('last_payment_amount_minor')) {
+      context.handle(
+          _lastPaymentAmountMinorMeta,
+          lastPaymentAmountMinor.isAcceptableOrUnknown(
+              data['last_payment_amount_minor']!, _lastPaymentAmountMinorMeta));
+    }
+    if (data.containsKey('waste_kg')) {
+      context.handle(_wasteKgMeta,
+          wasteKg.isAcceptableOrUnknown(data['waste_kg']!, _wasteKgMeta));
+    }
+    if (data.containsKey('net_total_amount_minor')) {
+      context.handle(
+          _netTotalAmountMinorMeta,
+          netTotalAmountMinor.isAcceptableOrUnknown(
+              data['net_total_amount_minor']!, _netTotalAmountMinorMeta));
+    }
+    if (data.containsKey('logistics_name')) {
+      context.handle(
+          _logisticsNameMeta,
+          logisticsName.isAcceptableOrUnknown(
+              data['logistics_name']!, _logisticsNameMeta));
+    }
+    if (data.containsKey('shipment_date')) {
+      context.handle(
+          _shipmentDateMeta,
+          shipmentDate.isAcceptableOrUnknown(
+              data['shipment_date']!, _shipmentDateMeta));
+    }
+    if (data.containsKey('delivery_date')) {
+      context.handle(
+          _deliveryDateMeta,
+          deliveryDate.isAcceptableOrUnknown(
+              data['delivery_date']!, _deliveryDateMeta));
+    }
+    if (data.containsKey('logistics_cost_minor')) {
+      context.handle(
+          _logisticsCostMinorMeta,
+          logisticsCostMinor.isAcceptableOrUnknown(
+              data['logistics_cost_minor']!, _logisticsCostMinorMeta));
+    }
+    if (data.containsKey('customs_cost_minor')) {
+      context.handle(
+          _customsCostMinorMeta,
+          customsCostMinor.isAcceptableOrUnknown(
+              data['customs_cost_minor']!, _customsCostMinorMeta));
+    }
+    if (data.containsKey('insurance_cost_minor')) {
+      context.handle(
+          _insuranceCostMinorMeta,
+          insuranceCostMinor.isAcceptableOrUnknown(
+              data['insurance_cost_minor']!, _insuranceCostMinorMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExportRecord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExportRecord(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      customerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
+      customerNameSnapshot: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}customer_name_snapshot']),
+      productName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
+      productId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_id']),
+      quantityTon: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity_ton'])!,
+      unitPriceMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}unit_price_minor'])!,
+      totalPriceMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}total_price_minor'])!,
+      paymentMethod: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payment_method']),
+      bank: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}bank']),
+      firstPaymentDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}first_payment_date']),
+      firstPaymentAmountMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}first_payment_amount_minor']),
+      lastPaymentDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_payment_date']),
+      lastPaymentAmountMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}last_payment_amount_minor']),
+      wasteKg: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}waste_kg']),
+      netTotalAmountMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}net_total_amount_minor']),
+      logisticsName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}logistics_name']),
+      shipmentDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}shipment_date']),
+      deliveryDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}delivery_date']),
+      logisticsCostMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}logistics_cost_minor']),
+      customsCostMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}customs_cost_minor']),
+      insuranceCostMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}insurance_cost_minor']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $ExportRecordsTable createAlias(String alias) {
+    return $ExportRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class ExportRecord extends DataClass implements Insertable<ExportRecord> {
+  final String id;
+  final String title;
+  final String customerId;
+  final String? customerNameSnapshot;
+  final String productName;
+  final String? productId;
+  final double quantityTon;
+  final int unitPriceMinor;
+  final int totalPriceMinor;
+  final String? paymentMethod;
+  final String? bank;
+  final DateTime? firstPaymentDate;
+  final int? firstPaymentAmountMinor;
+  final DateTime? lastPaymentDate;
+  final int? lastPaymentAmountMinor;
+  final double? wasteKg;
+  final int? netTotalAmountMinor;
+  final String? logisticsName;
+  final DateTime? shipmentDate;
+  final DateTime? deliveryDate;
+  final int? logisticsCostMinor;
+  final int? customsCostMinor;
+  final int? insuranceCostMinor;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const ExportRecord(
+      {required this.id,
+      required this.title,
+      required this.customerId,
+      this.customerNameSnapshot,
+      required this.productName,
+      this.productId,
+      required this.quantityTon,
+      required this.unitPriceMinor,
+      required this.totalPriceMinor,
+      this.paymentMethod,
+      this.bank,
+      this.firstPaymentDate,
+      this.firstPaymentAmountMinor,
+      this.lastPaymentDate,
+      this.lastPaymentAmountMinor,
+      this.wasteKg,
+      this.netTotalAmountMinor,
+      this.logisticsName,
+      this.shipmentDate,
+      this.deliveryDate,
+      this.logisticsCostMinor,
+      this.customsCostMinor,
+      this.insuranceCostMinor,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['customer_id'] = Variable<String>(customerId);
+    if (!nullToAbsent || customerNameSnapshot != null) {
+      map['customer_name_snapshot'] = Variable<String>(customerNameSnapshot);
+    }
+    map['product_name'] = Variable<String>(productName);
+    if (!nullToAbsent || productId != null) {
+      map['product_id'] = Variable<String>(productId);
+    }
+    map['quantity_ton'] = Variable<double>(quantityTon);
+    map['unit_price_minor'] = Variable<int>(unitPriceMinor);
+    map['total_price_minor'] = Variable<int>(totalPriceMinor);
+    if (!nullToAbsent || paymentMethod != null) {
+      map['payment_method'] = Variable<String>(paymentMethod);
+    }
+    if (!nullToAbsent || bank != null) {
+      map['bank'] = Variable<String>(bank);
+    }
+    if (!nullToAbsent || firstPaymentDate != null) {
+      map['first_payment_date'] = Variable<DateTime>(firstPaymentDate);
+    }
+    if (!nullToAbsent || firstPaymentAmountMinor != null) {
+      map['first_payment_amount_minor'] =
+          Variable<int>(firstPaymentAmountMinor);
+    }
+    if (!nullToAbsent || lastPaymentDate != null) {
+      map['last_payment_date'] = Variable<DateTime>(lastPaymentDate);
+    }
+    if (!nullToAbsent || lastPaymentAmountMinor != null) {
+      map['last_payment_amount_minor'] = Variable<int>(lastPaymentAmountMinor);
+    }
+    if (!nullToAbsent || wasteKg != null) {
+      map['waste_kg'] = Variable<double>(wasteKg);
+    }
+    if (!nullToAbsent || netTotalAmountMinor != null) {
+      map['net_total_amount_minor'] = Variable<int>(netTotalAmountMinor);
+    }
+    if (!nullToAbsent || logisticsName != null) {
+      map['logistics_name'] = Variable<String>(logisticsName);
+    }
+    if (!nullToAbsent || shipmentDate != null) {
+      map['shipment_date'] = Variable<DateTime>(shipmentDate);
+    }
+    if (!nullToAbsent || deliveryDate != null) {
+      map['delivery_date'] = Variable<DateTime>(deliveryDate);
+    }
+    if (!nullToAbsent || logisticsCostMinor != null) {
+      map['logistics_cost_minor'] = Variable<int>(logisticsCostMinor);
+    }
+    if (!nullToAbsent || customsCostMinor != null) {
+      map['customs_cost_minor'] = Variable<int>(customsCostMinor);
+    }
+    if (!nullToAbsent || insuranceCostMinor != null) {
+      map['insurance_cost_minor'] = Variable<int>(insuranceCostMinor);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  ExportRecordsCompanion toCompanion(bool nullToAbsent) {
+    return ExportRecordsCompanion(
+      id: Value(id),
+      title: Value(title),
+      customerId: Value(customerId),
+      customerNameSnapshot: customerNameSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerNameSnapshot),
+      productName: Value(productName),
+      productId: productId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(productId),
+      quantityTon: Value(quantityTon),
+      unitPriceMinor: Value(unitPriceMinor),
+      totalPriceMinor: Value(totalPriceMinor),
+      paymentMethod: paymentMethod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentMethod),
+      bank: bank == null && nullToAbsent ? const Value.absent() : Value(bank),
+      firstPaymentDate: firstPaymentDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstPaymentDate),
+      firstPaymentAmountMinor: firstPaymentAmountMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstPaymentAmountMinor),
+      lastPaymentDate: lastPaymentDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPaymentDate),
+      lastPaymentAmountMinor: lastPaymentAmountMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPaymentAmountMinor),
+      wasteKg: wasteKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(wasteKg),
+      netTotalAmountMinor: netTotalAmountMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(netTotalAmountMinor),
+      logisticsName: logisticsName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logisticsName),
+      shipmentDate: shipmentDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shipmentDate),
+      deliveryDate: deliveryDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deliveryDate),
+      logisticsCostMinor: logisticsCostMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logisticsCostMinor),
+      customsCostMinor: customsCostMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customsCostMinor),
+      insuranceCostMinor: insuranceCostMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(insuranceCostMinor),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory ExportRecord.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExportRecord(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      customerId: serializer.fromJson<String>(json['customerId']),
+      customerNameSnapshot:
+          serializer.fromJson<String?>(json['customerNameSnapshot']),
+      productName: serializer.fromJson<String>(json['productName']),
+      productId: serializer.fromJson<String?>(json['productId']),
+      quantityTon: serializer.fromJson<double>(json['quantityTon']),
+      unitPriceMinor: serializer.fromJson<int>(json['unitPriceMinor']),
+      totalPriceMinor: serializer.fromJson<int>(json['totalPriceMinor']),
+      paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
+      bank: serializer.fromJson<String?>(json['bank']),
+      firstPaymentDate:
+          serializer.fromJson<DateTime?>(json['firstPaymentDate']),
+      firstPaymentAmountMinor:
+          serializer.fromJson<int?>(json['firstPaymentAmountMinor']),
+      lastPaymentDate: serializer.fromJson<DateTime?>(json['lastPaymentDate']),
+      lastPaymentAmountMinor:
+          serializer.fromJson<int?>(json['lastPaymentAmountMinor']),
+      wasteKg: serializer.fromJson<double?>(json['wasteKg']),
+      netTotalAmountMinor:
+          serializer.fromJson<int?>(json['netTotalAmountMinor']),
+      logisticsName: serializer.fromJson<String?>(json['logisticsName']),
+      shipmentDate: serializer.fromJson<DateTime?>(json['shipmentDate']),
+      deliveryDate: serializer.fromJson<DateTime?>(json['deliveryDate']),
+      logisticsCostMinor: serializer.fromJson<int?>(json['logisticsCostMinor']),
+      customsCostMinor: serializer.fromJson<int?>(json['customsCostMinor']),
+      insuranceCostMinor: serializer.fromJson<int?>(json['insuranceCostMinor']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'customerId': serializer.toJson<String>(customerId),
+      'customerNameSnapshot': serializer.toJson<String?>(customerNameSnapshot),
+      'productName': serializer.toJson<String>(productName),
+      'productId': serializer.toJson<String?>(productId),
+      'quantityTon': serializer.toJson<double>(quantityTon),
+      'unitPriceMinor': serializer.toJson<int>(unitPriceMinor),
+      'totalPriceMinor': serializer.toJson<int>(totalPriceMinor),
+      'paymentMethod': serializer.toJson<String?>(paymentMethod),
+      'bank': serializer.toJson<String?>(bank),
+      'firstPaymentDate': serializer.toJson<DateTime?>(firstPaymentDate),
+      'firstPaymentAmountMinor':
+          serializer.toJson<int?>(firstPaymentAmountMinor),
+      'lastPaymentDate': serializer.toJson<DateTime?>(lastPaymentDate),
+      'lastPaymentAmountMinor': serializer.toJson<int?>(lastPaymentAmountMinor),
+      'wasteKg': serializer.toJson<double?>(wasteKg),
+      'netTotalAmountMinor': serializer.toJson<int?>(netTotalAmountMinor),
+      'logisticsName': serializer.toJson<String?>(logisticsName),
+      'shipmentDate': serializer.toJson<DateTime?>(shipmentDate),
+      'deliveryDate': serializer.toJson<DateTime?>(deliveryDate),
+      'logisticsCostMinor': serializer.toJson<int?>(logisticsCostMinor),
+      'customsCostMinor': serializer.toJson<int?>(customsCostMinor),
+      'insuranceCostMinor': serializer.toJson<int?>(insuranceCostMinor),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  ExportRecord copyWith(
+          {String? id,
+          String? title,
+          String? customerId,
+          Value<String?> customerNameSnapshot = const Value.absent(),
+          String? productName,
+          Value<String?> productId = const Value.absent(),
+          double? quantityTon,
+          int? unitPriceMinor,
+          int? totalPriceMinor,
+          Value<String?> paymentMethod = const Value.absent(),
+          Value<String?> bank = const Value.absent(),
+          Value<DateTime?> firstPaymentDate = const Value.absent(),
+          Value<int?> firstPaymentAmountMinor = const Value.absent(),
+          Value<DateTime?> lastPaymentDate = const Value.absent(),
+          Value<int?> lastPaymentAmountMinor = const Value.absent(),
+          Value<double?> wasteKg = const Value.absent(),
+          Value<int?> netTotalAmountMinor = const Value.absent(),
+          Value<String?> logisticsName = const Value.absent(),
+          Value<DateTime?> shipmentDate = const Value.absent(),
+          Value<DateTime?> deliveryDate = const Value.absent(),
+          Value<int?> logisticsCostMinor = const Value.absent(),
+          Value<int?> customsCostMinor = const Value.absent(),
+          Value<int?> insuranceCostMinor = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      ExportRecord(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        customerId: customerId ?? this.customerId,
+        customerNameSnapshot: customerNameSnapshot.present
+            ? customerNameSnapshot.value
+            : this.customerNameSnapshot,
+        productName: productName ?? this.productName,
+        productId: productId.present ? productId.value : this.productId,
+        quantityTon: quantityTon ?? this.quantityTon,
+        unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
+        totalPriceMinor: totalPriceMinor ?? this.totalPriceMinor,
+        paymentMethod:
+            paymentMethod.present ? paymentMethod.value : this.paymentMethod,
+        bank: bank.present ? bank.value : this.bank,
+        firstPaymentDate: firstPaymentDate.present
+            ? firstPaymentDate.value
+            : this.firstPaymentDate,
+        firstPaymentAmountMinor: firstPaymentAmountMinor.present
+            ? firstPaymentAmountMinor.value
+            : this.firstPaymentAmountMinor,
+        lastPaymentDate: lastPaymentDate.present
+            ? lastPaymentDate.value
+            : this.lastPaymentDate,
+        lastPaymentAmountMinor: lastPaymentAmountMinor.present
+            ? lastPaymentAmountMinor.value
+            : this.lastPaymentAmountMinor,
+        wasteKg: wasteKg.present ? wasteKg.value : this.wasteKg,
+        netTotalAmountMinor: netTotalAmountMinor.present
+            ? netTotalAmountMinor.value
+            : this.netTotalAmountMinor,
+        logisticsName:
+            logisticsName.present ? logisticsName.value : this.logisticsName,
+        shipmentDate:
+            shipmentDate.present ? shipmentDate.value : this.shipmentDate,
+        deliveryDate:
+            deliveryDate.present ? deliveryDate.value : this.deliveryDate,
+        logisticsCostMinor: logisticsCostMinor.present
+            ? logisticsCostMinor.value
+            : this.logisticsCostMinor,
+        customsCostMinor: customsCostMinor.present
+            ? customsCostMinor.value
+            : this.customsCostMinor,
+        insuranceCostMinor: insuranceCostMinor.present
+            ? insuranceCostMinor.value
+            : this.insuranceCostMinor,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  ExportRecord copyWithCompanion(ExportRecordsCompanion data) {
+    return ExportRecord(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      customerId:
+          data.customerId.present ? data.customerId.value : this.customerId,
+      customerNameSnapshot: data.customerNameSnapshot.present
+          ? data.customerNameSnapshot.value
+          : this.customerNameSnapshot,
+      productName:
+          data.productName.present ? data.productName.value : this.productName,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      quantityTon:
+          data.quantityTon.present ? data.quantityTon.value : this.quantityTon,
+      unitPriceMinor: data.unitPriceMinor.present
+          ? data.unitPriceMinor.value
+          : this.unitPriceMinor,
+      totalPriceMinor: data.totalPriceMinor.present
+          ? data.totalPriceMinor.value
+          : this.totalPriceMinor,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
+      bank: data.bank.present ? data.bank.value : this.bank,
+      firstPaymentDate: data.firstPaymentDate.present
+          ? data.firstPaymentDate.value
+          : this.firstPaymentDate,
+      firstPaymentAmountMinor: data.firstPaymentAmountMinor.present
+          ? data.firstPaymentAmountMinor.value
+          : this.firstPaymentAmountMinor,
+      lastPaymentDate: data.lastPaymentDate.present
+          ? data.lastPaymentDate.value
+          : this.lastPaymentDate,
+      lastPaymentAmountMinor: data.lastPaymentAmountMinor.present
+          ? data.lastPaymentAmountMinor.value
+          : this.lastPaymentAmountMinor,
+      wasteKg: data.wasteKg.present ? data.wasteKg.value : this.wasteKg,
+      netTotalAmountMinor: data.netTotalAmountMinor.present
+          ? data.netTotalAmountMinor.value
+          : this.netTotalAmountMinor,
+      logisticsName: data.logisticsName.present
+          ? data.logisticsName.value
+          : this.logisticsName,
+      shipmentDate: data.shipmentDate.present
+          ? data.shipmentDate.value
+          : this.shipmentDate,
+      deliveryDate: data.deliveryDate.present
+          ? data.deliveryDate.value
+          : this.deliveryDate,
+      logisticsCostMinor: data.logisticsCostMinor.present
+          ? data.logisticsCostMinor.value
+          : this.logisticsCostMinor,
+      customsCostMinor: data.customsCostMinor.present
+          ? data.customsCostMinor.value
+          : this.customsCostMinor,
+      insuranceCostMinor: data.insuranceCostMinor.present
+          ? data.insuranceCostMinor.value
+          : this.insuranceCostMinor,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExportRecord(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('customerId: $customerId, ')
+          ..write('customerNameSnapshot: $customerNameSnapshot, ')
+          ..write('productName: $productName, ')
+          ..write('productId: $productId, ')
+          ..write('quantityTon: $quantityTon, ')
+          ..write('unitPriceMinor: $unitPriceMinor, ')
+          ..write('totalPriceMinor: $totalPriceMinor, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('bank: $bank, ')
+          ..write('firstPaymentDate: $firstPaymentDate, ')
+          ..write('firstPaymentAmountMinor: $firstPaymentAmountMinor, ')
+          ..write('lastPaymentDate: $lastPaymentDate, ')
+          ..write('lastPaymentAmountMinor: $lastPaymentAmountMinor, ')
+          ..write('wasteKg: $wasteKg, ')
+          ..write('netTotalAmountMinor: $netTotalAmountMinor, ')
+          ..write('logisticsName: $logisticsName, ')
+          ..write('shipmentDate: $shipmentDate, ')
+          ..write('deliveryDate: $deliveryDate, ')
+          ..write('logisticsCostMinor: $logisticsCostMinor, ')
+          ..write('customsCostMinor: $customsCostMinor, ')
+          ..write('insuranceCostMinor: $insuranceCostMinor, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        id,
+        title,
+        customerId,
+        customerNameSnapshot,
+        productName,
+        productId,
+        quantityTon,
+        unitPriceMinor,
+        totalPriceMinor,
+        paymentMethod,
+        bank,
+        firstPaymentDate,
+        firstPaymentAmountMinor,
+        lastPaymentDate,
+        lastPaymentAmountMinor,
+        wasteKg,
+        netTotalAmountMinor,
+        logisticsName,
+        shipmentDate,
+        deliveryDate,
+        logisticsCostMinor,
+        customsCostMinor,
+        insuranceCostMinor,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExportRecord &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.customerId == this.customerId &&
+          other.customerNameSnapshot == this.customerNameSnapshot &&
+          other.productName == this.productName &&
+          other.productId == this.productId &&
+          other.quantityTon == this.quantityTon &&
+          other.unitPriceMinor == this.unitPriceMinor &&
+          other.totalPriceMinor == this.totalPriceMinor &&
+          other.paymentMethod == this.paymentMethod &&
+          other.bank == this.bank &&
+          other.firstPaymentDate == this.firstPaymentDate &&
+          other.firstPaymentAmountMinor == this.firstPaymentAmountMinor &&
+          other.lastPaymentDate == this.lastPaymentDate &&
+          other.lastPaymentAmountMinor == this.lastPaymentAmountMinor &&
+          other.wasteKg == this.wasteKg &&
+          other.netTotalAmountMinor == this.netTotalAmountMinor &&
+          other.logisticsName == this.logisticsName &&
+          other.shipmentDate == this.shipmentDate &&
+          other.deliveryDate == this.deliveryDate &&
+          other.logisticsCostMinor == this.logisticsCostMinor &&
+          other.customsCostMinor == this.customsCostMinor &&
+          other.insuranceCostMinor == this.insuranceCostMinor &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> customerId;
+  final Value<String?> customerNameSnapshot;
+  final Value<String> productName;
+  final Value<String?> productId;
+  final Value<double> quantityTon;
+  final Value<int> unitPriceMinor;
+  final Value<int> totalPriceMinor;
+  final Value<String?> paymentMethod;
+  final Value<String?> bank;
+  final Value<DateTime?> firstPaymentDate;
+  final Value<int?> firstPaymentAmountMinor;
+  final Value<DateTime?> lastPaymentDate;
+  final Value<int?> lastPaymentAmountMinor;
+  final Value<double?> wasteKg;
+  final Value<int?> netTotalAmountMinor;
+  final Value<String?> logisticsName;
+  final Value<DateTime?> shipmentDate;
+  final Value<DateTime?> deliveryDate;
+  final Value<int?> logisticsCostMinor;
+  final Value<int?> customsCostMinor;
+  final Value<int?> insuranceCostMinor;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const ExportRecordsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.customerId = const Value.absent(),
+    this.customerNameSnapshot = const Value.absent(),
+    this.productName = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.quantityTon = const Value.absent(),
+    this.unitPriceMinor = const Value.absent(),
+    this.totalPriceMinor = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.bank = const Value.absent(),
+    this.firstPaymentDate = const Value.absent(),
+    this.firstPaymentAmountMinor = const Value.absent(),
+    this.lastPaymentDate = const Value.absent(),
+    this.lastPaymentAmountMinor = const Value.absent(),
+    this.wasteKg = const Value.absent(),
+    this.netTotalAmountMinor = const Value.absent(),
+    this.logisticsName = const Value.absent(),
+    this.shipmentDate = const Value.absent(),
+    this.deliveryDate = const Value.absent(),
+    this.logisticsCostMinor = const Value.absent(),
+    this.customsCostMinor = const Value.absent(),
+    this.insuranceCostMinor = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExportRecordsCompanion.insert({
+    required String id,
+    required String title,
+    required String customerId,
+    this.customerNameSnapshot = const Value.absent(),
+    required String productName,
+    this.productId = const Value.absent(),
+    required double quantityTon,
+    required int unitPriceMinor,
+    required int totalPriceMinor,
+    this.paymentMethod = const Value.absent(),
+    this.bank = const Value.absent(),
+    this.firstPaymentDate = const Value.absent(),
+    this.firstPaymentAmountMinor = const Value.absent(),
+    this.lastPaymentDate = const Value.absent(),
+    this.lastPaymentAmountMinor = const Value.absent(),
+    this.wasteKg = const Value.absent(),
+    this.netTotalAmountMinor = const Value.absent(),
+    this.logisticsName = const Value.absent(),
+    this.shipmentDate = const Value.absent(),
+    this.deliveryDate = const Value.absent(),
+    this.logisticsCostMinor = const Value.absent(),
+    this.customsCostMinor = const Value.absent(),
+    this.insuranceCostMinor = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        title = Value(title),
+        customerId = Value(customerId),
+        productName = Value(productName),
+        quantityTon = Value(quantityTon),
+        unitPriceMinor = Value(unitPriceMinor),
+        totalPriceMinor = Value(totalPriceMinor),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<ExportRecord> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? customerId,
+    Expression<String>? customerNameSnapshot,
+    Expression<String>? productName,
+    Expression<String>? productId,
+    Expression<double>? quantityTon,
+    Expression<int>? unitPriceMinor,
+    Expression<int>? totalPriceMinor,
+    Expression<String>? paymentMethod,
+    Expression<String>? bank,
+    Expression<DateTime>? firstPaymentDate,
+    Expression<int>? firstPaymentAmountMinor,
+    Expression<DateTime>? lastPaymentDate,
+    Expression<int>? lastPaymentAmountMinor,
+    Expression<double>? wasteKg,
+    Expression<int>? netTotalAmountMinor,
+    Expression<String>? logisticsName,
+    Expression<DateTime>? shipmentDate,
+    Expression<DateTime>? deliveryDate,
+    Expression<int>? logisticsCostMinor,
+    Expression<int>? customsCostMinor,
+    Expression<int>? insuranceCostMinor,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (customerId != null) 'customer_id': customerId,
+      if (customerNameSnapshot != null)
+        'customer_name_snapshot': customerNameSnapshot,
+      if (productName != null) 'product_name': productName,
+      if (productId != null) 'product_id': productId,
+      if (quantityTon != null) 'quantity_ton': quantityTon,
+      if (unitPriceMinor != null) 'unit_price_minor': unitPriceMinor,
+      if (totalPriceMinor != null) 'total_price_minor': totalPriceMinor,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
+      if (bank != null) 'bank': bank,
+      if (firstPaymentDate != null) 'first_payment_date': firstPaymentDate,
+      if (firstPaymentAmountMinor != null)
+        'first_payment_amount_minor': firstPaymentAmountMinor,
+      if (lastPaymentDate != null) 'last_payment_date': lastPaymentDate,
+      if (lastPaymentAmountMinor != null)
+        'last_payment_amount_minor': lastPaymentAmountMinor,
+      if (wasteKg != null) 'waste_kg': wasteKg,
+      if (netTotalAmountMinor != null)
+        'net_total_amount_minor': netTotalAmountMinor,
+      if (logisticsName != null) 'logistics_name': logisticsName,
+      if (shipmentDate != null) 'shipment_date': shipmentDate,
+      if (deliveryDate != null) 'delivery_date': deliveryDate,
+      if (logisticsCostMinor != null)
+        'logistics_cost_minor': logisticsCostMinor,
+      if (customsCostMinor != null) 'customs_cost_minor': customsCostMinor,
+      if (insuranceCostMinor != null)
+        'insurance_cost_minor': insuranceCostMinor,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExportRecordsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? title,
+      Value<String>? customerId,
+      Value<String?>? customerNameSnapshot,
+      Value<String>? productName,
+      Value<String?>? productId,
+      Value<double>? quantityTon,
+      Value<int>? unitPriceMinor,
+      Value<int>? totalPriceMinor,
+      Value<String?>? paymentMethod,
+      Value<String?>? bank,
+      Value<DateTime?>? firstPaymentDate,
+      Value<int?>? firstPaymentAmountMinor,
+      Value<DateTime?>? lastPaymentDate,
+      Value<int?>? lastPaymentAmountMinor,
+      Value<double?>? wasteKg,
+      Value<int?>? netTotalAmountMinor,
+      Value<String?>? logisticsName,
+      Value<DateTime?>? shipmentDate,
+      Value<DateTime?>? deliveryDate,
+      Value<int?>? logisticsCostMinor,
+      Value<int?>? customsCostMinor,
+      Value<int?>? insuranceCostMinor,
+      Value<String?>? notes,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return ExportRecordsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      customerId: customerId ?? this.customerId,
+      customerNameSnapshot: customerNameSnapshot ?? this.customerNameSnapshot,
+      productName: productName ?? this.productName,
+      productId: productId ?? this.productId,
+      quantityTon: quantityTon ?? this.quantityTon,
+      unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
+      totalPriceMinor: totalPriceMinor ?? this.totalPriceMinor,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      bank: bank ?? this.bank,
+      firstPaymentDate: firstPaymentDate ?? this.firstPaymentDate,
+      firstPaymentAmountMinor:
+          firstPaymentAmountMinor ?? this.firstPaymentAmountMinor,
+      lastPaymentDate: lastPaymentDate ?? this.lastPaymentDate,
+      lastPaymentAmountMinor:
+          lastPaymentAmountMinor ?? this.lastPaymentAmountMinor,
+      wasteKg: wasteKg ?? this.wasteKg,
+      netTotalAmountMinor: netTotalAmountMinor ?? this.netTotalAmountMinor,
+      logisticsName: logisticsName ?? this.logisticsName,
+      shipmentDate: shipmentDate ?? this.shipmentDate,
+      deliveryDate: deliveryDate ?? this.deliveryDate,
+      logisticsCostMinor: logisticsCostMinor ?? this.logisticsCostMinor,
+      customsCostMinor: customsCostMinor ?? this.customsCostMinor,
+      insuranceCostMinor: insuranceCostMinor ?? this.insuranceCostMinor,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (customerId.present) {
+      map['customer_id'] = Variable<String>(customerId.value);
+    }
+    if (customerNameSnapshot.present) {
+      map['customer_name_snapshot'] =
+          Variable<String>(customerNameSnapshot.value);
+    }
+    if (productName.present) {
+      map['product_name'] = Variable<String>(productName.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (quantityTon.present) {
+      map['quantity_ton'] = Variable<double>(quantityTon.value);
+    }
+    if (unitPriceMinor.present) {
+      map['unit_price_minor'] = Variable<int>(unitPriceMinor.value);
+    }
+    if (totalPriceMinor.present) {
+      map['total_price_minor'] = Variable<int>(totalPriceMinor.value);
+    }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
+    if (bank.present) {
+      map['bank'] = Variable<String>(bank.value);
+    }
+    if (firstPaymentDate.present) {
+      map['first_payment_date'] = Variable<DateTime>(firstPaymentDate.value);
+    }
+    if (firstPaymentAmountMinor.present) {
+      map['first_payment_amount_minor'] =
+          Variable<int>(firstPaymentAmountMinor.value);
+    }
+    if (lastPaymentDate.present) {
+      map['last_payment_date'] = Variable<DateTime>(lastPaymentDate.value);
+    }
+    if (lastPaymentAmountMinor.present) {
+      map['last_payment_amount_minor'] =
+          Variable<int>(lastPaymentAmountMinor.value);
+    }
+    if (wasteKg.present) {
+      map['waste_kg'] = Variable<double>(wasteKg.value);
+    }
+    if (netTotalAmountMinor.present) {
+      map['net_total_amount_minor'] = Variable<int>(netTotalAmountMinor.value);
+    }
+    if (logisticsName.present) {
+      map['logistics_name'] = Variable<String>(logisticsName.value);
+    }
+    if (shipmentDate.present) {
+      map['shipment_date'] = Variable<DateTime>(shipmentDate.value);
+    }
+    if (deliveryDate.present) {
+      map['delivery_date'] = Variable<DateTime>(deliveryDate.value);
+    }
+    if (logisticsCostMinor.present) {
+      map['logistics_cost_minor'] = Variable<int>(logisticsCostMinor.value);
+    }
+    if (customsCostMinor.present) {
+      map['customs_cost_minor'] = Variable<int>(customsCostMinor.value);
+    }
+    if (insuranceCostMinor.present) {
+      map['insurance_cost_minor'] = Variable<int>(insuranceCostMinor.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExportRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('customerId: $customerId, ')
+          ..write('customerNameSnapshot: $customerNameSnapshot, ')
+          ..write('productName: $productName, ')
+          ..write('productId: $productId, ')
+          ..write('quantityTon: $quantityTon, ')
+          ..write('unitPriceMinor: $unitPriceMinor, ')
+          ..write('totalPriceMinor: $totalPriceMinor, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('bank: $bank, ')
+          ..write('firstPaymentDate: $firstPaymentDate, ')
+          ..write('firstPaymentAmountMinor: $firstPaymentAmountMinor, ')
+          ..write('lastPaymentDate: $lastPaymentDate, ')
+          ..write('lastPaymentAmountMinor: $lastPaymentAmountMinor, ')
+          ..write('wasteKg: $wasteKg, ')
+          ..write('netTotalAmountMinor: $netTotalAmountMinor, ')
+          ..write('logisticsName: $logisticsName, ')
+          ..write('shipmentDate: $shipmentDate, ')
+          ..write('deliveryDate: $deliveryDate, ')
+          ..write('logisticsCostMinor: $logisticsCostMinor, ')
+          ..write('customsCostMinor: $customsCostMinor, ')
+          ..write('insuranceCostMinor: $insuranceCostMinor, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ImportRecordsTable extends ImportRecords
+    with TableInfo<$ImportRecordsTable, ImportRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _supplierNameMeta =
+      const VerificationMeta('supplierName');
+  @override
+  late final GeneratedColumn<String> supplierName = GeneratedColumn<String>(
+      'supplier_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productsMeta =
+      const VerificationMeta('products');
+  @override
+  late final GeneratedColumn<String> products = GeneratedColumn<String>(
+      'products', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _totalAmountMinorMeta =
+      const VerificationMeta('totalAmountMinor');
+  @override
+  late final GeneratedColumn<int> totalAmountMinor = GeneratedColumn<int>(
+      'total_amount_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _shipmentDateMeta =
+      const VerificationMeta('shipmentDate');
+  @override
+  late final GeneratedColumn<DateTime> shipmentDate = GeneratedColumn<DateTime>(
+      'shipment_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _deliveryDateMeta =
+      const VerificationMeta('deliveryDate');
+  @override
+  late final GeneratedColumn<DateTime> deliveryDate = GeneratedColumn<DateTime>(
+      'delivery_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _logisticsNameMeta =
+      const VerificationMeta('logisticsName');
+  @override
+  late final GeneratedColumn<String> logisticsName = GeneratedColumn<String>(
+      'logistics_name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _logisticsCostMinorMeta =
+      const VerificationMeta('logisticsCostMinor');
+  @override
+  late final GeneratedColumn<int> logisticsCostMinor = GeneratedColumn<int>(
+      'logistics_cost_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _customsCostMinorMeta =
+      const VerificationMeta('customsCostMinor');
+  @override
+  late final GeneratedColumn<int> customsCostMinor = GeneratedColumn<int>(
+      'customs_cost_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _insuranceCostMinorMeta =
+      const VerificationMeta('insuranceCostMinor');
+  @override
+  late final GeneratedColumn<int> insuranceCostMinor = GeneratedColumn<int>(
+      'insurance_cost_minor', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        supplierName,
+        products,
+        totalAmountMinor,
+        shipmentDate,
+        deliveryDate,
+        logisticsName,
+        logisticsCostMinor,
+        customsCostMinor,
+        insuranceCostMinor,
+        notes,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'import_records';
+  @override
+  VerificationContext validateIntegrity(Insertable<ImportRecord> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('supplier_name')) {
+      context.handle(
+          _supplierNameMeta,
+          supplierName.isAcceptableOrUnknown(
+              data['supplier_name']!, _supplierNameMeta));
+    } else if (isInserting) {
+      context.missing(_supplierNameMeta);
+    }
+    if (data.containsKey('products')) {
+      context.handle(_productsMeta,
+          products.isAcceptableOrUnknown(data['products']!, _productsMeta));
+    } else if (isInserting) {
+      context.missing(_productsMeta);
+    }
+    if (data.containsKey('total_amount_minor')) {
+      context.handle(
+          _totalAmountMinorMeta,
+          totalAmountMinor.isAcceptableOrUnknown(
+              data['total_amount_minor']!, _totalAmountMinorMeta));
+    } else if (isInserting) {
+      context.missing(_totalAmountMinorMeta);
+    }
+    if (data.containsKey('shipment_date')) {
+      context.handle(
+          _shipmentDateMeta,
+          shipmentDate.isAcceptableOrUnknown(
+              data['shipment_date']!, _shipmentDateMeta));
+    }
+    if (data.containsKey('delivery_date')) {
+      context.handle(
+          _deliveryDateMeta,
+          deliveryDate.isAcceptableOrUnknown(
+              data['delivery_date']!, _deliveryDateMeta));
+    }
+    if (data.containsKey('logistics_name')) {
+      context.handle(
+          _logisticsNameMeta,
+          logisticsName.isAcceptableOrUnknown(
+              data['logistics_name']!, _logisticsNameMeta));
+    }
+    if (data.containsKey('logistics_cost_minor')) {
+      context.handle(
+          _logisticsCostMinorMeta,
+          logisticsCostMinor.isAcceptableOrUnknown(
+              data['logistics_cost_minor']!, _logisticsCostMinorMeta));
+    }
+    if (data.containsKey('customs_cost_minor')) {
+      context.handle(
+          _customsCostMinorMeta,
+          customsCostMinor.isAcceptableOrUnknown(
+              data['customs_cost_minor']!, _customsCostMinorMeta));
+    }
+    if (data.containsKey('insurance_cost_minor')) {
+      context.handle(
+          _insuranceCostMinorMeta,
+          insuranceCostMinor.isAcceptableOrUnknown(
+              data['insurance_cost_minor']!, _insuranceCostMinorMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ImportRecord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportRecord(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      supplierName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}supplier_name'])!,
+      products: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}products'])!,
+      totalAmountMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}total_amount_minor'])!,
+      shipmentDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}shipment_date']),
+      deliveryDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}delivery_date']),
+      logisticsName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}logistics_name']),
+      logisticsCostMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}logistics_cost_minor']),
+      customsCostMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}customs_cost_minor']),
+      insuranceCostMinor: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}insurance_cost_minor']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $ImportRecordsTable createAlias(String alias) {
+    return $ImportRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class ImportRecord extends DataClass implements Insertable<ImportRecord> {
+  final String id;
+  final String title;
+  final String supplierName;
+  final String products;
+  final int totalAmountMinor;
+  final DateTime? shipmentDate;
+  final DateTime? deliveryDate;
+  final String? logisticsName;
+  final int? logisticsCostMinor;
+  final int? customsCostMinor;
+  final int? insuranceCostMinor;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const ImportRecord(
+      {required this.id,
+      required this.title,
+      required this.supplierName,
+      required this.products,
+      required this.totalAmountMinor,
+      this.shipmentDate,
+      this.deliveryDate,
+      this.logisticsName,
+      this.logisticsCostMinor,
+      this.customsCostMinor,
+      this.insuranceCostMinor,
+      this.notes,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['supplier_name'] = Variable<String>(supplierName);
+    map['products'] = Variable<String>(products);
+    map['total_amount_minor'] = Variable<int>(totalAmountMinor);
+    if (!nullToAbsent || shipmentDate != null) {
+      map['shipment_date'] = Variable<DateTime>(shipmentDate);
+    }
+    if (!nullToAbsent || deliveryDate != null) {
+      map['delivery_date'] = Variable<DateTime>(deliveryDate);
+    }
+    if (!nullToAbsent || logisticsName != null) {
+      map['logistics_name'] = Variable<String>(logisticsName);
+    }
+    if (!nullToAbsent || logisticsCostMinor != null) {
+      map['logistics_cost_minor'] = Variable<int>(logisticsCostMinor);
+    }
+    if (!nullToAbsent || customsCostMinor != null) {
+      map['customs_cost_minor'] = Variable<int>(customsCostMinor);
+    }
+    if (!nullToAbsent || insuranceCostMinor != null) {
+      map['insurance_cost_minor'] = Variable<int>(insuranceCostMinor);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  ImportRecordsCompanion toCompanion(bool nullToAbsent) {
+    return ImportRecordsCompanion(
+      id: Value(id),
+      title: Value(title),
+      supplierName: Value(supplierName),
+      products: Value(products),
+      totalAmountMinor: Value(totalAmountMinor),
+      shipmentDate: shipmentDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shipmentDate),
+      deliveryDate: deliveryDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deliveryDate),
+      logisticsName: logisticsName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logisticsName),
+      logisticsCostMinor: logisticsCostMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logisticsCostMinor),
+      customsCostMinor: customsCostMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customsCostMinor),
+      insuranceCostMinor: insuranceCostMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(insuranceCostMinor),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory ImportRecord.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportRecord(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      supplierName: serializer.fromJson<String>(json['supplierName']),
+      products: serializer.fromJson<String>(json['products']),
+      totalAmountMinor: serializer.fromJson<int>(json['totalAmountMinor']),
+      shipmentDate: serializer.fromJson<DateTime?>(json['shipmentDate']),
+      deliveryDate: serializer.fromJson<DateTime?>(json['deliveryDate']),
+      logisticsName: serializer.fromJson<String?>(json['logisticsName']),
+      logisticsCostMinor: serializer.fromJson<int?>(json['logisticsCostMinor']),
+      customsCostMinor: serializer.fromJson<int?>(json['customsCostMinor']),
+      insuranceCostMinor: serializer.fromJson<int?>(json['insuranceCostMinor']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'supplierName': serializer.toJson<String>(supplierName),
+      'products': serializer.toJson<String>(products),
+      'totalAmountMinor': serializer.toJson<int>(totalAmountMinor),
+      'shipmentDate': serializer.toJson<DateTime?>(shipmentDate),
+      'deliveryDate': serializer.toJson<DateTime?>(deliveryDate),
+      'logisticsName': serializer.toJson<String?>(logisticsName),
+      'logisticsCostMinor': serializer.toJson<int?>(logisticsCostMinor),
+      'customsCostMinor': serializer.toJson<int?>(customsCostMinor),
+      'insuranceCostMinor': serializer.toJson<int?>(insuranceCostMinor),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  ImportRecord copyWith(
+          {String? id,
+          String? title,
+          String? supplierName,
+          String? products,
+          int? totalAmountMinor,
+          Value<DateTime?> shipmentDate = const Value.absent(),
+          Value<DateTime?> deliveryDate = const Value.absent(),
+          Value<String?> logisticsName = const Value.absent(),
+          Value<int?> logisticsCostMinor = const Value.absent(),
+          Value<int?> customsCostMinor = const Value.absent(),
+          Value<int?> insuranceCostMinor = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      ImportRecord(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        supplierName: supplierName ?? this.supplierName,
+        products: products ?? this.products,
+        totalAmountMinor: totalAmountMinor ?? this.totalAmountMinor,
+        shipmentDate:
+            shipmentDate.present ? shipmentDate.value : this.shipmentDate,
+        deliveryDate:
+            deliveryDate.present ? deliveryDate.value : this.deliveryDate,
+        logisticsName:
+            logisticsName.present ? logisticsName.value : this.logisticsName,
+        logisticsCostMinor: logisticsCostMinor.present
+            ? logisticsCostMinor.value
+            : this.logisticsCostMinor,
+        customsCostMinor: customsCostMinor.present
+            ? customsCostMinor.value
+            : this.customsCostMinor,
+        insuranceCostMinor: insuranceCostMinor.present
+            ? insuranceCostMinor.value
+            : this.insuranceCostMinor,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  ImportRecord copyWithCompanion(ImportRecordsCompanion data) {
+    return ImportRecord(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      supplierName: data.supplierName.present
+          ? data.supplierName.value
+          : this.supplierName,
+      products: data.products.present ? data.products.value : this.products,
+      totalAmountMinor: data.totalAmountMinor.present
+          ? data.totalAmountMinor.value
+          : this.totalAmountMinor,
+      shipmentDate: data.shipmentDate.present
+          ? data.shipmentDate.value
+          : this.shipmentDate,
+      deliveryDate: data.deliveryDate.present
+          ? data.deliveryDate.value
+          : this.deliveryDate,
+      logisticsName: data.logisticsName.present
+          ? data.logisticsName.value
+          : this.logisticsName,
+      logisticsCostMinor: data.logisticsCostMinor.present
+          ? data.logisticsCostMinor.value
+          : this.logisticsCostMinor,
+      customsCostMinor: data.customsCostMinor.present
+          ? data.customsCostMinor.value
+          : this.customsCostMinor,
+      insuranceCostMinor: data.insuranceCostMinor.present
+          ? data.insuranceCostMinor.value
+          : this.insuranceCostMinor,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportRecord(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('supplierName: $supplierName, ')
+          ..write('products: $products, ')
+          ..write('totalAmountMinor: $totalAmountMinor, ')
+          ..write('shipmentDate: $shipmentDate, ')
+          ..write('deliveryDate: $deliveryDate, ')
+          ..write('logisticsName: $logisticsName, ')
+          ..write('logisticsCostMinor: $logisticsCostMinor, ')
+          ..write('customsCostMinor: $customsCostMinor, ')
+          ..write('insuranceCostMinor: $insuranceCostMinor, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      title,
+      supplierName,
+      products,
+      totalAmountMinor,
+      shipmentDate,
+      deliveryDate,
+      logisticsName,
+      logisticsCostMinor,
+      customsCostMinor,
+      insuranceCostMinor,
+      notes,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportRecord &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.supplierName == this.supplierName &&
+          other.products == this.products &&
+          other.totalAmountMinor == this.totalAmountMinor &&
+          other.shipmentDate == this.shipmentDate &&
+          other.deliveryDate == this.deliveryDate &&
+          other.logisticsName == this.logisticsName &&
+          other.logisticsCostMinor == this.logisticsCostMinor &&
+          other.customsCostMinor == this.customsCostMinor &&
+          other.insuranceCostMinor == this.insuranceCostMinor &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> supplierName;
+  final Value<String> products;
+  final Value<int> totalAmountMinor;
+  final Value<DateTime?> shipmentDate;
+  final Value<DateTime?> deliveryDate;
+  final Value<String?> logisticsName;
+  final Value<int?> logisticsCostMinor;
+  final Value<int?> customsCostMinor;
+  final Value<int?> insuranceCostMinor;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const ImportRecordsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.supplierName = const Value.absent(),
+    this.products = const Value.absent(),
+    this.totalAmountMinor = const Value.absent(),
+    this.shipmentDate = const Value.absent(),
+    this.deliveryDate = const Value.absent(),
+    this.logisticsName = const Value.absent(),
+    this.logisticsCostMinor = const Value.absent(),
+    this.customsCostMinor = const Value.absent(),
+    this.insuranceCostMinor = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImportRecordsCompanion.insert({
+    required String id,
+    required String title,
+    required String supplierName,
+    required String products,
+    required int totalAmountMinor,
+    this.shipmentDate = const Value.absent(),
+    this.deliveryDate = const Value.absent(),
+    this.logisticsName = const Value.absent(),
+    this.logisticsCostMinor = const Value.absent(),
+    this.customsCostMinor = const Value.absent(),
+    this.insuranceCostMinor = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        title = Value(title),
+        supplierName = Value(supplierName),
+        products = Value(products),
+        totalAmountMinor = Value(totalAmountMinor),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<ImportRecord> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? supplierName,
+    Expression<String>? products,
+    Expression<int>? totalAmountMinor,
+    Expression<DateTime>? shipmentDate,
+    Expression<DateTime>? deliveryDate,
+    Expression<String>? logisticsName,
+    Expression<int>? logisticsCostMinor,
+    Expression<int>? customsCostMinor,
+    Expression<int>? insuranceCostMinor,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (supplierName != null) 'supplier_name': supplierName,
+      if (products != null) 'products': products,
+      if (totalAmountMinor != null) 'total_amount_minor': totalAmountMinor,
+      if (shipmentDate != null) 'shipment_date': shipmentDate,
+      if (deliveryDate != null) 'delivery_date': deliveryDate,
+      if (logisticsName != null) 'logistics_name': logisticsName,
+      if (logisticsCostMinor != null)
+        'logistics_cost_minor': logisticsCostMinor,
+      if (customsCostMinor != null) 'customs_cost_minor': customsCostMinor,
+      if (insuranceCostMinor != null)
+        'insurance_cost_minor': insuranceCostMinor,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImportRecordsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? title,
+      Value<String>? supplierName,
+      Value<String>? products,
+      Value<int>? totalAmountMinor,
+      Value<DateTime?>? shipmentDate,
+      Value<DateTime?>? deliveryDate,
+      Value<String?>? logisticsName,
+      Value<int?>? logisticsCostMinor,
+      Value<int?>? customsCostMinor,
+      Value<int?>? insuranceCostMinor,
+      Value<String?>? notes,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return ImportRecordsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      supplierName: supplierName ?? this.supplierName,
+      products: products ?? this.products,
+      totalAmountMinor: totalAmountMinor ?? this.totalAmountMinor,
+      shipmentDate: shipmentDate ?? this.shipmentDate,
+      deliveryDate: deliveryDate ?? this.deliveryDate,
+      logisticsName: logisticsName ?? this.logisticsName,
+      logisticsCostMinor: logisticsCostMinor ?? this.logisticsCostMinor,
+      customsCostMinor: customsCostMinor ?? this.customsCostMinor,
+      insuranceCostMinor: insuranceCostMinor ?? this.insuranceCostMinor,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (supplierName.present) {
+      map['supplier_name'] = Variable<String>(supplierName.value);
+    }
+    if (products.present) {
+      map['products'] = Variable<String>(products.value);
+    }
+    if (totalAmountMinor.present) {
+      map['total_amount_minor'] = Variable<int>(totalAmountMinor.value);
+    }
+    if (shipmentDate.present) {
+      map['shipment_date'] = Variable<DateTime>(shipmentDate.value);
+    }
+    if (deliveryDate.present) {
+      map['delivery_date'] = Variable<DateTime>(deliveryDate.value);
+    }
+    if (logisticsName.present) {
+      map['logistics_name'] = Variable<String>(logisticsName.value);
+    }
+    if (logisticsCostMinor.present) {
+      map['logistics_cost_minor'] = Variable<int>(logisticsCostMinor.value);
+    }
+    if (customsCostMinor.present) {
+      map['customs_cost_minor'] = Variable<int>(customsCostMinor.value);
+    }
+    if (insuranceCostMinor.present) {
+      map['insurance_cost_minor'] = Variable<int>(insuranceCostMinor.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('supplierName: $supplierName, ')
+          ..write('products: $products, ')
+          ..write('totalAmountMinor: $totalAmountMinor, ')
+          ..write('shipmentDate: $shipmentDate, ')
+          ..write('deliveryDate: $deliveryDate, ')
+          ..write('logisticsName: $logisticsName, ')
+          ..write('logisticsCostMinor: $logisticsCostMinor, ')
+          ..write('customsCostMinor: $customsCostMinor, ')
+          ..write('insuranceCostMinor: $insuranceCostMinor, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8000,6 +10110,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $RemindersTable reminders = $RemindersTable(this);
   late final $PriceListsTable priceLists = $PriceListsTable(this);
   late final $PriceListItemsTable priceListItems = $PriceListItemsTable(this);
+  late final $ExportRecordsTable exportRecords = $ExportRecordsTable(this);
+  late final $ImportRecordsTable importRecords = $ImportRecordsTable(this);
   late final UserDao userDao = UserDao(this as AppDatabase);
   late final AuthSessionDao authSessionDao =
       AuthSessionDao(this as AppDatabase);
@@ -8009,6 +10121,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final CustomerContactDao customerContactDao =
       CustomerContactDao(this as AppDatabase);
   late final DueRecordDao dueRecordDao = DueRecordDao(this as AppDatabase);
+  late final ExportRecordDao exportRecordDao =
+      ExportRecordDao(this as AppDatabase);
+  late final ImportRecordDao importRecordDao =
+      ImportRecordDao(this as AppDatabase);
   late final MeetingDao meetingDao = MeetingDao(this as AppDatabase);
   late final NoteDao noteDao = NoteDao(this as AppDatabase);
   late final ScrapQualityDao scrapQualityDao =
@@ -8037,7 +10153,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         legalTextTemplates,
         reminders,
         priceLists,
-        priceListItems
+        priceListItems,
+        exportRecords,
+        importRecords
       ];
 }
 
@@ -10480,6 +12598,7 @@ typedef $$PriceOffersTableCreateCompanionBuilder = PriceOffersCompanion
   required DateTime offerDate,
   required DateTime validityDate,
   required String customerId,
+  Value<String?> customerNameSnapshot,
   required String contactPerson,
   Value<String?> authorizedPhone,
   Value<String?> mobilePhone,
@@ -10501,6 +12620,7 @@ typedef $$PriceOffersTableUpdateCompanionBuilder = PriceOffersCompanion
   Value<DateTime> offerDate,
   Value<DateTime> validityDate,
   Value<String> customerId,
+  Value<String?> customerNameSnapshot,
   Value<String> contactPerson,
   Value<String?> authorizedPhone,
   Value<String?> mobilePhone,
@@ -10539,6 +12659,10 @@ class $$PriceOffersTableFilterComposer
 
   ColumnFilters<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get contactPerson => $composableBuilder(
       column: $table.contactPerson, builder: (column) => ColumnFilters(column));
@@ -10605,6 +12729,10 @@ class $$PriceOffersTableOrderingComposer
 
   ColumnOrderings<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get contactPerson => $composableBuilder(
       column: $table.contactPerson,
@@ -10673,6 +12801,9 @@ class $$PriceOffersTableAnnotationComposer
   GeneratedColumn<String> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => column);
 
+  GeneratedColumn<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot, builder: (column) => column);
+
   GeneratedColumn<String> get contactPerson => $composableBuilder(
       column: $table.contactPerson, builder: (column) => column);
 
@@ -10738,6 +12869,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             Value<DateTime> offerDate = const Value.absent(),
             Value<DateTime> validityDate = const Value.absent(),
             Value<String> customerId = const Value.absent(),
+            Value<String?> customerNameSnapshot = const Value.absent(),
             Value<String> contactPerson = const Value.absent(),
             Value<String?> authorizedPhone = const Value.absent(),
             Value<String?> mobilePhone = const Value.absent(),
@@ -10758,6 +12890,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             offerDate: offerDate,
             validityDate: validityDate,
             customerId: customerId,
+            customerNameSnapshot: customerNameSnapshot,
             contactPerson: contactPerson,
             authorizedPhone: authorizedPhone,
             mobilePhone: mobilePhone,
@@ -10778,6 +12911,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             required DateTime offerDate,
             required DateTime validityDate,
             required String customerId,
+            Value<String?> customerNameSnapshot = const Value.absent(),
             required String contactPerson,
             Value<String?> authorizedPhone = const Value.absent(),
             Value<String?> mobilePhone = const Value.absent(),
@@ -10798,6 +12932,7 @@ class $$PriceOffersTableTableManager extends RootTableManager<
             offerDate: offerDate,
             validityDate: validityDate,
             customerId: customerId,
+            customerNameSnapshot: customerNameSnapshot,
             contactPerson: contactPerson,
             authorizedPhone: authorizedPhone,
             mobilePhone: mobilePhone,
@@ -11991,6 +14126,870 @@ typedef $$PriceListItemsTableProcessedTableManager = ProcessedTableManager<
     ),
     PriceListItem,
     PrefetchHooks Function()>;
+typedef $$ExportRecordsTableCreateCompanionBuilder = ExportRecordsCompanion
+    Function({
+  required String id,
+  required String title,
+  required String customerId,
+  Value<String?> customerNameSnapshot,
+  required String productName,
+  Value<String?> productId,
+  required double quantityTon,
+  required int unitPriceMinor,
+  required int totalPriceMinor,
+  Value<String?> paymentMethod,
+  Value<String?> bank,
+  Value<DateTime?> firstPaymentDate,
+  Value<int?> firstPaymentAmountMinor,
+  Value<DateTime?> lastPaymentDate,
+  Value<int?> lastPaymentAmountMinor,
+  Value<double?> wasteKg,
+  Value<int?> netTotalAmountMinor,
+  Value<String?> logisticsName,
+  Value<DateTime?> shipmentDate,
+  Value<DateTime?> deliveryDate,
+  Value<int?> logisticsCostMinor,
+  Value<int?> customsCostMinor,
+  Value<int?> insuranceCostMinor,
+  Value<String?> notes,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$ExportRecordsTableUpdateCompanionBuilder = ExportRecordsCompanion
+    Function({
+  Value<String> id,
+  Value<String> title,
+  Value<String> customerId,
+  Value<String?> customerNameSnapshot,
+  Value<String> productName,
+  Value<String?> productId,
+  Value<double> quantityTon,
+  Value<int> unitPriceMinor,
+  Value<int> totalPriceMinor,
+  Value<String?> paymentMethod,
+  Value<String?> bank,
+  Value<DateTime?> firstPaymentDate,
+  Value<int?> firstPaymentAmountMinor,
+  Value<DateTime?> lastPaymentDate,
+  Value<int?> lastPaymentAmountMinor,
+  Value<double?> wasteKg,
+  Value<int?> netTotalAmountMinor,
+  Value<String?> logisticsName,
+  Value<DateTime?> shipmentDate,
+  Value<DateTime?> deliveryDate,
+  Value<int?> logisticsCostMinor,
+  Value<int?> customsCostMinor,
+  Value<int?> insuranceCostMinor,
+  Value<String?> notes,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$ExportRecordsTableFilterComposer
+    extends Composer<_$AppDatabase, $ExportRecordsTable> {
+  $$ExportRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customerId => $composableBuilder(
+      column: $table.customerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get productId => $composableBuilder(
+      column: $table.productId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantityTon => $composableBuilder(
+      column: $table.quantityTon, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get unitPriceMinor => $composableBuilder(
+      column: $table.unitPriceMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalPriceMinor => $composableBuilder(
+      column: $table.totalPriceMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+      column: $table.paymentMethod, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get bank => $composableBuilder(
+      column: $table.bank, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get firstPaymentDate => $composableBuilder(
+      column: $table.firstPaymentDate,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get firstPaymentAmountMinor => $composableBuilder(
+      column: $table.firstPaymentAmountMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastPaymentDate => $composableBuilder(
+      column: $table.lastPaymentDate,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastPaymentAmountMinor => $composableBuilder(
+      column: $table.lastPaymentAmountMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get wasteKg => $composableBuilder(
+      column: $table.wasteKg, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get netTotalAmountMinor => $composableBuilder(
+      column: $table.netTotalAmountMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get logisticsName => $composableBuilder(
+      column: $table.logisticsName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get shipmentDate => $composableBuilder(
+      column: $table.shipmentDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deliveryDate => $composableBuilder(
+      column: $table.deliveryDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get logisticsCostMinor => $composableBuilder(
+      column: $table.logisticsCostMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get customsCostMinor => $composableBuilder(
+      column: $table.customsCostMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get insuranceCostMinor => $composableBuilder(
+      column: $table.insuranceCostMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ExportRecordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExportRecordsTable> {
+  $$ExportRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get customerId => $composableBuilder(
+      column: $table.customerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+      column: $table.productId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantityTon => $composableBuilder(
+      column: $table.quantityTon, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get unitPriceMinor => $composableBuilder(
+      column: $table.unitPriceMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalPriceMinor => $composableBuilder(
+      column: $table.totalPriceMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+      column: $table.paymentMethod,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get bank => $composableBuilder(
+      column: $table.bank, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get firstPaymentDate => $composableBuilder(
+      column: $table.firstPaymentDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get firstPaymentAmountMinor => $composableBuilder(
+      column: $table.firstPaymentAmountMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastPaymentDate => $composableBuilder(
+      column: $table.lastPaymentDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastPaymentAmountMinor => $composableBuilder(
+      column: $table.lastPaymentAmountMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get wasteKg => $composableBuilder(
+      column: $table.wasteKg, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get netTotalAmountMinor => $composableBuilder(
+      column: $table.netTotalAmountMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get logisticsName => $composableBuilder(
+      column: $table.logisticsName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get shipmentDate => $composableBuilder(
+      column: $table.shipmentDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deliveryDate => $composableBuilder(
+      column: $table.deliveryDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get logisticsCostMinor => $composableBuilder(
+      column: $table.logisticsCostMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get customsCostMinor => $composableBuilder(
+      column: $table.customsCostMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get insuranceCostMinor => $composableBuilder(
+      column: $table.insuranceCostMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ExportRecordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExportRecordsTable> {
+  $$ExportRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get customerId => $composableBuilder(
+      column: $table.customerId, builder: (column) => column);
+
+  GeneratedColumn<String> get customerNameSnapshot => $composableBuilder(
+      column: $table.customerNameSnapshot, builder: (column) => column);
+
+  GeneratedColumn<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<double> get quantityTon => $composableBuilder(
+      column: $table.quantityTon, builder: (column) => column);
+
+  GeneratedColumn<int> get unitPriceMinor => $composableBuilder(
+      column: $table.unitPriceMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get totalPriceMinor => $composableBuilder(
+      column: $table.totalPriceMinor, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+      column: $table.paymentMethod, builder: (column) => column);
+
+  GeneratedColumn<String> get bank =>
+      $composableBuilder(column: $table.bank, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get firstPaymentDate => $composableBuilder(
+      column: $table.firstPaymentDate, builder: (column) => column);
+
+  GeneratedColumn<int> get firstPaymentAmountMinor => $composableBuilder(
+      column: $table.firstPaymentAmountMinor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastPaymentDate => $composableBuilder(
+      column: $table.lastPaymentDate, builder: (column) => column);
+
+  GeneratedColumn<int> get lastPaymentAmountMinor => $composableBuilder(
+      column: $table.lastPaymentAmountMinor, builder: (column) => column);
+
+  GeneratedColumn<double> get wasteKg =>
+      $composableBuilder(column: $table.wasteKg, builder: (column) => column);
+
+  GeneratedColumn<int> get netTotalAmountMinor => $composableBuilder(
+      column: $table.netTotalAmountMinor, builder: (column) => column);
+
+  GeneratedColumn<String> get logisticsName => $composableBuilder(
+      column: $table.logisticsName, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get shipmentDate => $composableBuilder(
+      column: $table.shipmentDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deliveryDate => $composableBuilder(
+      column: $table.deliveryDate, builder: (column) => column);
+
+  GeneratedColumn<int> get logisticsCostMinor => $composableBuilder(
+      column: $table.logisticsCostMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get customsCostMinor => $composableBuilder(
+      column: $table.customsCostMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get insuranceCostMinor => $composableBuilder(
+      column: $table.insuranceCostMinor, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$ExportRecordsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ExportRecordsTable,
+    ExportRecord,
+    $$ExportRecordsTableFilterComposer,
+    $$ExportRecordsTableOrderingComposer,
+    $$ExportRecordsTableAnnotationComposer,
+    $$ExportRecordsTableCreateCompanionBuilder,
+    $$ExportRecordsTableUpdateCompanionBuilder,
+    (
+      ExportRecord,
+      BaseReferences<_$AppDatabase, $ExportRecordsTable, ExportRecord>
+    ),
+    ExportRecord,
+    PrefetchHooks Function()> {
+  $$ExportRecordsTableTableManager(_$AppDatabase db, $ExportRecordsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExportRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExportRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExportRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String> customerId = const Value.absent(),
+            Value<String?> customerNameSnapshot = const Value.absent(),
+            Value<String> productName = const Value.absent(),
+            Value<String?> productId = const Value.absent(),
+            Value<double> quantityTon = const Value.absent(),
+            Value<int> unitPriceMinor = const Value.absent(),
+            Value<int> totalPriceMinor = const Value.absent(),
+            Value<String?> paymentMethod = const Value.absent(),
+            Value<String?> bank = const Value.absent(),
+            Value<DateTime?> firstPaymentDate = const Value.absent(),
+            Value<int?> firstPaymentAmountMinor = const Value.absent(),
+            Value<DateTime?> lastPaymentDate = const Value.absent(),
+            Value<int?> lastPaymentAmountMinor = const Value.absent(),
+            Value<double?> wasteKg = const Value.absent(),
+            Value<int?> netTotalAmountMinor = const Value.absent(),
+            Value<String?> logisticsName = const Value.absent(),
+            Value<DateTime?> shipmentDate = const Value.absent(),
+            Value<DateTime?> deliveryDate = const Value.absent(),
+            Value<int?> logisticsCostMinor = const Value.absent(),
+            Value<int?> customsCostMinor = const Value.absent(),
+            Value<int?> insuranceCostMinor = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExportRecordsCompanion(
+            id: id,
+            title: title,
+            customerId: customerId,
+            customerNameSnapshot: customerNameSnapshot,
+            productName: productName,
+            productId: productId,
+            quantityTon: quantityTon,
+            unitPriceMinor: unitPriceMinor,
+            totalPriceMinor: totalPriceMinor,
+            paymentMethod: paymentMethod,
+            bank: bank,
+            firstPaymentDate: firstPaymentDate,
+            firstPaymentAmountMinor: firstPaymentAmountMinor,
+            lastPaymentDate: lastPaymentDate,
+            lastPaymentAmountMinor: lastPaymentAmountMinor,
+            wasteKg: wasteKg,
+            netTotalAmountMinor: netTotalAmountMinor,
+            logisticsName: logisticsName,
+            shipmentDate: shipmentDate,
+            deliveryDate: deliveryDate,
+            logisticsCostMinor: logisticsCostMinor,
+            customsCostMinor: customsCostMinor,
+            insuranceCostMinor: insuranceCostMinor,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String title,
+            required String customerId,
+            Value<String?> customerNameSnapshot = const Value.absent(),
+            required String productName,
+            Value<String?> productId = const Value.absent(),
+            required double quantityTon,
+            required int unitPriceMinor,
+            required int totalPriceMinor,
+            Value<String?> paymentMethod = const Value.absent(),
+            Value<String?> bank = const Value.absent(),
+            Value<DateTime?> firstPaymentDate = const Value.absent(),
+            Value<int?> firstPaymentAmountMinor = const Value.absent(),
+            Value<DateTime?> lastPaymentDate = const Value.absent(),
+            Value<int?> lastPaymentAmountMinor = const Value.absent(),
+            Value<double?> wasteKg = const Value.absent(),
+            Value<int?> netTotalAmountMinor = const Value.absent(),
+            Value<String?> logisticsName = const Value.absent(),
+            Value<DateTime?> shipmentDate = const Value.absent(),
+            Value<DateTime?> deliveryDate = const Value.absent(),
+            Value<int?> logisticsCostMinor = const Value.absent(),
+            Value<int?> customsCostMinor = const Value.absent(),
+            Value<int?> insuranceCostMinor = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExportRecordsCompanion.insert(
+            id: id,
+            title: title,
+            customerId: customerId,
+            customerNameSnapshot: customerNameSnapshot,
+            productName: productName,
+            productId: productId,
+            quantityTon: quantityTon,
+            unitPriceMinor: unitPriceMinor,
+            totalPriceMinor: totalPriceMinor,
+            paymentMethod: paymentMethod,
+            bank: bank,
+            firstPaymentDate: firstPaymentDate,
+            firstPaymentAmountMinor: firstPaymentAmountMinor,
+            lastPaymentDate: lastPaymentDate,
+            lastPaymentAmountMinor: lastPaymentAmountMinor,
+            wasteKg: wasteKg,
+            netTotalAmountMinor: netTotalAmountMinor,
+            logisticsName: logisticsName,
+            shipmentDate: shipmentDate,
+            deliveryDate: deliveryDate,
+            logisticsCostMinor: logisticsCostMinor,
+            customsCostMinor: customsCostMinor,
+            insuranceCostMinor: insuranceCostMinor,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ExportRecordsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ExportRecordsTable,
+    ExportRecord,
+    $$ExportRecordsTableFilterComposer,
+    $$ExportRecordsTableOrderingComposer,
+    $$ExportRecordsTableAnnotationComposer,
+    $$ExportRecordsTableCreateCompanionBuilder,
+    $$ExportRecordsTableUpdateCompanionBuilder,
+    (
+      ExportRecord,
+      BaseReferences<_$AppDatabase, $ExportRecordsTable, ExportRecord>
+    ),
+    ExportRecord,
+    PrefetchHooks Function()>;
+typedef $$ImportRecordsTableCreateCompanionBuilder = ImportRecordsCompanion
+    Function({
+  required String id,
+  required String title,
+  required String supplierName,
+  required String products,
+  required int totalAmountMinor,
+  Value<DateTime?> shipmentDate,
+  Value<DateTime?> deliveryDate,
+  Value<String?> logisticsName,
+  Value<int?> logisticsCostMinor,
+  Value<int?> customsCostMinor,
+  Value<int?> insuranceCostMinor,
+  Value<String?> notes,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$ImportRecordsTableUpdateCompanionBuilder = ImportRecordsCompanion
+    Function({
+  Value<String> id,
+  Value<String> title,
+  Value<String> supplierName,
+  Value<String> products,
+  Value<int> totalAmountMinor,
+  Value<DateTime?> shipmentDate,
+  Value<DateTime?> deliveryDate,
+  Value<String?> logisticsName,
+  Value<int?> logisticsCostMinor,
+  Value<int?> customsCostMinor,
+  Value<int?> insuranceCostMinor,
+  Value<String?> notes,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$ImportRecordsTableFilterComposer
+    extends Composer<_$AppDatabase, $ImportRecordsTable> {
+  $$ImportRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get supplierName => $composableBuilder(
+      column: $table.supplierName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get products => $composableBuilder(
+      column: $table.products, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalAmountMinor => $composableBuilder(
+      column: $table.totalAmountMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get shipmentDate => $composableBuilder(
+      column: $table.shipmentDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deliveryDate => $composableBuilder(
+      column: $table.deliveryDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get logisticsName => $composableBuilder(
+      column: $table.logisticsName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get logisticsCostMinor => $composableBuilder(
+      column: $table.logisticsCostMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get customsCostMinor => $composableBuilder(
+      column: $table.customsCostMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get insuranceCostMinor => $composableBuilder(
+      column: $table.insuranceCostMinor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ImportRecordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ImportRecordsTable> {
+  $$ImportRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get supplierName => $composableBuilder(
+      column: $table.supplierName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get products => $composableBuilder(
+      column: $table.products, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalAmountMinor => $composableBuilder(
+      column: $table.totalAmountMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get shipmentDate => $composableBuilder(
+      column: $table.shipmentDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deliveryDate => $composableBuilder(
+      column: $table.deliveryDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get logisticsName => $composableBuilder(
+      column: $table.logisticsName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get logisticsCostMinor => $composableBuilder(
+      column: $table.logisticsCostMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get customsCostMinor => $composableBuilder(
+      column: $table.customsCostMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get insuranceCostMinor => $composableBuilder(
+      column: $table.insuranceCostMinor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ImportRecordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ImportRecordsTable> {
+  $$ImportRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get supplierName => $composableBuilder(
+      column: $table.supplierName, builder: (column) => column);
+
+  GeneratedColumn<String> get products =>
+      $composableBuilder(column: $table.products, builder: (column) => column);
+
+  GeneratedColumn<int> get totalAmountMinor => $composableBuilder(
+      column: $table.totalAmountMinor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get shipmentDate => $composableBuilder(
+      column: $table.shipmentDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deliveryDate => $composableBuilder(
+      column: $table.deliveryDate, builder: (column) => column);
+
+  GeneratedColumn<String> get logisticsName => $composableBuilder(
+      column: $table.logisticsName, builder: (column) => column);
+
+  GeneratedColumn<int> get logisticsCostMinor => $composableBuilder(
+      column: $table.logisticsCostMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get customsCostMinor => $composableBuilder(
+      column: $table.customsCostMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get insuranceCostMinor => $composableBuilder(
+      column: $table.insuranceCostMinor, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$ImportRecordsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ImportRecordsTable,
+    ImportRecord,
+    $$ImportRecordsTableFilterComposer,
+    $$ImportRecordsTableOrderingComposer,
+    $$ImportRecordsTableAnnotationComposer,
+    $$ImportRecordsTableCreateCompanionBuilder,
+    $$ImportRecordsTableUpdateCompanionBuilder,
+    (
+      ImportRecord,
+      BaseReferences<_$AppDatabase, $ImportRecordsTable, ImportRecord>
+    ),
+    ImportRecord,
+    PrefetchHooks Function()> {
+  $$ImportRecordsTableTableManager(_$AppDatabase db, $ImportRecordsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImportRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImportRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String> supplierName = const Value.absent(),
+            Value<String> products = const Value.absent(),
+            Value<int> totalAmountMinor = const Value.absent(),
+            Value<DateTime?> shipmentDate = const Value.absent(),
+            Value<DateTime?> deliveryDate = const Value.absent(),
+            Value<String?> logisticsName = const Value.absent(),
+            Value<int?> logisticsCostMinor = const Value.absent(),
+            Value<int?> customsCostMinor = const Value.absent(),
+            Value<int?> insuranceCostMinor = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ImportRecordsCompanion(
+            id: id,
+            title: title,
+            supplierName: supplierName,
+            products: products,
+            totalAmountMinor: totalAmountMinor,
+            shipmentDate: shipmentDate,
+            deliveryDate: deliveryDate,
+            logisticsName: logisticsName,
+            logisticsCostMinor: logisticsCostMinor,
+            customsCostMinor: customsCostMinor,
+            insuranceCostMinor: insuranceCostMinor,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String title,
+            required String supplierName,
+            required String products,
+            required int totalAmountMinor,
+            Value<DateTime?> shipmentDate = const Value.absent(),
+            Value<DateTime?> deliveryDate = const Value.absent(),
+            Value<String?> logisticsName = const Value.absent(),
+            Value<int?> logisticsCostMinor = const Value.absent(),
+            Value<int?> customsCostMinor = const Value.absent(),
+            Value<int?> insuranceCostMinor = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ImportRecordsCompanion.insert(
+            id: id,
+            title: title,
+            supplierName: supplierName,
+            products: products,
+            totalAmountMinor: totalAmountMinor,
+            shipmentDate: shipmentDate,
+            deliveryDate: deliveryDate,
+            logisticsName: logisticsName,
+            logisticsCostMinor: logisticsCostMinor,
+            customsCostMinor: customsCostMinor,
+            insuranceCostMinor: insuranceCostMinor,
+            notes: notes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ImportRecordsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ImportRecordsTable,
+    ImportRecord,
+    $$ImportRecordsTableFilterComposer,
+    $$ImportRecordsTableOrderingComposer,
+    $$ImportRecordsTableAnnotationComposer,
+    $$ImportRecordsTableCreateCompanionBuilder,
+    $$ImportRecordsTableUpdateCompanionBuilder,
+    (
+      ImportRecord,
+      BaseReferences<_$AppDatabase, $ImportRecordsTable, ImportRecord>
+    ),
+    ImportRecord,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12025,4 +15024,8 @@ class $AppDatabaseManager {
       $$PriceListsTableTableManager(_db, _db.priceLists);
   $$PriceListItemsTableTableManager get priceListItems =>
       $$PriceListItemsTableTableManager(_db, _db.priceListItems);
+  $$ExportRecordsTableTableManager get exportRecords =>
+      $$ExportRecordsTableTableManager(_db, _db.exportRecords);
+  $$ImportRecordsTableTableManager get importRecords =>
+      $$ImportRecordsTableTableManager(_db, _db.importRecords);
 }

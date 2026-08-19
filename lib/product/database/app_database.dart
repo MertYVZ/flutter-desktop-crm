@@ -6,6 +6,8 @@ import 'package:Ok/product/database/daos/auth_session_dao.dart';
 import 'package:Ok/product/database/daos/customer_contact_dao.dart';
 import 'package:Ok/product/database/daos/customer_dao.dart';
 import 'package:Ok/product/database/daos/due_record_dao.dart';
+import 'package:Ok/product/database/daos/export_record_dao.dart';
+import 'package:Ok/product/database/daos/import_record_dao.dart';
 import 'package:Ok/product/database/daos/meeting_dao.dart';
 import 'package:Ok/product/database/daos/note_dao.dart';
 import 'package:Ok/product/database/daos/legal_text_template_dao.dart';
@@ -19,6 +21,8 @@ import 'package:Ok/product/database/tables/auth_sessions_table.dart';
 import 'package:Ok/product/database/tables/customer_contacts_table.dart';
 import 'package:Ok/product/database/tables/customers_table.dart';
 import 'package:Ok/product/database/tables/due_records_table.dart';
+import 'package:Ok/product/database/tables/export_records_table.dart';
+import 'package:Ok/product/database/tables/import_records_table.dart';
 import 'package:Ok/product/database/tables/meetings_table.dart';
 import 'package:Ok/product/database/tables/notes_table.dart';
 import 'package:Ok/product/database/tables/legal_text_templates_table.dart';
@@ -49,6 +53,8 @@ part 'app_database.g.dart';
     Reminders,
     PriceLists,
     PriceListItems,
+    ExportRecords,
+    ImportRecords,
   ],
   daos: [
     UserDao,
@@ -57,6 +63,8 @@ part 'app_database.g.dart';
     CustomerDao,
     CustomerContactDao,
     DueRecordDao,
+    ExportRecordDao,
+    ImportRecordDao,
     MeetingDao,
     NoteDao,
     ScrapQualityDao,
@@ -72,7 +80,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -237,6 +245,46 @@ class AppDatabase extends _$AppDatabase {
               'currency',
               'TEXT',
             );
+          }
+          if (from < 17) {
+            await _addColumnIfNotExists(
+              'price_offers',
+              'customer_name_snapshot',
+              'TEXT',
+            );
+            await customStatement('''
+              UPDATE price_offers
+              SET customer_name_snapshot = (
+                SELECT name FROM customers
+                WHERE customers.id = price_offers.customer_id
+              )
+              WHERE customer_name_snapshot IS NULL
+                AND customer_id IS NOT NULL
+                AND TRIM(customer_id) != ''
+            ''');
+          }
+          if (from < 18) {
+            await m.createTable(exportRecords);
+          }
+          if (from < 19) {
+            await m.createTable(importRecords);
+          }
+          if (from < 20) {
+            await _addColumnIfNotExists(
+              'export_records',
+              'customer_name_snapshot',
+              'TEXT',
+            );
+            await customStatement('''
+              UPDATE export_records
+              SET customer_name_snapshot = (
+                SELECT name FROM customers
+                WHERE customers.id = export_records.customer_id
+              )
+              WHERE customer_name_snapshot IS NULL
+                AND customer_id IS NOT NULL
+                AND TRIM(customer_id) != ''
+            ''');
           }
         },
       );

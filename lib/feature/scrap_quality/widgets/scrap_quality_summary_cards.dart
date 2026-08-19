@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:Ok/feature/scrap_quality/controllers/scrap_quality_controller.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/money_utils.dart';
@@ -27,52 +28,150 @@ class ScrapQualitySummaryCards extends StatelessWidget {
 
         return Obx(() {
           final summary = controller.summary.value;
+          final currencyLabel = summary.currency.label;
 
-          return _SummaryCardsLayout(
-            useSingleRow: useSingleRow,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _SummaryCard(
-                label: 'Toplam Bulunan Hurda',
-                value: QuantityUtils.formatKg(summary.totalFoundKg),
-                helper: 'Seçili ay toplamı',
-                icon: Icons.inventory_2_outlined,
-              ),
-              _SummaryCard(
-                label: 'Satın Alınan Hurda',
-                value: QuantityUtils.formatKg(summary.totalPurchasedKg),
-                helper: 'Alındı statüsündeki kayıtlar',
-                icon: Icons.check_circle_outline_rounded,
-                accentColor: const Color(0xFF059669),
-              ),
-              _SummaryCard(
-                label: 'Kaybedilen / Alınamayan',
-                value: QuantityUtils.formatKg(summary.totalNotPurchasedKg),
-                helper: 'Alınmadı statüsündeki kayıtlar',
-                icon: Icons.trending_down_rounded,
-                accentColor: const Color(0xFFDC2626),
-              ),
-              _SummaryCard(
-                label: 'Bekleyen / Sonuçlanmamış',
-                value: QuantityUtils.formatKg(summary.totalPendingKg),
-                helper: 'Bekleyecek ve sonuçlanmadı',
-                icon: Icons.hourglass_empty_rounded,
-                accentColor: const Color(0xFFF59E0B),
-              ),
-              _SummaryCard(
-                label: 'Ort. Teklif Fiyatı',
-                value: summary.averageOfferPrice <= 0
-                    ? '—'
-                    : '${MoneyUtils.formatAmountInput(summary.averageOfferPrice)} TL/KG',
-                helper: summary.totalFoundKg <= 0
-                    ? 'Teklif girilen kayıt yok'
-                    : 'Alım Oranı: %${summary.purchaseRatePercent.toStringAsFixed(1)}',
-                icon: Icons.payments_outlined,
-                accentColor: const Color(0xFF2563EB),
+              _CurrencyTabs(controller: controller),
+              const SizedBox(height: AppUiTokens.space12),
+              _SummaryCardsLayout(
+                useSingleRow: useSingleRow,
+                children: [
+                  _SummaryCard(
+                    label: 'Toplam Bulunan Hurda',
+                    value: QuantityUtils.formatKg(summary.totalFoundKg),
+                    helper: 'Seçili ay toplamı',
+                    icon: Icons.inventory_2_outlined,
+                  ),
+                  _SummaryCard(
+                    label: 'Satın Alınan Hurda',
+                    value: QuantityUtils.formatKg(summary.totalPurchasedKg),
+                    helper: 'Alındı statüsündeki kayıtlar',
+                    icon: Icons.check_circle_outline_rounded,
+                    accentColor: const Color(0xFF059669),
+                  ),
+                  _SummaryCard(
+                    label: 'Kaybedilen / Alınamayan',
+                    value: QuantityUtils.formatKg(summary.totalNotPurchasedKg),
+                    helper: 'Alınmadı statüsündeki kayıtlar',
+                    icon: Icons.trending_down_rounded,
+                    accentColor: const Color(0xFFDC2626),
+                  ),
+                  _SummaryCard(
+                    label: 'Bekleyen / Sonuçlanmamış',
+                    value: QuantityUtils.formatKg(summary.totalPendingKg),
+                    helper: 'Bekleyecek ve sonuçlanmadı',
+                    icon: Icons.hourglass_empty_rounded,
+                    accentColor: const Color(0xFFF59E0B),
+                  ),
+                  _SummaryCard(
+                    label: 'Ort. Teklif Fiyatı',
+                    value: summary.averageOfferPrice <= 0
+                        ? '—'
+                        : '${MoneyUtils.formatAmountInput(summary.averageOfferPrice)} $currencyLabel/KG',
+                    helper: summary.averageOfferPrice <= 0
+                        ? '$currencyLabel teklif girilen kayıt yok'
+                        : 'Alım Oranı: %${summary.purchaseRatePercent.toStringAsFixed(1)}',
+                    icon: Icons.payments_outlined,
+                    accentColor: const Color(0xFF2563EB),
+                  ),
+                ],
               ),
             ],
           );
         });
       },
+    );
+  }
+}
+
+class _CurrencyTabs extends StatelessWidget {
+  const _CurrencyTabs({required this.controller});
+
+  final ScrapQualityController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final selected = controller.selectedKpiCurrency.value;
+
+      return Row(
+        children: [
+          Text(
+            'Para birimi',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppUiTokens.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(width: AppUiTokens.space12),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppUiTokens.surface,
+              border: Border.all(color: AppUiTokens.border),
+              borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final currency in CurrencyType.values)
+                  _CurrencyTab(
+                    label: currency.label,
+                    isSelected: selected == currency,
+                    onTap: () => controller.selectKpiCurrency(currency),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _CurrencyTab extends StatelessWidget {
+  const _CurrencyTab({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        mouseCursor: SystemMouseCursors.click,
+        borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isSelected ? AppUiTokens.accentSoft : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppUiTokens.space12,
+              vertical: AppUiTokens.space8,
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected
+                    ? AppUiTokens.textPrimary
+                    : AppUiTokens.textSecondary,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

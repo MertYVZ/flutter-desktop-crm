@@ -7,6 +7,12 @@ import 'package:Ok/feature/customers/views/customers_list_page.dart';
 import 'package:Ok/feature/due_tracking/views/due_tracking_create_page.dart';
 import 'package:Ok/feature/due_tracking/views/due_tracking_edit_page.dart';
 import 'package:Ok/feature/due_tracking/views/due_tracking_list_page.dart';
+import 'package:Ok/feature/export/views/export_create_page.dart';
+import 'package:Ok/feature/export/views/export_edit_page.dart';
+import 'package:Ok/feature/export/views/export_list_page.dart';
+import 'package:Ok/feature/import/views/import_create_page.dart';
+import 'package:Ok/feature/import/views/import_edit_page.dart';
+import 'package:Ok/feature/import/views/import_list_page.dart';
 import 'package:Ok/feature/meetings/views/meeting_create_page.dart';
 import 'package:Ok/feature/meetings/views/meeting_detail_page.dart';
 import 'package:Ok/feature/meetings/views/meeting_edit_page.dart';
@@ -193,6 +199,26 @@ class _ContentPanel extends StatelessWidget {
       );
     }
 
+    if (menu == ShellMenuItem.exports || route.startsWith('/exports')) {
+      return ColoredBox(
+        color: AppUiTokens.surface,
+        child: Padding(
+          padding: padding,
+          child: _ExportRouteContent(route: route),
+        ),
+      );
+    }
+
+    if (menu == ShellMenuItem.imports || route.startsWith('/imports')) {
+      return ColoredBox(
+        color: AppUiTokens.surface,
+        child: Padding(
+          padding: padding,
+          child: _ImportRouteContent(route: route),
+        ),
+      );
+    }
+
     if (menu == ShellMenuItem.notebook || route.startsWith('/notes')) {
       return ColoredBox(
         color: AppUiTokens.surface,
@@ -375,6 +401,44 @@ class _ScrapQualityRouteContent extends StatelessWidget {
     }
 
     return const ScrapQualityListPage();
+  }
+}
+
+class _ExportRouteContent extends StatelessWidget {
+  const _ExportRouteContent({required this.route});
+
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    if (route == AppRoutes.exportsNew.value) {
+      return const ExportCreatePage();
+    }
+
+    if (route.endsWith('/edit') && route.startsWith('/exports/')) {
+      return const ExportEditPage();
+    }
+
+    return const ExportListPage();
+  }
+}
+
+class _ImportRouteContent extends StatelessWidget {
+  const _ImportRouteContent({required this.route});
+
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    if (route == AppRoutes.importsNew.value) {
+      return const ImportCreatePage();
+    }
+
+    if (route.endsWith('/edit') && route.startsWith('/imports/')) {
+      return const ImportEditPage();
+    }
+
+    return const ImportListPage();
   }
 }
 

@@ -2,18 +2,15 @@ final class PriceOfferMessages {
   PriceOfferMessages._();
 
   static const createSuccess = 'Fiyat teklifi oluşturuldu.';
-  static const createError =
-      'Fiyat teklifi oluşturulurken bir hata oluştu.';
+  static const createError = 'Fiyat teklifi oluşturulurken bir hata oluştu.';
   static const updateSuccess = 'Fiyat teklifi güncellendi.';
-  static const updateError =
-      'Fiyat teklifi güncellenirken bir hata oluştu.';
+  static const updateError = 'Fiyat teklifi güncellenirken bir hata oluştu.';
   static const deleteSuccess = 'Fiyat teklifi silindi.';
   static const deleteError = 'Fiyat teklifi silinirken bir hata oluştu.';
   static const notFound = 'Fiyat teklifi bulunamadı.';
   static const exportSuccess = 'Fiyat teklifleri Excel\'e aktarıldı.';
   static const exportError = 'Excel\'e aktarılırken bir hata oluştu.';
-  static const exportEmpty =
-      'Dışa aktarılacak fiyat teklifi bulunmuyor.';
+  static const exportEmpty = 'Dışa aktarılacak fiyat teklifi bulunmuyor.';
   static const deleteTitle = 'Fiyat Teklifini Sil';
   static const deleteBody =
       'Bu fiyat teklifini silmek istediğinize emin misiniz? Bu işlem sonrasında kayıt listede görünmeyecektir.';
@@ -28,8 +25,7 @@ final class PriceOfferMessages {
   static const noCustomersForForm =
       'Fiyat teklifi oluşturmak için önce aktif bir müşteri eklemeniz gerekir.';
   static const listEmpty = 'Henüz fiyat teklifi bulunmuyor.';
-  static const listFilteredEmpty =
-      'Kriterlere uygun fiyat teklifi bulunamadı.';
+  static const listFilteredEmpty = 'Kriterlere uygun fiyat teklifi bulunamadı.';
   static const pdfSuccess = 'PDF dosyası oluşturuldu.';
   static const pdfError = 'PDF oluşturulurken bir hata oluştu.';
   static const pdfCancelled = 'PDF kaydetme işlemi iptal edildi.';
@@ -40,9 +36,8 @@ final class PriceOfferMessages {
   static const validityDateBeforeOfferDate =
       'Geçerlilik tarihi teklif tarihinden önce olamaz.';
   static const customerRequired = 'Müşteri seçiniz.';
-  static const contactPersonRequired = 'Yetkili kişi zorunludur.';
-  static const legalTextRequired =
-      'Teklif bilgilendirme metni zorunludur.';
+  static const guestCustomerNameRequired = 'Firma / müşteri adı giriniz.';
+  static const legalTextRequired = 'Teklif bilgilendirme metni zorunludur.';
   static const statusRequired = 'Durum seçiniz.';
   static const itemsRequired = 'En az bir ürün ekleyiniz.';
   static const productNameRequired = 'Ürün adı zorunludur.';

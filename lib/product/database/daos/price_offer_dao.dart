@@ -53,7 +53,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     await applyAutomaticExpiry();
 
     final query = select(priceOffers).join([
-      innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
+      leftOuterJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
     ]);
 
     query.where(priceOffers.deletedAt.isNull());
@@ -63,6 +63,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
       final pattern = '%${trimmedSearch.toLowerCase()}%';
       query.where(
         customers.name.lower().like(pattern) |
+            priceOffers.customerNameSnapshot.lower().like(pattern) |
             priceOffers.contactPerson.lower().like(pattern) |
             priceOffers.authorizedPhone.lower().like(pattern) |
             priceOffers.mobilePhone.lower().like(pattern),
@@ -117,7 +118,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     await applyAutomaticExpiry();
 
     final offerQuery = select(priceOffers).join([
-      innerJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
+      leftOuterJoin(customers, customers.id.equalsExp(priceOffers.customerId)),
     ])
       ..where(priceOffers.id.equals(id) & priceOffers.deletedAt.isNull());
 
@@ -127,7 +128,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     }
 
     final offer = offerRow.readTable(priceOffers);
-    final customer = offerRow.readTable(customers);
+    final customer = offerRow.readTableOrNull(customers);
 
     final items = await (select(priceOfferItems)
           ..where(
@@ -142,7 +143,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
       offerDate: offer.offerDate,
       validityDate: offer.validityDate,
       customerId: offer.customerId,
-      customerName: customer.name,
+      customerName: _resolveCustomerName(offer, customer),
       contactPerson: offer.contactPerson,
       authorizedPhone: offer.authorizedPhone,
       mobilePhone: offer.mobilePhone,
@@ -223,9 +224,18 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  String _resolveCustomerName(PriceOffer offer, Customer? customer) {
+    final linkedName = customer?.name.trim();
+    if (linkedName != null && linkedName.isNotEmpty) {
+      return linkedName;
+    }
+
+    return offer.customerNameSnapshot?.trim() ?? '';
+  }
+
   PriceOfferListItem _mapRowToListItem(TypedResult row) {
     final offer = row.readTable(priceOffers);
-    final customer = row.readTable(customers);
+    final customer = row.readTableOrNull(customers);
 
     return PriceOfferListItem(
       id: offer.id,
@@ -233,7 +243,7 @@ class PriceOfferDao extends DatabaseAccessor<AppDatabase>
       offerDate: offer.offerDate,
       validityDate: offer.validityDate,
       customerId: offer.customerId,
-      customerName: customer.name,
+      customerName: _resolveCustomerName(offer, customer),
       contactPerson: offer.contactPerson,
       authorizedPhone: offer.authorizedPhone,
       mobilePhone: offer.mobilePhone,

@@ -1,3 +1,4 @@
+import 'package:Ok/feature/due_tracking/models/currency_type.dart';
 import 'package:equatable/equatable.dart';
 
 final class ScrapQualityAnalytics extends Equatable {
@@ -9,6 +10,7 @@ final class ScrapQualityAnalytics extends Equatable {
     this.topCity,
     this.highestOfferPrice,
     this.lowestOfferPrice,
+    this.currency = CurrencyType.try_,
   });
 
   final String? topFoundCustomer;
@@ -18,6 +20,7 @@ final class ScrapQualityAnalytics extends Equatable {
   final String? topCity;
   final double? highestOfferPrice;
   final double? lowestOfferPrice;
+  final CurrencyType currency;
 
   @override
   List<Object?> get props => [
@@ -28,5 +31,6 @@ final class ScrapQualityAnalytics extends Equatable {
         topCity,
         highestOfferPrice,
         lowestOfferPrice,
+        currency,
       ];
 }

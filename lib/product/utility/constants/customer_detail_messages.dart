@@ -9,6 +9,8 @@ abstract final class CustomerDetailMessages {
   static const notesEmpty = 'Bu müşteriye ait not bulunmuyor.';
   static const scrapQualityEmpty =
       'Bu müşteriye ait hurda kalite kaydı bulunmuyor.';
+  static const exportsEmpty =
+      'Bu müşteriye ait ihracat kaydı bulunmuyor.';
   static const contactsEmpty =
       'Bu müşteriye ait yetkili kişi bulunmuyor.';
 

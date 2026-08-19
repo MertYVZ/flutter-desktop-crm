@@ -1,5 +1,6 @@
 import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/due_tracking/models/due_record_list_item.dart';
+import 'package:Ok/feature/export/models/export_record_list_item.dart';
 import 'package:Ok/feature/meetings/models/meeting_list_item.dart';
 import 'package:Ok/feature/notes/models/note_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
@@ -40,6 +41,9 @@ final class CustomerDetailService {
     String customerId,
   ) =>
       _databaseService.scrapQualityRecords.getRecordsByCustomerId(customerId);
+
+  Future<List<ExportRecordListItem>> getCustomerExports(String customerId) =>
+      _databaseService.exports.getExportsByCustomerId(customerId);
 
   Future<List<CustomerContactItem>> getCustomerContacts(
     String customerId,

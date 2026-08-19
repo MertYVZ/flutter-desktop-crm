@@ -2,6 +2,7 @@ import 'package:Ok/feature/customers/models/customer_contact.dart';
 import 'package:Ok/feature/customers/services/customer_detail_service.dart';
 import 'package:Ok/feature/customers/services/customers_service.dart';
 import 'package:Ok/feature/due_tracking/models/due_record_list_item.dart';
+import 'package:Ok/feature/export/models/export_record_list_item.dart';
 import 'package:Ok/feature/meetings/models/meeting_list_item.dart';
 import 'package:Ok/feature/notes/models/note_list_item.dart';
 import 'package:Ok/feature/price_offers/models/price_offer_list_item.dart';
@@ -27,6 +28,7 @@ enum CustomerDetailTab {
   reminders,
   notes,
   scrapQuality,
+  exports,
   contacts,
 }
 
@@ -58,6 +60,8 @@ final class CustomerDetailController extends GetxController {
   final RxList<NoteListItem> notes = <NoteListItem>[].obs;
   final RxList<ScrapQualityListItem> scrapQualityRecords =
       <ScrapQualityListItem>[].obs;
+  final RxList<ExportRecordListItem> exportRecords =
+      <ExportRecordListItem>[].obs;
   final RxList<CustomerContactItem> contacts = <CustomerContactItem>[].obs;
   final RxnString errorMessage = RxnString();
   final RxnString successMessage = RxnString();
@@ -148,6 +152,8 @@ final class CustomerDetailController extends GetxController {
         await loadNotes();
       case CustomerDetailTab.scrapQuality:
         await loadScrapQualityRecords();
+      case CustomerDetailTab.exports:
+        await loadExportRecords();
       case CustomerDetailTab.contacts:
         await loadContacts();
     }
@@ -229,6 +235,18 @@ final class CustomerDetailController extends GetxController {
           await _customerDetailService.getCustomerScrapQualityRecords(id);
       scrapQualityRecords.assignAll(result);
     }, CustomerDetailTab.scrapQuality.index);
+  }
+
+  Future<void> loadExportRecords() async {
+    final id = customerId;
+    if (id == null) {
+      return;
+    }
+
+    await _loadTabData(() async {
+      final result = await _customerDetailService.getCustomerExports(id);
+      exportRecords.assignAll(result);
+    }, CustomerDetailTab.exports.index);
   }
 
   Future<void> loadContacts() async {
@@ -465,6 +483,7 @@ final class CustomerDetailController extends GetxController {
     reminders.clear();
     notes.clear();
     scrapQualityRecords.clear();
+    exportRecords.clear();
     contacts.clear();
   }
 

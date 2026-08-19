@@ -6,6 +6,7 @@ class PriceOffers extends Table {
   DateTimeColumn get offerDate => dateTime()();
   DateTimeColumn get validityDate => dateTime()();
   TextColumn get customerId => text()();
+  TextColumn get customerNameSnapshot => text().nullable()();
   TextColumn get contactPerson => text()();
   TextColumn get authorizedPhone => text().nullable()();
   TextColumn get mobilePhone => text().nullable()();
