@@ -16,12 +16,18 @@ class MainFlutterWindow: NSWindow {
     flutterViewController.view.layer?.backgroundColor = launchBackground.cgColor
 
     self.contentViewController = flutterViewController
-    self.setContentSize(NSSize(width: 1250, height: 750))
-    self.minSize = NSSize(width: 1024, height: 640)
+    self.setContentSize(NSSize(width: 1024, height: 717))
     self.center()
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
+    _applyMinimumSize()
+  }
+
+  private func _applyMinimumSize() {
+    let minimum = NSSize(width: 720, height: 500)
+    contentMinSize = minimum
+    minSize = minimum
   }
 }

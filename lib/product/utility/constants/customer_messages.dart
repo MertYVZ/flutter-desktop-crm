@@ -25,4 +25,27 @@ abstract final class CustomerMessages {
   static const countryRequired = 'Ülke zorunludur.';
   static const invalidEmail = 'Geçerli bir e-posta adresi giriniz.';
   static const phoneTooShort = 'Telefon numarası çok kısa.';
+
+  static const excelInvalidFormat =
+      'Excel formatı geçersiz. İlk satırda Müşteri Adı ve Müşteri Tipi sütunları olmalıdır.';
+  static const excelEmpty = 'Excel dosyasında içe aktarılacak müşteri satırı yok.';
+  static const excelImportError =
+      'Müşteriler Excel\'den içe aktarılırken bir hata oluştu.';
+
+  static String excelImportSummary({
+    required int imported,
+    required int skippedDuplicate,
+    required int skippedInvalid,
+  }) {
+    final parts = <String>[
+      '$imported müşteri eklendi',
+    ];
+    if (skippedDuplicate > 0) {
+      parts.add('$skippedDuplicate zaten kayıtlı');
+    }
+    if (skippedInvalid > 0) {
+      parts.add('$skippedInvalid satır atlandı');
+    }
+    return '${parts.join(', ')}.';
+  }
 }

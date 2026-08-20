@@ -1,6 +1,6 @@
+import 'package:Ok/feature/export/models/export_product_names.dart';
 import 'package:Ok/feature/export/models/export_record_list_item.dart';
 import 'package:Ok/feature/export/services/export_service.dart';
-import 'package:Ok/feature/price_list/models/price_list_item_model.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -11,8 +11,6 @@ import 'package:Ok/product/utility/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
 import 'package:get/get.dart';
-
-const exportOtherProductId = '__other__';
 
 final class ExportController extends GetxController {
   ExportController(this._exportService);
@@ -25,7 +23,6 @@ final class ExportController extends GetxController {
   final RxList<ExportRecordListItem> exports = <ExportRecordListItem>[].obs;
   final Rxn<ExportRecord> selectedExport = Rxn<ExportRecord>();
   final RxList<Customer> customers = <Customer>[].obs;
-  final RxList<PriceListItemModel> products = <PriceListItemModel>[].obs;
   final RxString searchQuery = ''.obs;
   final RxnString errorMessage = RxnString();
   final RxnString successMessage = RxnString();
@@ -44,15 +41,6 @@ final class ExportController extends GetxController {
       customers.assignAll(result);
     } catch (_) {
       customers.clear();
-    }
-  }
-
-  Future<void> loadProductsForDropdown() async {
-    try {
-      final result = await _exportService.getActivePriceListProducts();
-      products.assignAll(result);
-    } catch (_) {
-      products.clear();
     }
   }
 
@@ -84,8 +72,7 @@ final class ExportController extends GetxController {
     required String title,
     required String? customerId,
     required String guestCustomerName,
-    required String? selectedProductId,
-    required String customProductName,
+    required List<String> productNames,
     required String quantityTonText,
     required String unitPriceText,
     required String paymentMethod,
@@ -110,14 +97,11 @@ final class ExportController extends GetxController {
 
     clearMessages();
 
-    final isCustomProduct = selectedProductId == exportOtherProductId;
     final validationError = Validators.validateExportForm(
       title: title,
       customerId: customerId,
       guestCustomerName: guestCustomerName,
-      selectedProductId: selectedProductId,
-      isCustomProduct: isCustomProduct,
-      customProductName: customProductName,
+      productNames: productNames,
       quantityTonText: quantityTonText,
       unitPriceText: unitPriceText,
       firstPaymentAmountText: firstPaymentAmountText,
@@ -135,10 +119,7 @@ final class ExportController extends GetxController {
 
     isSaving.value = true;
     try {
-      final resolved = _resolveProduct(
-        selectedProductId: selectedProductId,
-        customProductName: customProductName,
-      );
+      final resolved = _resolveProduct(productNames);
       final customer = _resolveCustomer(
         customerId: customerId,
         guestCustomerName: guestCustomerName,
@@ -213,8 +194,7 @@ final class ExportController extends GetxController {
     required String title,
     required String? customerId,
     required String guestCustomerName,
-    required String? selectedProductId,
-    required String customProductName,
+    required List<String> productNames,
     required String quantityTonText,
     required String unitPriceText,
     required String paymentMethod,
@@ -239,14 +219,11 @@ final class ExportController extends GetxController {
 
     clearMessages();
 
-    final isCustomProduct = selectedProductId == exportOtherProductId;
     final validationError = Validators.validateExportForm(
       title: title,
       customerId: customerId,
       guestCustomerName: guestCustomerName,
-      selectedProductId: selectedProductId,
-      isCustomProduct: isCustomProduct,
-      customProductName: customProductName,
+      productNames: productNames,
       quantityTonText: quantityTonText,
       unitPriceText: unitPriceText,
       firstPaymentAmountText: firstPaymentAmountText,
@@ -264,10 +241,7 @@ final class ExportController extends GetxController {
 
     isSaving.value = true;
     try {
-      final resolved = _resolveProduct(
-        selectedProductId: selectedProductId,
-        customProductName: customProductName,
-      );
+      final resolved = _resolveProduct(productNames);
       final customer = _resolveCustomer(
         customerId: customerId,
         guestCustomerName: guestCustomerName,
@@ -353,21 +327,8 @@ final class ExportController extends GetxController {
     return (id: '', name: guestCustomerName.trim());
   }
 
-  ({String? id, String name}) _resolveProduct({
-    required String? selectedProductId,
-    required String customProductName,
-  }) {
-    if (selectedProductId == exportOtherProductId) {
-      return (id: null, name: customProductName.trim());
-    }
-
-    for (final product in products) {
-      if (product.id == selectedProductId) {
-        return (id: product.id, name: product.productName);
-      }
-    }
-
-    return (id: selectedProductId, name: customProductName.trim());
+  ({String? id, String name}) _resolveProduct(List<String> productNames) {
+    return (id: null, name: ExportProductNames.join(productNames));
   }
 
   int _totalPriceMinor(double quantityTon, int unitPriceMinor) =>

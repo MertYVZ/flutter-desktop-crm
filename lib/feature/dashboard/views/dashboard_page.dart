@@ -4,6 +4,7 @@ import 'package:Ok/feature/dashboard/controllers/dashboard_controller.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_summary_cards.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_calendar.dart';
 import 'package:Ok/feature/dashboard/widgets/dashboard_day_detail_panel.dart';
+import 'package:Ok/feature/shell/controller/shell_controller.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
@@ -55,7 +56,8 @@ class _DashboardPageState extends BaseState<DashboardPage> {
           return LayoutBuilder(
             builder: (context, constraints) {
               _logViewportSize(context, constraints);
-              final isCompact = constraints.maxWidth < 960;
+              final isCompact = MediaQuery.sizeOf(context).width <=
+                  ShellController.mobileBreakpoint;
 
               return PanelFormScrollView(
                 child: Column(

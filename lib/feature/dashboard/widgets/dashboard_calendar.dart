@@ -786,29 +786,10 @@ class _BadgeShell extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          const SizedBox(width: 8),
-          if (typeLabel != null) ...[
-            Text(
-              typeLabel!,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 10,
-                  ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '·',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppUiTokens.textMuted,
-                    fontSize: 10,
-                  ),
-            ),
-            const SizedBox(width: 4),
-          ],
+          const SizedBox(width: 6),
           Expanded(
             child: Text(
-              label,
+              typeLabel == null ? label : '$typeLabel · $label',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(

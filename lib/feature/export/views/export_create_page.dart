@@ -24,7 +24,7 @@ final class ExportCreatePage extends StatefulWidget {
 class _ExportCreatePageState extends BaseState<ExportCreatePage> {
   late final TextEditingController _titleController;
   late final TextEditingController _guestCustomerNameController;
-  late final TextEditingController _customProductController;
+  late final List<TextEditingController> _productControllers;
   late final TextEditingController _quantityTonController;
   late final TextEditingController _unitPriceController;
   late final TextEditingController _paymentMethodController;
@@ -39,7 +39,6 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
   late final TextEditingController _insuranceCostController;
   late final TextEditingController _notesController;
   String? _selectedCustomerId;
-  String? _selectedProductId;
   DateTime? _firstPaymentDate;
   DateTime? _lastPaymentDate;
   DateTime? _shipmentDate;
@@ -51,7 +50,7 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
     _selectedCustomerId = AppRouteArgs.readCustomerId();
     _titleController = TextEditingController();
     _guestCustomerNameController = TextEditingController();
-    _customProductController = TextEditingController();
+    _productControllers = [TextEditingController()];
     _quantityTonController = TextEditingController();
     _unitPriceController = TextEditingController();
     _paymentMethodController = TextEditingController();
@@ -71,7 +70,9 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
   void dispose() {
     _titleController.dispose();
     _guestCustomerNameController.dispose();
-    _customProductController.dispose();
+    for (final controller in _productControllers) {
+      controller.dispose();
+    }
     _quantityTonController.dispose();
     _unitPriceController.dispose();
     _paymentMethodController.dispose();
@@ -86,6 +87,22 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
     _insuranceCostController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _addProduct() {
+    setState(() {
+      _productControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeProduct(int index) {
+    if (_productControllers.length <= 1) {
+      return;
+    }
+
+    setState(() {
+      _productControllers.removeAt(index).dispose();
+    });
   }
 
   String get _totalPriceText {
@@ -107,8 +124,7 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
       onModelReady: (controller) {
         controller
           ..clearMessages()
-          ..loadCustomersForDropdown()
-          ..loadProductsForDropdown();
+          ..loadCustomersForDropdown();
       },
       onPageBuilder: (context, controller) {
         return PanelFormScrollView(
@@ -142,14 +158,13 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
                     Obx(
                       () => ExportRecordForm(
                         customers: controller.customers.toList(),
-                        products: controller.products.toList(),
                         selectedCustomerId: _selectedCustomerId,
                         guestCustomerNameController:
                             _guestCustomerNameController,
-                        selectedProductId: _selectedProductId,
-                        fallbackProductName: null,
+                        productControllers: _productControllers,
+                        onAddProduct: _addProduct,
+                        onRemoveProduct: _removeProduct,
                         titleController: _titleController,
-                        customProductController: _customProductController,
                         quantityTonController: _quantityTonController,
                         unitPriceController: _unitPriceController,
                         totalPriceText: _totalPriceText,
@@ -175,9 +190,6 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
                         }),
                         onGuestCustomerNameChanged: (value) => setState(() {
                           _guestCustomerNameController.text = value;
-                        }),
-                        onProductChanged: (value) => setState(() {
-                          _selectedProductId = value;
                         }),
                         onFirstPaymentDateChanged: (value) => setState(() {
                           _firstPaymentDate = value;
@@ -222,8 +234,8 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
       title: _titleController.text,
       customerId: _selectedCustomerId,
       guestCustomerName: _guestCustomerNameController.text,
-      selectedProductId: _selectedProductId,
-      customProductName: _customProductController.text,
+      productNames:
+          _productControllers.map((controller) => controller.text).toList(),
       quantityTonText: _quantityTonController.text,
       unitPriceText: _unitPriceController.text,
       paymentMethod: _paymentMethodController.text,

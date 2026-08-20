@@ -65,6 +65,20 @@ class CustomerDao extends DatabaseAccessor<AppDatabase> with _$CustomerDaoMixin 
         ..where((t) => t.id.equals(id) & t.deletedAt.isNull()))
       .getSingleOrNull();
 
+  Future<Customer?> getActiveCustomerByName(String name) {
+    final normalized = name.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return Future<Customer?>.value(null);
+    }
+
+    return (select(customers)
+          ..where(
+            (t) => t.deletedAt.isNull() & t.name.lower().equals(normalized),
+          )
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
   Future<int> insertCustomer(CustomersCompanion customer) =>
       into(customers).insert(customer);
 

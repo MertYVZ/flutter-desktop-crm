@@ -1,3 +1,4 @@
+import 'package:Ok/feature/export/models/export_product_names.dart';
 import 'package:Ok/feature/import/controllers/import_controller.dart';
 import 'package:Ok/feature/import/widgets/import_record_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -21,7 +22,7 @@ final class ImportCreatePage extends StatefulWidget {
 class _ImportCreatePageState extends BaseState<ImportCreatePage> {
   late final TextEditingController _titleController;
   late final TextEditingController _supplierNameController;
-  late final TextEditingController _productsController;
+  late final List<TextEditingController> _productControllers;
   late final TextEditingController _totalAmountController;
   late final TextEditingController _logisticsNameController;
   late final TextEditingController _logisticsCostController;
@@ -36,7 +37,7 @@ class _ImportCreatePageState extends BaseState<ImportCreatePage> {
     super.initState();
     _titleController = TextEditingController();
     _supplierNameController = TextEditingController();
-    _productsController = TextEditingController();
+    _productControllers = [TextEditingController()];
     _totalAmountController = TextEditingController();
     _logisticsNameController = TextEditingController();
     _logisticsCostController = TextEditingController();
@@ -49,7 +50,9 @@ class _ImportCreatePageState extends BaseState<ImportCreatePage> {
   void dispose() {
     _titleController.dispose();
     _supplierNameController.dispose();
-    _productsController.dispose();
+    for (final controller in _productControllers) {
+      controller.dispose();
+    }
     _totalAmountController.dispose();
     _logisticsNameController.dispose();
     _logisticsCostController.dispose();
@@ -57,6 +60,22 @@ class _ImportCreatePageState extends BaseState<ImportCreatePage> {
     _insuranceCostController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _addProduct() {
+    setState(() {
+      _productControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeProduct(int index) {
+    if (_productControllers.length <= 1) {
+      return;
+    }
+
+    setState(() {
+      _productControllers.removeAt(index).dispose();
+    });
   }
 
   @override
@@ -98,7 +117,9 @@ class _ImportCreatePageState extends BaseState<ImportCreatePage> {
                     ImportRecordForm(
                       titleController: _titleController,
                       supplierNameController: _supplierNameController,
-                      productsController: _productsController,
+                      productControllers: _productControllers,
+                      onAddProduct: _addProduct,
+                      onRemoveProduct: _removeProduct,
                       totalAmountController: _totalAmountController,
                       logisticsNameController: _logisticsNameController,
                       shipmentDate: _shipmentDate,
@@ -141,7 +162,9 @@ class _ImportCreatePageState extends BaseState<ImportCreatePage> {
     final id = await controller.createImport(
       title: _titleController.text,
       supplierName: _supplierNameController.text,
-      products: _productsController.text,
+      products: ExportProductNames.join(
+        _productControllers.map((controller) => controller.text),
+      ),
       totalAmountText: _totalAmountController.text,
       shipmentDate: _shipmentDate,
       deliveryDate: _deliveryDate,

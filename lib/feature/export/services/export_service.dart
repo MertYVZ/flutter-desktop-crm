@@ -1,5 +1,4 @@
 import 'package:Ok/feature/export/models/export_record_list_item.dart';
-import 'package:Ok/feature/price_list/models/price_list_item_model.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/database/database_service.dart';
 import 'package:drift/drift.dart';
@@ -27,15 +26,6 @@ final class ExportService {
 
   Future<List<Customer>> getSelectableCustomers() =>
       _databaseService.customers.getSelectableCustomers();
-
-  Future<List<PriceListItemModel>> getActivePriceListProducts() async {
-    final list = await _databaseService.priceLists.getActivePriceList();
-    if (list == null) {
-      return const [];
-    }
-
-    return _databaseService.priceLists.getItemsByPriceListId(list.id);
-  }
 
   Future<String> createExport({
     required String title,

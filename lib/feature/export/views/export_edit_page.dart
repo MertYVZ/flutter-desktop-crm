@@ -1,4 +1,5 @@
 import 'package:Ok/feature/export/controllers/export_controller.dart';
+import 'package:Ok/feature/export/models/export_product_names.dart';
 import 'package:Ok/feature/export/widgets/export_record_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
@@ -25,7 +26,7 @@ final class ExportEditPage extends StatefulWidget {
 class _ExportEditPageState extends BaseState<ExportEditPage> {
   late final TextEditingController _titleController;
   late final TextEditingController _guestCustomerNameController;
-  late final TextEditingController _customProductController;
+  late final List<TextEditingController> _productControllers;
   late final TextEditingController _quantityTonController;
   late final TextEditingController _unitPriceController;
   late final TextEditingController _paymentMethodController;
@@ -40,7 +41,6 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
   late final TextEditingController _insuranceCostController;
   late final TextEditingController _notesController;
   String? _selectedCustomerId;
-  String? _selectedProductId;
   DateTime? _firstPaymentDate;
   DateTime? _lastPaymentDate;
   DateTime? _shipmentDate;
@@ -54,7 +54,7 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
     super.initState();
     _titleController = TextEditingController();
     _guestCustomerNameController = TextEditingController();
-    _customProductController = TextEditingController();
+    _productControllers = [TextEditingController()];
     _quantityTonController = TextEditingController();
     _unitPriceController = TextEditingController();
     _paymentMethodController = TextEditingController();
@@ -74,7 +74,9 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
   void dispose() {
     _titleController.dispose();
     _guestCustomerNameController.dispose();
-    _customProductController.dispose();
+    for (final controller in _productControllers) {
+      controller.dispose();
+    }
     _quantityTonController.dispose();
     _unitPriceController.dispose();
     _paymentMethodController.dispose();
@@ -89,6 +91,31 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
     _insuranceCostController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _addProduct() {
+    setState(() {
+      _productControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeProduct(int index) {
+    if (_productControllers.length <= 1) {
+      return;
+    }
+
+    setState(() {
+      _productControllers.removeAt(index).dispose();
+    });
+  }
+
+  void _replaceProductControllers(List<String> names) {
+    for (final controller in _productControllers) {
+      controller.dispose();
+    }
+    _productControllers
+      ..clear()
+      ..addAll(names.map((name) => TextEditingController(text: name)));
   }
 
   String get _totalPriceText {
@@ -155,15 +182,10 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
     _setOptionalAmount(_insuranceCostController, record.insuranceCostMinor);
     _notesController.text = record.notes ?? '';
 
-    final productId = record.productId;
-    final hasListedProduct = productId != null &&
-        controller.products.any((product) => product.id == productId);
-    if (hasListedProduct) {
-      _selectedProductId = productId;
-    } else {
-      _selectedProductId = exportOtherProductId;
-      _customProductController.text = record.productName;
-    }
+    final productNames = ExportProductNames.parse(record.productName);
+    _replaceProductControllers(
+      productNames.isEmpty ? [''] : productNames,
+    );
 
     _isFormInitialized = true;
   }
@@ -177,9 +199,7 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
         controller
           ..clearMessages()
           ..loadCustomersForDropdown();
-        controller.loadProductsForDropdown().then((_) {
-          return controller.getExportById(_recordId);
-        }).then((loaded) {
+        controller.getExportById(_recordId).then((loaded) {
           if (!loaded || !mounted) {
             return;
           }
@@ -245,14 +265,13 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
                     children: [
                       ExportRecordForm(
                         customers: controller.customers.toList(),
-                        products: controller.products.toList(),
                         selectedCustomerId: _selectedCustomerId,
                         guestCustomerNameController:
                             _guestCustomerNameController,
-                        selectedProductId: _selectedProductId,
-                        fallbackProductName: record.productName,
+                        productControllers: _productControllers,
+                        onAddProduct: _addProduct,
+                        onRemoveProduct: _removeProduct,
                         titleController: _titleController,
-                        customProductController: _customProductController,
                         quantityTonController: _quantityTonController,
                         unitPriceController: _unitPriceController,
                         totalPriceText: _totalPriceText,
@@ -278,9 +297,6 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
                         }),
                         onGuestCustomerNameChanged: (value) => setState(() {
                           _guestCustomerNameController.text = value;
-                        }),
-                        onProductChanged: (value) => setState(() {
-                          _selectedProductId = value;
                         }),
                         onFirstPaymentDateChanged: (value) => setState(() {
                           _firstPaymentDate = value;
@@ -327,8 +343,8 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
       title: _titleController.text,
       customerId: _selectedCustomerId,
       guestCustomerName: _guestCustomerNameController.text,
-      selectedProductId: _selectedProductId,
-      customProductName: _customProductController.text,
+      productNames:
+          _productControllers.map((controller) => controller.text).toList(),
       quantityTonText: _quantityTonController.text,
       unitPriceText: _unitPriceController.text,
       paymentMethod: _paymentMethodController.text,

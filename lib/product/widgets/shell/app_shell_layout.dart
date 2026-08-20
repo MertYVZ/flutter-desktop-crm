@@ -60,7 +60,7 @@ class AppShellLayout extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact =
-            constraints.maxWidth < ShellController.mobileBreakpoint;
+            constraints.maxWidth <= ShellController.mobileBreakpoint;
 
         return Obx(
           () {
@@ -131,7 +131,7 @@ class _ContentPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCompact =
-        MediaQuery.sizeOf(context).width < ShellController.mobileBreakpoint;
+        MediaQuery.sizeOf(context).width <= ShellController.mobileBreakpoint;
     final padding = EdgeInsets.all(
       isCompact ? AppUiTokens.space16 : AppUiTokens.space32,
     );

@@ -16,8 +16,7 @@ final class ExportMessages {
   static const titleRequired = 'Başlık zorunludur.';
   static const titleMinLength = 'Başlık en az 2 karakter olmalıdır.';
   static const customerRequired = 'Müşteri seçiniz veya adını giriniz.';
-  static const productRequired = 'Ürün seçiniz.';
-  static const customProductRequired = 'Ürün adı giriniz.';
+  static const productRequired = 'En az bir ürün adı giriniz.';
   static const quantityRequired = 'Gönderilen miktar zorunludur.';
   static const quantityPositive = 'Gönderilen miktar 0\'dan büyük olmalıdır.';
   static const unitPriceRequired = 'Anlaşılan birim fiyat zorunludur.';

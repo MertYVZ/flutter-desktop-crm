@@ -17,7 +17,7 @@ final class ImportMessages {
   static const titleRequired = 'Başlık zorunludur.';
   static const titleMinLength = 'Başlık en az 2 karakter olmalıdır.';
   static const supplierRequired = 'Tedarikçi giriniz.';
-  static const productsRequired = 'Ürünler giriniz.';
+  static const productsRequired = 'En az bir ürün adı giriniz.';
   static const totalAmountRequired = 'Toplam tutar zorunludur.';
   static const totalAmountPositive = "Toplam tutar 0'dan büyük olmalıdır.";
   static const amountInvalid = 'Geçerli bir tutar giriniz.';

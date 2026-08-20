@@ -1,5 +1,6 @@
 import 'package:Ok/feature/customers/models/customer_status.dart';
 import 'package:Ok/feature/customers/models/customer_type.dart';
+import 'package:Ok/feature/customers/services/customers_excel_import_service.dart';
 import 'package:Ok/feature/customers/services/customers_service.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
@@ -11,13 +12,18 @@ import 'package:gen/gen.dart';
 import 'package:get/get.dart';
 
 final class CustomersController extends GetxController {
-  CustomersController(this._customersService);
+  CustomersController(
+    this._customersService,
+    this._excelImportService,
+  );
 
   final CustomersService _customersService;
+  final CustomersExcelImportService _excelImportService;
 
   final RxBool isListLoading = false.obs;
   final RxBool isDetailLoading = false.obs;
   final RxBool isSaving = false.obs;
+  final RxBool isImporting = false.obs;
   final RxBool isDeleting = false.obs;
   final RxList<Customer> customers = <Customer>[].obs;
   final Rxn<Customer> selectedCustomer = Rxn<Customer>();
@@ -239,6 +245,34 @@ final class CustomersController extends GetxController {
     } finally {
       isDeleting.value = false;
       deletingCustomerId.value = null;
+    }
+  }
+
+  Future<void> importFromExcel() async {
+    if (isImporting.value || isListLoading.value) {
+      return;
+    }
+
+    clearMessages();
+    isImporting.value = true;
+    try {
+      final result = await _excelImportService.importFromExcel();
+      if (result.cancelled) {
+        return;
+      }
+
+      await searchAndFilterCustomers();
+      successMessage.value = CustomerMessages.excelImportSummary(
+        imported: result.imported,
+        skippedDuplicate: result.skippedDuplicate,
+        skippedInvalid: result.skippedInvalid,
+      );
+    } on StateError catch (error) {
+      errorMessage.value = error.message;
+    } catch (_) {
+      errorMessage.value = CustomerMessages.excelImportError;
+    } finally {
+      isImporting.value = false;
     }
   }
 

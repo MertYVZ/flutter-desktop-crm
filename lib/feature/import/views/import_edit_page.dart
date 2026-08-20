@@ -1,3 +1,4 @@
+import 'package:Ok/feature/export/models/export_product_names.dart';
 import 'package:Ok/feature/import/controllers/import_controller.dart';
 import 'package:Ok/feature/import/widgets/import_record_form.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
@@ -23,7 +24,7 @@ final class ImportEditPage extends StatefulWidget {
 class _ImportEditPageState extends BaseState<ImportEditPage> {
   late final TextEditingController _titleController;
   late final TextEditingController _supplierNameController;
-  late final TextEditingController _productsController;
+  late final List<TextEditingController> _productControllers;
   late final TextEditingController _totalAmountController;
   late final TextEditingController _logisticsNameController;
   late final TextEditingController _logisticsCostController;
@@ -41,7 +42,7 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
     super.initState();
     _titleController = TextEditingController();
     _supplierNameController = TextEditingController();
-    _productsController = TextEditingController();
+    _productControllers = [TextEditingController()];
     _totalAmountController = TextEditingController();
     _logisticsNameController = TextEditingController();
     _logisticsCostController = TextEditingController();
@@ -54,7 +55,9 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
   void dispose() {
     _titleController.dispose();
     _supplierNameController.dispose();
-    _productsController.dispose();
+    for (final controller in _productControllers) {
+      controller.dispose();
+    }
     _totalAmountController.dispose();
     _logisticsNameController.dispose();
     _logisticsCostController.dispose();
@@ -62,6 +65,31 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
     _insuranceCostController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _addProduct() {
+    setState(() {
+      _productControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeProduct(int index) {
+    if (_productControllers.length <= 1) {
+      return;
+    }
+
+    setState(() {
+      _productControllers.removeAt(index).dispose();
+    });
+  }
+
+  void _replaceProductControllers(List<String> names) {
+    for (final controller in _productControllers) {
+      controller.dispose();
+    }
+    _productControllers
+      ..clear()
+      ..addAll(names.map((name) => TextEditingController(text: name)));
   }
 
   void _setOptionalAmount(TextEditingController controller, int? amountMinor) {
@@ -80,7 +108,10 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
 
     _titleController.text = record.title;
     _supplierNameController.text = record.supplierName;
-    _productsController.text = record.products;
+    final productNames = ExportProductNames.parse(record.products);
+    _replaceProductControllers(
+      productNames.isEmpty ? [''] : productNames,
+    );
     PanelAmountField.setAmountFromMinor(
       _totalAmountController,
       record.totalAmountMinor,
@@ -169,7 +200,9 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
                       ImportRecordForm(
                         titleController: _titleController,
                         supplierNameController: _supplierNameController,
-                        productsController: _productsController,
+                        productControllers: _productControllers,
+                        onAddProduct: _addProduct,
+                        onRemoveProduct: _removeProduct,
                         totalAmountController: _totalAmountController,
                         logisticsNameController: _logisticsNameController,
                         shipmentDate: _shipmentDate,
@@ -215,7 +248,9 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
       id: _recordId,
       title: _titleController.text,
       supplierName: _supplierNameController.text,
-      products: _productsController.text,
+      products: ExportProductNames.join(
+        _productControllers.map((controller) => controller.text),
+      ),
       totalAmountText: _totalAmountController.text,
       shipmentDate: _shipmentDate,
       deliveryDate: _deliveryDate,

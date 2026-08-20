@@ -31,6 +31,9 @@ final class CustomersService {
   Future<Customer?> getCustomerById(String id) =>
       _databaseService.customers.getCustomerById(id);
 
+  Future<Customer?> getActiveCustomerByName(String name) =>
+      _databaseService.customers.getActiveCustomerByName(name);
+
   Future<String> createCustomer({
     required String name,
     required CustomerType type,

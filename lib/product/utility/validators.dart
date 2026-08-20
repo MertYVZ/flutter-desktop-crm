@@ -195,9 +195,7 @@ abstract final class Validators {
     required String title,
     required String? customerId,
     required String guestCustomerName,
-    required String? selectedProductId,
-    required bool isCustomProduct,
-    required String customProductName,
+    required List<String> productNames,
     required String quantityTonText,
     required String unitPriceText,
     String firstPaymentAmountText = '',
@@ -222,12 +220,9 @@ abstract final class Validators {
       return ExportMessages.customerRequired;
     }
 
-    if (selectedProductId == null || selectedProductId.isEmpty) {
+    final hasProduct = productNames.any((name) => name.trim().isNotEmpty);
+    if (!hasProduct) {
       return ExportMessages.productRequired;
-    }
-
-    if (isCustomProduct && customProductName.trim().isEmpty) {
-      return ExportMessages.customProductRequired;
     }
 
     final trimmedQuantity = quantityTonText.trim();

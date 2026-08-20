@@ -51,21 +51,30 @@ class _CustomersListPageState extends BaseState<CustomersListPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _PageHeader(
+                    controller: controller,
                     onCreatePressed: () =>
                         Get.toNamed<void>(AppRoutes.customersNew.value),
+                    onImportPressed: () => controller.importFromExcel(),
                   ),
                   const SizedBox(height: AppUiTokens.space16),
                   Obx(() {
                     final error = controller.errorMessage.value;
-
-                    if (error == null) {
+                    final success = controller.successMessage.value;
+                    if (error == null && success == null) {
                       return const SizedBox.shrink();
                     }
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        PanelMessage(message: error),
+                        if (error != null) PanelMessage(message: error),
+                        if (error != null && success != null)
+                          const SizedBox(height: AppUiTokens.space8),
+                        if (success != null)
+                          PanelMessage(
+                            message: success,
+                            type: PanelMessageType.info,
+                          ),
                         const SizedBox(height: AppUiTokens.space16),
                       ],
                     );
@@ -107,9 +116,15 @@ class _CustomersListPageState extends BaseState<CustomersListPage> {
 }
 
 class _PageHeader extends StatelessWidget {
-  const _PageHeader({required this.onCreatePressed});
+  const _PageHeader({
+    required this.controller,
+    required this.onCreatePressed,
+    required this.onImportPressed,
+  });
 
+  final CustomersController controller;
   final VoidCallback onCreatePressed;
+  final VoidCallback onImportPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +151,38 @@ class _PageHeader extends StatelessWidget {
                   ),
             ),
           ],
+        );
+
+        final importButton = Obx(
+          () => SizedBox(
+            height: 44,
+            child: OutlinedButton.icon(
+              onPressed: controller.isImporting.value ? null : onImportPressed,
+              style: AppInteractiveTheme.outlinedButtonStyle(
+                OutlinedButton.styleFrom(
+                  foregroundColor: AppUiTokens.textPrimary,
+                  side: const BorderSide(color: AppUiTokens.border),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppUiTokens.space16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppUiTokens.radiusSm),
+                  ),
+                ),
+              ),
+              icon: controller.isImporting.value
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.upload_file_outlined, size: 18),
+              label: const Text(
+                'Excel\'den Aktar',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
         );
 
         final createButton = SizedBox(
@@ -169,6 +216,8 @@ class _PageHeader extends StatelessWidget {
               titleSection,
               const SizedBox(height: AppUiTokens.space16),
               createButton,
+              const SizedBox(height: AppUiTokens.space8),
+              importButton,
             ],
           );
         }
@@ -177,6 +226,8 @@ class _PageHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: titleSection),
+            importButton,
+            const SizedBox(width: AppUiTokens.space8),
             createButton,
           ],
         );
