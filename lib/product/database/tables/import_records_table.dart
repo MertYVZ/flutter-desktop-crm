@@ -5,6 +5,7 @@ class ImportRecords extends Table {
   TextColumn get title => text()();
   TextColumn get supplierName => text()();
   TextColumn get products => text()();
+  TextColumn get currency => text().withDefault(const Constant('TRY'))();
   IntColumn get totalAmountMinor => integer()();
   DateTimeColumn get shipmentDate => dateTime().nullable()();
   DateTimeColumn get deliveryDate => dateTime().nullable()();

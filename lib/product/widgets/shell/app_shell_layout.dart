@@ -8,9 +8,11 @@ import 'package:Ok/feature/due_tracking/views/due_tracking_create_page.dart';
 import 'package:Ok/feature/due_tracking/views/due_tracking_edit_page.dart';
 import 'package:Ok/feature/due_tracking/views/due_tracking_list_page.dart';
 import 'package:Ok/feature/export/views/export_create_page.dart';
+import 'package:Ok/feature/export/views/export_detail_page.dart';
 import 'package:Ok/feature/export/views/export_edit_page.dart';
 import 'package:Ok/feature/export/views/export_list_page.dart';
 import 'package:Ok/feature/import/views/import_create_page.dart';
+import 'package:Ok/feature/import/views/import_detail_page.dart';
 import 'package:Ok/feature/import/views/import_edit_page.dart';
 import 'package:Ok/feature/import/views/import_list_page.dart';
 import 'package:Ok/feature/meetings/views/meeting_create_page.dart';
@@ -419,6 +421,10 @@ class _ExportRouteContent extends StatelessWidget {
       return const ExportEditPage();
     }
 
+    if (route.startsWith('/exports/') && route != AppRoutes.exportsNew.value) {
+      return const ExportDetailPage();
+    }
+
     return const ExportListPage();
   }
 }
@@ -436,6 +442,10 @@ class _ImportRouteContent extends StatelessWidget {
 
     if (route.endsWith('/edit') && route.startsWith('/imports/')) {
       return const ImportEditPage();
+    }
+
+    if (route.startsWith('/imports/') && route != AppRoutes.importsNew.value) {
+      return const ImportDetailPage();
     }
 
     return const ImportListPage();

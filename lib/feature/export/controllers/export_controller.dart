@@ -1,12 +1,14 @@
-import 'package:Ok/feature/export/models/export_product_names.dart';
+import 'package:Ok/feature/export/models/export_detail.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
 import 'package:Ok/feature/export/models/export_record_list_item.dart';
+import 'package:Ok/feature/export/models/export_totals.dart';
 import 'package:Ok/feature/export/services/export_service.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/constants/export_messages.dart';
 import 'package:Ok/product/utility/money_utils.dart';
-import 'package:Ok/product/utility/quantity_utils.dart';
 import 'package:Ok/product/utility/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
@@ -21,7 +23,7 @@ final class ExportController extends GetxController {
   final RxBool isSaving = false.obs;
   final RxBool isDeleting = false.obs;
   final RxList<ExportRecordListItem> exports = <ExportRecordListItem>[].obs;
-  final Rxn<ExportRecord> selectedExport = Rxn<ExportRecord>();
+  final Rxn<ExportDetail> selectedExport = Rxn<ExportDetail>();
   final RxList<Customer> customers = <Customer>[].obs;
   final RxString searchQuery = ''.obs;
   final RxnString errorMessage = RxnString();
@@ -72,17 +74,15 @@ final class ExportController extends GetxController {
     required String title,
     required String? customerId,
     required String guestCustomerName,
-    required List<String> productNames,
-    required String quantityTonText,
-    required String unitPriceText,
+    required PriceOfferCurrencyType currency,
+    required List<ExportItemData> items,
+    required List<ExportItemValidationInput> itemInputs,
     required String paymentMethod,
     required String bank,
     required DateTime? firstPaymentDate,
     required String firstPaymentAmountText,
     required DateTime? lastPaymentDate,
     required String lastPaymentAmountText,
-    required String wasteKgText,
-    required String netTotalAmountText,
     required String logisticsName,
     required DateTime? shipmentDate,
     required DateTime? deliveryDate,
@@ -98,20 +98,16 @@ final class ExportController extends GetxController {
     clearMessages();
 
     final validationError = Validators.validateExportForm(
-      title: title,
-      customerId: customerId,
-      guestCustomerName: guestCustomerName,
-      productNames: productNames,
-      quantityTonText: quantityTonText,
-      unitPriceText: unitPriceText,
-      firstPaymentAmountText: firstPaymentAmountText,
-      lastPaymentAmountText: lastPaymentAmountText,
-      wasteKgText: wasteKgText,
-      netTotalAmountText: netTotalAmountText,
-      logisticsCostText: logisticsCostText,
-      customsCostText: customsCostText,
-      insuranceCostText: insuranceCostText,
-    );
+          title: title,
+          customerId: customerId,
+          guestCustomerName: guestCustomerName,
+          firstPaymentAmountText: firstPaymentAmountText,
+          lastPaymentAmountText: lastPaymentAmountText,
+          logisticsCostText: logisticsCostText,
+          customsCostText: customsCostText,
+          insuranceCostText: insuranceCostText,
+        ) ??
+        Validators.validateExportItems(items: itemInputs);
     if (validationError != null) {
       errorMessage.value = validationError;
       return null;
@@ -119,31 +115,30 @@ final class ExportController extends GetxController {
 
     isSaving.value = true;
     try {
-      final resolved = _resolveProduct(productNames);
       final customer = _resolveCustomer(
         customerId: customerId,
         guestCustomerName: guestCustomerName,
       );
-      final quantityTon = QuantityUtils.parseQuantity(quantityTonText.trim())!;
-      final unitPriceMinor = MoneyUtils.parseAmountToMinor(unitPriceText.trim())!;
+      final totals = ExportTotals.fromCostTexts(
+        items: items,
+        logisticsCostText: logisticsCostText,
+        customsCostText: customsCostText,
+        insuranceCostText: insuranceCostText,
+      );
 
       final id = await _exportService.createExport(
         title: title,
         customerId: customer.id,
         customerNameSnapshot: customer.name,
-        productName: resolved.name,
-        productId: resolved.id,
-        quantityTon: quantityTon,
-        unitPriceMinor: unitPriceMinor,
-        totalPriceMinor: _totalPriceMinor(quantityTon, unitPriceMinor),
+        currency: currency,
+        items: items,
+        totals: totals,
         paymentMethod: paymentMethod,
         bank: bank,
         firstPaymentDate: firstPaymentDate,
         firstPaymentAmountMinor: _optionalAmount(firstPaymentAmountText),
         lastPaymentDate: lastPaymentDate,
         lastPaymentAmountMinor: _optionalAmount(lastPaymentAmountText),
-        wasteKg: _optionalQuantity(wasteKgText),
-        netTotalAmountMinor: _optionalAmount(netTotalAmountText),
         logisticsName: logisticsName,
         shipmentDate: shipmentDate,
         deliveryDate: deliveryDate,
@@ -171,14 +166,14 @@ final class ExportController extends GetxController {
     selectedExport.value = null;
     isLoading.value = true;
     try {
-      final record = await _exportService.getExportById(id);
-      if (record == null) {
+      final detail = await _exportService.getExportById(id);
+      if (detail == null) {
         errorMessage.value = ExportMessages.notFound;
         selectedExport.value = null;
         return false;
       }
 
-      selectedExport.value = record;
+      selectedExport.value = detail;
       return true;
     } catch (_) {
       errorMessage.value = ExportMessages.notFound;
@@ -194,17 +189,15 @@ final class ExportController extends GetxController {
     required String title,
     required String? customerId,
     required String guestCustomerName,
-    required List<String> productNames,
-    required String quantityTonText,
-    required String unitPriceText,
+    required PriceOfferCurrencyType currency,
+    required List<ExportItemData> items,
+    required List<ExportItemValidationInput> itemInputs,
     required String paymentMethod,
     required String bank,
     required DateTime? firstPaymentDate,
     required String firstPaymentAmountText,
     required DateTime? lastPaymentDate,
     required String lastPaymentAmountText,
-    required String wasteKgText,
-    required String netTotalAmountText,
     required String logisticsName,
     required DateTime? shipmentDate,
     required DateTime? deliveryDate,
@@ -220,20 +213,16 @@ final class ExportController extends GetxController {
     clearMessages();
 
     final validationError = Validators.validateExportForm(
-      title: title,
-      customerId: customerId,
-      guestCustomerName: guestCustomerName,
-      productNames: productNames,
-      quantityTonText: quantityTonText,
-      unitPriceText: unitPriceText,
-      firstPaymentAmountText: firstPaymentAmountText,
-      lastPaymentAmountText: lastPaymentAmountText,
-      wasteKgText: wasteKgText,
-      netTotalAmountText: netTotalAmountText,
-      logisticsCostText: logisticsCostText,
-      customsCostText: customsCostText,
-      insuranceCostText: insuranceCostText,
-    );
+          title: title,
+          customerId: customerId,
+          guestCustomerName: guestCustomerName,
+          firstPaymentAmountText: firstPaymentAmountText,
+          lastPaymentAmountText: lastPaymentAmountText,
+          logisticsCostText: logisticsCostText,
+          customsCostText: customsCostText,
+          insuranceCostText: insuranceCostText,
+        ) ??
+        Validators.validateExportItems(items: itemInputs);
     if (validationError != null) {
       errorMessage.value = validationError;
       return false;
@@ -241,32 +230,31 @@ final class ExportController extends GetxController {
 
     isSaving.value = true;
     try {
-      final resolved = _resolveProduct(productNames);
       final customer = _resolveCustomer(
         customerId: customerId,
         guestCustomerName: guestCustomerName,
       );
-      final quantityTon = QuantityUtils.parseQuantity(quantityTonText.trim())!;
-      final unitPriceMinor = MoneyUtils.parseAmountToMinor(unitPriceText.trim())!;
+      final totals = ExportTotals.fromCostTexts(
+        items: items,
+        logisticsCostText: logisticsCostText,
+        customsCostText: customsCostText,
+        insuranceCostText: insuranceCostText,
+      );
 
       await _exportService.updateExport(
         id: id,
         title: title,
         customerId: customer.id,
         customerNameSnapshot: customer.name,
-        productName: resolved.name,
-        productId: resolved.id,
-        quantityTon: quantityTon,
-        unitPriceMinor: unitPriceMinor,
-        totalPriceMinor: _totalPriceMinor(quantityTon, unitPriceMinor),
+        currency: currency,
+        items: items,
+        totals: totals,
         paymentMethod: paymentMethod,
         bank: bank,
         firstPaymentDate: firstPaymentDate,
         firstPaymentAmountMinor: _optionalAmount(firstPaymentAmountText),
         lastPaymentDate: lastPaymentDate,
         lastPaymentAmountMinor: _optionalAmount(lastPaymentAmountText),
-        wasteKg: _optionalQuantity(wasteKgText),
-        netTotalAmountMinor: _optionalAmount(netTotalAmountText),
         logisticsName: logisticsName,
         shipmentDate: shipmentDate,
         deliveryDate: deliveryDate,
@@ -327,24 +315,15 @@ final class ExportController extends GetxController {
     return (id: '', name: guestCustomerName.trim());
   }
 
-  ({String? id, String name}) _resolveProduct(List<String> productNames) {
-    return (id: null, name: ExportProductNames.join(productNames));
-  }
-
-  int _totalPriceMinor(double quantityTon, int unitPriceMinor) =>
-      (quantityTon * unitPriceMinor).round();
-
   int? _optionalAmount(String text) =>
       MoneyUtils.parseAmountToMinor(text.trim());
-
-  double? _optionalQuantity(String text) =>
-      QuantityUtils.parseQuantity(text.trim());
 
   Future<bool> _showDeleteConfirmDialog() async {
     final result = await Get.dialog<bool>(
       Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: AppUiTokens.space24),
+        insetPadding:
+            const EdgeInsets.symmetric(horizontal: AppUiTokens.space24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: DecoratedBox(

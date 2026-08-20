@@ -1,10 +1,15 @@
 import 'package:Ok/feature/due_tracking/widgets/customer_search_dropdown.dart';
-import 'package:Ok/feature/export/widgets/export_products_field.dart';
+import 'package:Ok/feature/export/models/export_currency.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/models/export_totals.dart';
+import 'package:Ok/feature/export/widgets/export_items_editor.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
-import 'package:Ok/product/utility/formatters/turkish_amount_input_formatter.dart';
+import 'package:Ok/product/utility/money_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
+import 'package:Ok/product/widgets/panel/panel_dropdown.dart';
 import 'package:Ok/product/widgets/panel/panel_text_field.dart';
 import 'package:Ok/shared/widgets/app_date_picker_field.dart';
 import 'package:flutter/material.dart';
@@ -15,21 +20,15 @@ class ExportRecordForm extends StatelessWidget {
     required this.customers,
     required this.selectedCustomerId,
     required this.guestCustomerNameController,
-    required this.productControllers,
-    required this.onAddProduct,
-    required this.onRemoveProduct,
+    required this.itemRows,
+    required this.currency,
     required this.titleController,
-    required this.quantityTonController,
-    required this.unitPriceController,
-    required this.totalPriceText,
     required this.paymentMethodController,
     required this.bankController,
     required this.firstPaymentDate,
     required this.firstPaymentAmountController,
     required this.lastPaymentDate,
     required this.lastPaymentAmountController,
-    required this.wasteKgController,
-    required this.netTotalAmountController,
     required this.logisticsNameController,
     required this.shipmentDate,
     required this.deliveryDate,
@@ -39,6 +38,8 @@ class ExportRecordForm extends StatelessWidget {
     required this.notesController,
     required this.onCustomerChanged,
     required this.onGuestCustomerNameChanged,
+    required this.onCurrencyChanged,
+    required this.onItemsChanged,
     required this.onFirstPaymentDateChanged,
     required this.onLastPaymentDateChanged,
     required this.onShipmentDateChanged,
@@ -50,21 +51,15 @@ class ExportRecordForm extends StatelessWidget {
   final List<Customer> customers;
   final String? selectedCustomerId;
   final TextEditingController guestCustomerNameController;
-  final List<TextEditingController> productControllers;
-  final VoidCallback onAddProduct;
-  final ValueChanged<int> onRemoveProduct;
+  final List<ExportItemFormRow> itemRows;
+  final PriceOfferCurrencyType currency;
   final TextEditingController titleController;
-  final TextEditingController quantityTonController;
-  final TextEditingController unitPriceController;
-  final String totalPriceText;
   final TextEditingController paymentMethodController;
   final TextEditingController bankController;
   final DateTime? firstPaymentDate;
   final TextEditingController firstPaymentAmountController;
   final DateTime? lastPaymentDate;
   final TextEditingController lastPaymentAmountController;
-  final TextEditingController wasteKgController;
-  final TextEditingController netTotalAmountController;
   final TextEditingController logisticsNameController;
   final DateTime? shipmentDate;
   final DateTime? deliveryDate;
@@ -74,150 +69,199 @@ class ExportRecordForm extends StatelessWidget {
   final TextEditingController notesController;
   final ValueChanged<String?> onCustomerChanged;
   final ValueChanged<String> onGuestCustomerNameChanged;
+  final ValueChanged<PriceOfferCurrencyType?> onCurrencyChanged;
+  final VoidCallback onItemsChanged;
   final ValueChanged<DateTime?> onFirstPaymentDateChanged;
   final ValueChanged<DateTime?> onLastPaymentDateChanged;
   final ValueChanged<DateTime?> onShipmentDateChanged;
   final ValueChanged<DateTime?> onDeliveryDateChanged;
   final VoidCallback onTotalsChanged;
 
+  ExportTotals get _totals {
+    final items = <ExportItemData>[];
+    for (var index = 0; index < itemRows.length; index++) {
+      final item = itemRows[index].toItemData(sortOrder: index);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+
+    return ExportTotals.fromCostTexts(
+      items: items,
+      logisticsCostText: logisticsCostController.text,
+      customsCostText: customsCostController.text,
+      insuranceCostText: insuranceCostController.text,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 800;
+    final totals = _totals;
+    final moneyCurrency = mapExportCurrency(currency);
 
-        final leftColumn = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _ExportFormGroup(
+          title: 'Genel',
+          icon: Icons.info_outline_rounded,
           children: [
-            _ExportFormGroup(
-              title: 'Genel',
-              icon: Icons.info_outline_rounded,
-              children: [
-                PanelTextField(
-                  controller: titleController,
-                  label: 'Başlık',
-                ),
-                CustomerSearchDropdown(
-                  customers: customers,
-                  selectedCustomerId: selectedCustomerId,
-                  allowCustomEntry: true,
-                  customName: guestCustomerNameController.text,
-                  placeholder: 'Müşteri seçin veya yazın',
-                  onChanged: onCustomerChanged,
-                  onCustomNameChanged: onGuestCustomerNameChanged,
-                ),
-              ],
+            PanelTextField(
+              controller: titleController,
+              label: 'Başlık',
             ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ExportFormGroup(
-              title: 'Ürün ve miktar',
-              icon: Icons.inventory_2_outlined,
-              children: [
-                ExportProductsField(
-                  controllers: productControllers,
-                  onAdd: onAddProduct,
-                  onRemove: onRemoveProduct,
-                ),
-                PanelTextField(
-                  controller: quantityTonController,
-                  label: 'Gönderilen miktar (ton)',
-                  hintText: '0',
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: const [
-                    TurkishAmountInputFormatter(maxFractionDigits: 3),
-                  ],
-                  onChanged: (_) => onTotalsChanged(),
-                ),
-                PanelTextField(
-                  controller: wasteKgController,
-                  label: 'Fire miktarı (kg)',
-                  hintText: '0',
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: const [
-                    TurkishAmountInputFormatter(maxFractionDigits: 3),
-                  ],
-                ),
-              ],
+            CustomerSearchDropdown(
+              customers: customers,
+              selectedCustomerId: selectedCustomerId,
+              allowCustomEntry: true,
+              customName: guestCustomerNameController.text,
+              placeholder: 'Müşteri seçin veya yazın',
+              onChanged: onCustomerChanged,
+              onCustomNameChanged: onGuestCustomerNameChanged,
             ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ExportFormGroup(
-              title: 'Fiyat',
-              icon: Icons.payments_outlined,
-              children: [
-                PanelAmountField(
-                  controller: unitPriceController,
-                  label: 'Anlaşılan birim fiyat',
-                  onChanged: (_) => onTotalsChanged(),
-                ),
-                _ReadOnlyAmountField(
-                  label: 'Toplam fiyat',
-                  value: totalPriceText,
-                ),
-                PanelAmountField(
-                  controller: netTotalAmountController,
-                  label: 'Net toplam tutar',
-                ),
-              ],
-            ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ExportFormGroup(
-              title: 'Notlar',
-              icon: Icons.notes_outlined,
-              children: [
-                PanelTextField(
-                  controller: notesController,
-                  label: 'Notlar',
-                  minLines: 4,
-                  maxLines: 6,
-                ),
-              ],
+            PanelDropdown<PriceOfferCurrencyType>(
+              label: 'Para birimi',
+              hint: 'Para birimi seçiniz',
+              value: currency,
+              items: PriceOfferCurrencyType.values,
+              itemLabel: (value) => value.label,
+              onChanged: onCurrencyChanged,
             ),
           ],
-        );
-
-        final rightColumn = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        ),
+        const SizedBox(height: AppUiTokens.space24),
+        _ExportFormGroup(
+          title: 'Ürün ve fiyat',
+          icon: Icons.inventory_2_outlined,
           children: [
-            _ExportFormGroup(
-              title: 'Ödeme',
-              icon: Icons.account_balance_outlined,
+            ExportItemsEditor(
+              rows: itemRows,
+              currency: currency,
+              onChanged: onItemsChanged,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppUiTokens.space24),
+        _ExportFormGroup(
+          title: 'Tutar özeti',
+          icon: Icons.payments_outlined,
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 800;
+                final fields = [
+                  _ReadOnlyAmountField(
+                    label: 'Gönderilen toplam',
+                    helper: 'Gönderilen ürünlerin toplam tutarı',
+                    value: MoneyUtils.formatAmountMinor(
+                      totals.sentTotalMinor,
+                      moneyCurrency,
+                    ),
+                  ),
+                  _ReadOnlyAmountField(
+                    label: 'Firesiz toplam',
+                    helper: 'Gönderilen − Fire',
+                    value: MoneyUtils.formatAmountMinor(
+                      totals.afterWasteMinor,
+                      moneyCurrency,
+                    ),
+                  ),
+                  _ReadOnlyAmountField(
+                    label: 'Net toplam',
+                    helper: 'Gönderilen − Fire − Lojistik − Gümrük − Sigorta',
+                    value: MoneyUtils.formatAmountMinor(
+                      totals.netTotalMinor,
+                      moneyCurrency,
+                    ),
+                  ),
+                ];
+
+                if (isCompact) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < fields.length; i++) ...[
+                        if (i > 0) const SizedBox(height: AppUiTokens.space16),
+                        fields[i],
+                      ],
+                    ],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var i = 0; i < fields.length; i++) ...[
+                      if (i > 0) const SizedBox(width: AppUiTokens.space16),
+                      Expanded(child: fields[i]),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: AppUiTokens.space24),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 800;
+
+            final leftColumn = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                PanelTextField(
-                  controller: paymentMethodController,
-                  label: 'Ödeme şekli',
+                _ExportFormGroup(
+                  title: 'Ödeme',
+                  icon: Icons.account_balance_outlined,
+                  children: [
+                    PanelTextField(
+                      controller: paymentMethodController,
+                      label: 'Ödeme şekli',
+                    ),
+                    PanelTextField(
+                      controller: bankController,
+                      label: 'Banka',
+                    ),
+                    AppDatePickerField(
+                      key: ValueKey('first-$firstPaymentDate'),
+                      label: 'İlk ödeme tarihi',
+                      placeholder: 'İlk ödeme tarihi seçiniz',
+                      selectedDate: firstPaymentDate,
+                      onDateSelected: onFirstPaymentDateChanged,
+                    ),
+                    PanelAmountField(
+                      controller: firstPaymentAmountController,
+                      label: 'İlk ödeme tutarı',
+                    ),
+                    AppDatePickerField(
+                      key: ValueKey('last-$lastPaymentDate'),
+                      label: 'Son ödeme tarihi',
+                      placeholder: 'Son ödeme tarihi seçiniz',
+                      selectedDate: lastPaymentDate,
+                      onDateSelected: onLastPaymentDateChanged,
+                    ),
+                    PanelAmountField(
+                      controller: lastPaymentAmountController,
+                      label: 'Son ödeme tutarı',
+                    ),
+                  ],
                 ),
-                PanelTextField(
-                  controller: bankController,
-                  label: 'Banka',
-                ),
-                AppDatePickerField(
-                  key: ValueKey('first-$firstPaymentDate'),
-                  label: 'İlk ödeme tarihi',
-                  placeholder: 'İlk ödeme tarihi seçiniz',
-                  selectedDate: firstPaymentDate,
-                  onDateSelected: onFirstPaymentDateChanged,
-                ),
-                PanelAmountField(
-                  controller: firstPaymentAmountController,
-                  label: 'İlk ödeme tutarı',
-                ),
-                AppDatePickerField(
-                  key: ValueKey('last-$lastPaymentDate'),
-                  label: 'Son ödeme tarihi',
-                  placeholder: 'Son ödeme tarihi seçiniz',
-                  selectedDate: lastPaymentDate,
-                  onDateSelected: onLastPaymentDateChanged,
-                ),
-                PanelAmountField(
-                  controller: lastPaymentAmountController,
-                  label: 'Son ödeme tutarı',
+                const SizedBox(height: AppUiTokens.space24),
+                _ExportFormGroup(
+                  title: 'Notlar',
+                  icon: Icons.notes_outlined,
+                  children: [
+                    PanelTextField(
+                      controller: notesController,
+                      label: 'Notlar',
+                      minLines: 4,
+                      maxLines: 6,
+                    ),
+                  ],
                 ),
               ],
-            ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ExportFormGroup(
+            );
+
+            final rightColumn = _ExportFormGroup(
               title: 'Lojistik',
               icon: Icons.local_shipping_outlined,
               children: [
@@ -242,40 +286,43 @@ class ExportRecordForm extends StatelessWidget {
                 PanelAmountField(
                   controller: logisticsCostController,
                   label: 'Lojistik masrafı',
+                  onChanged: (_) => onTotalsChanged(),
                 ),
                 PanelAmountField(
                   controller: customsCostController,
                   label: 'Gümrük masrafı',
+                  onChanged: (_) => onTotalsChanged(),
                 ),
                 PanelAmountField(
                   controller: insuranceCostController,
                   label: 'Sigorta masrafı',
+                  onChanged: (_) => onTotalsChanged(),
                 ),
               ],
-            ),
-          ],
-        );
+            );
 
-        if (isCompact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              leftColumn,
-              const SizedBox(height: AppUiTokens.space16),
-              rightColumn,
-            ],
-          );
-        }
+            if (isCompact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  leftColumn,
+                  const SizedBox(height: AppUiTokens.space16),
+                  rightColumn,
+                ],
+              );
+            }
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: leftColumn),
-            const SizedBox(width: AppUiTokens.space24),
-            Expanded(child: rightColumn),
-          ],
-        );
-      },
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: leftColumn),
+                const SizedBox(width: AppUiTokens.space24),
+                Expanded(child: rightColumn),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -411,10 +458,12 @@ class _ReadOnlyAmountField extends StatelessWidget {
   const _ReadOnlyAmountField({
     required this.label,
     required this.value,
+    this.helper,
   });
 
   final String label;
   final String value;
+  final String? helper;
 
   @override
   Widget build(BuildContext context) {
@@ -428,16 +477,24 @@ class _ReadOnlyAmountField extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
         ),
+        if (helper != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helper!,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppUiTokens.textMuted,
+                ),
+          ),
+        ],
         const SizedBox(height: AppUiTokens.space8),
         InputDecorator(
           decoration: PanelInputDecoration.build(hintText: '0,00'),
           child: Text(
-            value.isEmpty ? '0,00' : value,
-            style: TextStyle(
-              color: value.isEmpty
-                  ? AppUiTokens.textMuted
-                  : AppUiTokens.textPrimary,
+            value,
+            style: const TextStyle(
+              color: AppUiTokens.textPrimary,
               fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

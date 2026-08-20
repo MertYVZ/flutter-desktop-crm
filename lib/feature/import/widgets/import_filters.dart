@@ -2,6 +2,7 @@ import 'package:Ok/feature/import/controllers/import_controller.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ImportFilters extends StatelessWidget {
   const ImportFilters({
@@ -55,50 +56,56 @@ class ImportFilters extends StatelessWidget {
           ),
         );
 
-        final clearButton = TextButton(
-          onPressed: () {
-            searchController.clear();
-            controller.clearFilters();
-          },
-          style: AppInteractiveTheme.textButtonStyle(
-            TextButton.styleFrom(
-              foregroundColor: AppUiTokens.textSecondary,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppUiTokens.space12,
-              ),
-              minimumSize: const Size(0, _fieldHeight),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-          child: const Text(
-            'Filtreleri Temizle',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-        );
+        return Obx(() {
+          final clearButton = controller.hasActiveFilters
+              ? TextButton(
+                  onPressed: () {
+                    searchController.clear();
+                    controller.clearFilters();
+                  },
+                  style: AppInteractiveTheme.textButtonStyle(
+                    TextButton.styleFrom(
+                      foregroundColor: AppUiTokens.textSecondary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppUiTokens.space12,
+                      ),
+                      minimumSize: const Size(0, _fieldHeight),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  child: const Text(
+                    'Filtreleri Temizle',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                )
+              : const SizedBox.shrink();
 
-        if (isCompact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          if (isCompact) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                searchField,
+                if (controller.hasActiveFilters) ...[
+                  const SizedBox(height: AppUiTokens.space8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: clearButton,
+                  ),
+                ],
+              ],
+            );
+          }
+
+          return Wrap(
+            spacing: AppUiTokens.space8,
+            runSpacing: AppUiTokens.space8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               searchField,
-              const SizedBox(height: AppUiTokens.space8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: clearButton,
-              ),
+              clearButton,
             ],
           );
-        }
-
-        return Wrap(
-          spacing: AppUiTokens.space8,
-          runSpacing: AppUiTokens.space8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            searchField,
-            clearButton,
-          ],
-        );
+        });
       },
     );
   }

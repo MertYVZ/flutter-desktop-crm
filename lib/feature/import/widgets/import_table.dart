@@ -1,5 +1,7 @@
+import 'package:Ok/feature/export/models/export_currency.dart';
 import 'package:Ok/feature/import/controllers/import_controller.dart';
 import 'package:Ok/feature/import/models/import_record_list_item.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
@@ -185,7 +187,12 @@ class ImportTable extends StatelessWidget {
         ),
         DataCell(
           Text(
-            MoneyUtils.formatAmountMinorForExport(record.totalAmountMinor),
+            MoneyUtils.formatAmountMinor(
+              record.totalAmountMinor,
+              mapExportCurrency(
+                PriceOfferCurrencyTypeX.fromValue(record.currency),
+              ),
+            ),
             style: _dataStyle,
           ),
         ),
@@ -210,6 +217,15 @@ class ImportTable extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _ActionIconButton(
+                tooltip: 'Detay',
+                icon: Icons.visibility_outlined,
+                onPressed: isDeleting
+                    ? null
+                    : () => Get.toNamed<void>(
+                          AppRoutes.importsDetail.pathForId(record.id),
+                        ),
+              ),
+              _ActionIconButton(
                 tooltip: 'Düzenle',
                 icon: Icons.edit_outlined,
                 onPressed: isDeleting
@@ -226,7 +242,8 @@ class ImportTable extends StatelessWidget {
                 onPressed: isDeleting
                     ? null
                     : () async {
-                        final deleted = await controller.deleteImport(record.id);
+                        final deleted =
+                            await controller.deleteImport(record.id);
                         if (deleted) {
                           await controller.searchAndFilterImports();
                         }
@@ -260,8 +277,9 @@ class _ActionIconButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      mouseCursor:
-          onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      mouseCursor: onPressed == null
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
       icon: isLoading
           ? SizedBox(
               width: 16,

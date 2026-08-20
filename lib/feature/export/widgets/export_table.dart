@@ -1,11 +1,12 @@
 import 'package:Ok/feature/export/controllers/export_controller.dart';
+import 'package:Ok/feature/export/models/export_currency.dart';
 import 'package:Ok/feature/export/models/export_record_list_item.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/utility/app_date_utils.dart';
 import 'package:Ok/product/utility/money_utils.dart';
-import 'package:Ok/product/utility/quantity_utils.dart';
 import 'package:Ok/product/widgets/app_empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:gen/gen.dart';
@@ -88,7 +89,6 @@ class ExportTable extends StatelessWidget {
             DataColumn(label: Text('Başlık')),
             DataColumn(label: Text('Müşteri')),
             DataColumn(label: Text('Ürün')),
-            DataColumn(label: Text('Ton')),
             DataColumn(label: Text('Toplam')),
             DataColumn(label: Text('Sevkiyat')),
             DataColumn(label: Text('Teslim')),
@@ -187,13 +187,12 @@ class ExportTable extends StatelessWidget {
         ),
         DataCell(
           Text(
-            QuantityUtils.formatQuantity(record.quantityTon),
-            style: _dataStyle,
-          ),
-        ),
-        DataCell(
-          Text(
-            MoneyUtils.formatAmountMinorForExport(record.totalPriceMinor),
+            MoneyUtils.formatAmountMinor(
+              record.totalPriceMinor,
+              mapExportCurrency(
+                PriceOfferCurrencyTypeX.fromValue(record.currency),
+              ),
+            ),
             style: _dataStyle,
           ),
         ),
@@ -218,6 +217,15 @@ class ExportTable extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _ActionIconButton(
+                tooltip: 'Detay',
+                icon: Icons.visibility_outlined,
+                onPressed: isDeleting
+                    ? null
+                    : () => Get.toNamed<void>(
+                          AppRoutes.exportsDetail.pathForId(record.id),
+                        ),
+              ),
+              _ActionIconButton(
                 tooltip: 'Düzenle',
                 icon: Icons.edit_outlined,
                 onPressed: isDeleting
@@ -234,7 +242,8 @@ class ExportTable extends StatelessWidget {
                 onPressed: isDeleting
                     ? null
                     : () async {
-                        final deleted = await controller.deleteExport(record.id);
+                        final deleted =
+                            await controller.deleteExport(record.id);
                         if (deleted) {
                           await controller.searchAndFilterExports();
                         }
@@ -268,8 +277,9 @@ class _ActionIconButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      mouseCursor:
-          onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      mouseCursor: onPressed == null
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
       icon: isLoading
           ? SizedBox(
               width: 16,

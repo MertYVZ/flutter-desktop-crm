@@ -1,13 +1,13 @@
 import 'package:Ok/feature/export/controllers/export_controller.dart';
-import 'package:Ok/feature/export/models/export_product_names.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/widgets/export_items_editor.dart';
 import 'package:Ok/feature/export/widgets/export_record_form.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
 import 'package:Ok/product/utility/constants/export_messages.dart';
-import 'package:Ok/product/utility/money_utils.dart';
-import 'package:Ok/product/utility/quantity_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
 import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
@@ -26,21 +26,18 @@ final class ExportEditPage extends StatefulWidget {
 class _ExportEditPageState extends BaseState<ExportEditPage> {
   late final TextEditingController _titleController;
   late final TextEditingController _guestCustomerNameController;
-  late final List<TextEditingController> _productControllers;
-  late final TextEditingController _quantityTonController;
-  late final TextEditingController _unitPriceController;
+  late final List<ExportItemFormRow> _itemRows;
   late final TextEditingController _paymentMethodController;
   late final TextEditingController _bankController;
   late final TextEditingController _firstPaymentAmountController;
   late final TextEditingController _lastPaymentAmountController;
-  late final TextEditingController _wasteKgController;
-  late final TextEditingController _netTotalAmountController;
   late final TextEditingController _logisticsNameController;
   late final TextEditingController _logisticsCostController;
   late final TextEditingController _customsCostController;
   late final TextEditingController _insuranceCostController;
   late final TextEditingController _notesController;
   String? _selectedCustomerId;
+  PriceOfferCurrencyType _currency = PriceOfferCurrencyType.try_;
   DateTime? _firstPaymentDate;
   DateTime? _lastPaymentDate;
   DateTime? _shipmentDate;
@@ -54,15 +51,11 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
     super.initState();
     _titleController = TextEditingController();
     _guestCustomerNameController = TextEditingController();
-    _productControllers = [TextEditingController()];
-    _quantityTonController = TextEditingController();
-    _unitPriceController = TextEditingController();
+    _itemRows = [ExportItemFormRow()];
     _paymentMethodController = TextEditingController();
     _bankController = TextEditingController();
     _firstPaymentAmountController = TextEditingController();
     _lastPaymentAmountController = TextEditingController();
-    _wasteKgController = TextEditingController();
-    _netTotalAmountController = TextEditingController();
     _logisticsNameController = TextEditingController();
     _logisticsCostController = TextEditingController();
     _customsCostController = TextEditingController();
@@ -74,17 +67,13 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
   void dispose() {
     _titleController.dispose();
     _guestCustomerNameController.dispose();
-    for (final controller in _productControllers) {
-      controller.dispose();
+    for (final row in _itemRows) {
+      row.dispose();
     }
-    _quantityTonController.dispose();
-    _unitPriceController.dispose();
     _paymentMethodController.dispose();
     _bankController.dispose();
     _firstPaymentAmountController.dispose();
     _lastPaymentAmountController.dispose();
-    _wasteKgController.dispose();
-    _netTotalAmountController.dispose();
     _logisticsNameController.dispose();
     _logisticsCostController.dispose();
     _customsCostController.dispose();
@@ -93,41 +82,19 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
     super.dispose();
   }
 
-  void _addProduct() {
-    setState(() {
-      _productControllers.add(TextEditingController());
-    });
-  }
-
-  void _removeProduct(int index) {
-    if (_productControllers.length <= 1) {
-      return;
+  void _replaceItemRows(List<ExportItemData> items) {
+    for (final row in _itemRows) {
+      row.dispose();
     }
-
-    setState(() {
-      _productControllers.removeAt(index).dispose();
-    });
-  }
-
-  void _replaceProductControllers(List<String> names) {
-    for (final controller in _productControllers) {
-      controller.dispose();
-    }
-    _productControllers
+    _itemRows
       ..clear()
-      ..addAll(names.map((name) => TextEditingController(text: name)));
-  }
-
-  String get _totalPriceText {
-    final quantity = QuantityUtils.parseQuantity(_quantityTonController.text);
-    final unitPrice = MoneyUtils.parseAmountToMinor(_unitPriceController.text);
-    if (quantity == null || unitPrice == null) {
-      return '';
-    }
-
-    return MoneyUtils.formatAmountInputFromMinor(
-      (quantity * unitPrice).round(),
-    );
+      ..addAll(
+        items.isEmpty
+            ? [ExportItemFormRow()]
+            : items.map((item) {
+                return ExportItemFormRow(id: item.id)..populateFromItem(item);
+              }),
+      );
   }
 
   void _setOptionalAmount(TextEditingController controller, int? amountMinor) {
@@ -139,11 +106,12 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
   }
 
   void _populateForm(ExportController controller) {
-    final record = controller.selectedExport.value;
-    if (record == null || _isFormInitialized) {
+    final detail = controller.selectedExport.value;
+    if (detail == null || _isFormInitialized) {
       return;
     }
 
+    final record = detail.record;
     _titleController.text = record.title;
     if (record.customerId.trim().isEmpty) {
       _selectedCustomerId = null;
@@ -152,12 +120,7 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
       _selectedCustomerId = record.customerId;
       _guestCustomerNameController.text = record.customerNameSnapshot ?? '';
     }
-    _quantityTonController.text =
-        QuantityUtils.formatQuantityInput(record.quantityTon);
-    PanelAmountField.setAmountFromMinor(
-      _unitPriceController,
-      record.unitPriceMinor,
-    );
+    _currency = detail.currency;
     _paymentMethodController.text = record.paymentMethod ?? '';
     _bankController.text = record.bank ?? '';
     _firstPaymentDate = record.firstPaymentDate;
@@ -170,10 +133,6 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
       _lastPaymentAmountController,
       record.lastPaymentAmountMinor,
     );
-    if (record.wasteKg != null) {
-      _wasteKgController.text = QuantityUtils.formatQuantityInput(record.wasteKg!);
-    }
-    _setOptionalAmount(_netTotalAmountController, record.netTotalAmountMinor);
     _logisticsNameController.text = record.logisticsName ?? '';
     _shipmentDate = record.shipmentDate;
     _deliveryDate = record.deliveryDate;
@@ -181,13 +140,20 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
     _setOptionalAmount(_customsCostController, record.customsCostMinor);
     _setOptionalAmount(_insuranceCostController, record.insuranceCostMinor);
     _notesController.text = record.notes ?? '';
-
-    final productNames = ExportProductNames.parse(record.productName);
-    _replaceProductControllers(
-      productNames.isEmpty ? [''] : productNames,
-    );
+    _replaceItemRows(detail.items);
 
     _isFormInitialized = true;
+  }
+
+  List<ExportItemData> get _items {
+    final items = <ExportItemData>[];
+    for (var index = 0; index < _itemRows.length; index++) {
+      final item = _itemRows[index].toItemData(sortOrder: index);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+    return items;
   }
 
   @override
@@ -223,8 +189,8 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
             );
           }
 
-          final record = controller.selectedExport.value;
-          if (record == null) {
+          final detail = controller.selectedExport.value;
+          if (detail == null) {
             return Center(
               child: Text(
                 controller.errorMessage.value ?? ExportMessages.notFound,
@@ -241,7 +207,7 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
               children: [
                 PanelFormPageHeader(
                   title: 'İhracat Düzenle',
-                  subtitle: record.title,
+                  subtitle: detail.record.title,
                   onBack: () => Get.offNamed<void>(AppRoutes.exports.value),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
@@ -268,13 +234,9 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
                         selectedCustomerId: _selectedCustomerId,
                         guestCustomerNameController:
                             _guestCustomerNameController,
-                        productControllers: _productControllers,
-                        onAddProduct: _addProduct,
-                        onRemoveProduct: _removeProduct,
+                        itemRows: _itemRows,
+                        currency: _currency,
                         titleController: _titleController,
-                        quantityTonController: _quantityTonController,
-                        unitPriceController: _unitPriceController,
-                        totalPriceText: _totalPriceText,
                         paymentMethodController: _paymentMethodController,
                         bankController: _bankController,
                         firstPaymentDate: _firstPaymentDate,
@@ -283,8 +245,6 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
                         lastPaymentDate: _lastPaymentDate,
                         lastPaymentAmountController:
                             _lastPaymentAmountController,
-                        wasteKgController: _wasteKgController,
-                        netTotalAmountController: _netTotalAmountController,
                         logisticsNameController: _logisticsNameController,
                         shipmentDate: _shipmentDate,
                         deliveryDate: _deliveryDate,
@@ -298,6 +258,12 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
                         onGuestCustomerNameChanged: (value) => setState(() {
                           _guestCustomerNameController.text = value;
                         }),
+                        onCurrencyChanged: (value) => setState(() {
+                          if (value != null) {
+                            _currency = value;
+                          }
+                        }),
+                        onItemsChanged: () => setState(() {}),
                         onFirstPaymentDateChanged: (value) => setState(() {
                           _firstPaymentDate = value;
                         }),
@@ -343,18 +309,15 @@ class _ExportEditPageState extends BaseState<ExportEditPage> {
       title: _titleController.text,
       customerId: _selectedCustomerId,
       guestCustomerName: _guestCustomerNameController.text,
-      productNames:
-          _productControllers.map((controller) => controller.text).toList(),
-      quantityTonText: _quantityTonController.text,
-      unitPriceText: _unitPriceController.text,
+      currency: _currency,
+      items: _items,
+      itemInputs: _itemRows.map((row) => row.toValidationInput()).toList(),
       paymentMethod: _paymentMethodController.text,
       bank: _bankController.text,
       firstPaymentDate: _firstPaymentDate,
       firstPaymentAmountText: _firstPaymentAmountController.text,
       lastPaymentDate: _lastPaymentDate,
       lastPaymentAmountText: _lastPaymentAmountController.text,
-      wasteKgText: _wasteKgController.text,
-      netTotalAmountText: _netTotalAmountController.text,
       logisticsName: _logisticsNameController.text,
       shipmentDate: _shipmentDate,
       deliveryDate: _deliveryDate,

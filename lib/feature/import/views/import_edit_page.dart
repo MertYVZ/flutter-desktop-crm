@@ -1,6 +1,8 @@
-import 'package:Ok/feature/export/models/export_product_names.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/widgets/export_items_editor.dart';
 import 'package:Ok/feature/import/controllers/import_controller.dart';
 import 'package:Ok/feature/import/widgets/import_record_form.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
@@ -24,13 +26,13 @@ final class ImportEditPage extends StatefulWidget {
 class _ImportEditPageState extends BaseState<ImportEditPage> {
   late final TextEditingController _titleController;
   late final TextEditingController _supplierNameController;
-  late final List<TextEditingController> _productControllers;
-  late final TextEditingController _totalAmountController;
+  late final List<ExportItemFormRow> _itemRows;
   late final TextEditingController _logisticsNameController;
   late final TextEditingController _logisticsCostController;
   late final TextEditingController _customsCostController;
   late final TextEditingController _insuranceCostController;
   late final TextEditingController _notesController;
+  PriceOfferCurrencyType _currency = PriceOfferCurrencyType.try_;
   DateTime? _shipmentDate;
   DateTime? _deliveryDate;
   bool _isFormInitialized = false;
@@ -42,8 +44,7 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
     super.initState();
     _titleController = TextEditingController();
     _supplierNameController = TextEditingController();
-    _productControllers = [TextEditingController()];
-    _totalAmountController = TextEditingController();
+    _itemRows = [ExportItemFormRow()];
     _logisticsNameController = TextEditingController();
     _logisticsCostController = TextEditingController();
     _customsCostController = TextEditingController();
@@ -55,10 +56,9 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
   void dispose() {
     _titleController.dispose();
     _supplierNameController.dispose();
-    for (final controller in _productControllers) {
-      controller.dispose();
+    for (final row in _itemRows) {
+      row.dispose();
     }
-    _totalAmountController.dispose();
     _logisticsNameController.dispose();
     _logisticsCostController.dispose();
     _customsCostController.dispose();
@@ -67,29 +67,19 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
     super.dispose();
   }
 
-  void _addProduct() {
-    setState(() {
-      _productControllers.add(TextEditingController());
-    });
-  }
-
-  void _removeProduct(int index) {
-    if (_productControllers.length <= 1) {
-      return;
+  void _replaceItemRows(List<ExportItemData> items) {
+    for (final row in _itemRows) {
+      row.dispose();
     }
-
-    setState(() {
-      _productControllers.removeAt(index).dispose();
-    });
-  }
-
-  void _replaceProductControllers(List<String> names) {
-    for (final controller in _productControllers) {
-      controller.dispose();
-    }
-    _productControllers
+    _itemRows
       ..clear()
-      ..addAll(names.map((name) => TextEditingController(text: name)));
+      ..addAll(
+        items.isEmpty
+            ? [ExportItemFormRow()]
+            : items.map((item) {
+                return ExportItemFormRow(id: item.id)..populateFromItem(item);
+              }),
+      );
   }
 
   void _setOptionalAmount(TextEditingController controller, int? amountMinor) {
@@ -101,21 +91,15 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
   }
 
   void _populateForm(ImportController controller) {
-    final record = controller.selectedImport.value;
-    if (record == null || _isFormInitialized) {
+    final detail = controller.selectedImport.value;
+    if (detail == null || _isFormInitialized) {
       return;
     }
 
+    final record = detail.record;
     _titleController.text = record.title;
     _supplierNameController.text = record.supplierName;
-    final productNames = ExportProductNames.parse(record.products);
-    _replaceProductControllers(
-      productNames.isEmpty ? [''] : productNames,
-    );
-    PanelAmountField.setAmountFromMinor(
-      _totalAmountController,
-      record.totalAmountMinor,
-    );
+    _currency = detail.currency;
     _logisticsNameController.text = record.logisticsName ?? '';
     _shipmentDate = record.shipmentDate;
     _deliveryDate = record.deliveryDate;
@@ -123,7 +107,19 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
     _setOptionalAmount(_customsCostController, record.customsCostMinor);
     _setOptionalAmount(_insuranceCostController, record.insuranceCostMinor);
     _notesController.text = record.notes ?? '';
+    _replaceItemRows(detail.items);
     _isFormInitialized = true;
+  }
+
+  List<ExportItemData> get _items {
+    final items = <ExportItemData>[];
+    for (var index = 0; index < _itemRows.length; index++) {
+      final item = _itemRows[index].toItemData(sortOrder: index);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+    return items;
   }
 
   @override
@@ -157,8 +153,8 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
             );
           }
 
-          final record = controller.selectedImport.value;
-          if (record == null) {
+          final detail = controller.selectedImport.value;
+          if (detail == null) {
             return Center(
               child: Text(
                 controller.errorMessage.value ?? ImportMessages.notFound,
@@ -175,7 +171,7 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
               children: [
                 PanelFormPageHeader(
                   title: 'İthalat Düzenle',
-                  subtitle: record.title,
+                  subtitle: detail.record.title,
                   onBack: () => Get.offNamed<void>(AppRoutes.imports.value),
                 ),
                 const SizedBox(height: AppUiTokens.space16),
@@ -200,10 +196,8 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
                       ImportRecordForm(
                         titleController: _titleController,
                         supplierNameController: _supplierNameController,
-                        productControllers: _productControllers,
-                        onAddProduct: _addProduct,
-                        onRemoveProduct: _removeProduct,
-                        totalAmountController: _totalAmountController,
+                        itemRows: _itemRows,
+                        currency: _currency,
                         logisticsNameController: _logisticsNameController,
                         shipmentDate: _shipmentDate,
                         deliveryDate: _deliveryDate,
@@ -211,12 +205,19 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
                         customsCostController: _customsCostController,
                         insuranceCostController: _insuranceCostController,
                         notesController: _notesController,
+                        onCurrencyChanged: (value) => setState(() {
+                          if (value != null) {
+                            _currency = value;
+                          }
+                        }),
+                        onItemsChanged: () => setState(() {}),
                         onShipmentDateChanged: (value) => setState(() {
                           _shipmentDate = value;
                         }),
                         onDeliveryDateChanged: (value) => setState(() {
                           _deliveryDate = value;
                         }),
+                        onTotalsChanged: () => setState(() {}),
                       ),
                       const SizedBox(height: AppUiTokens.space24),
                       Obx(
@@ -248,10 +249,9 @@ class _ImportEditPageState extends BaseState<ImportEditPage> {
       id: _recordId,
       title: _titleController.text,
       supplierName: _supplierNameController.text,
-      products: ExportProductNames.join(
-        _productControllers.map((controller) => controller.text),
-      ),
-      totalAmountText: _totalAmountController.text,
+      currency: _currency,
+      items: _items,
+      itemInputs: _itemRows.map((row) => row.toValidationInput()).toList(),
       shipmentDate: _shipmentDate,
       deliveryDate: _deliveryDate,
       logisticsName: _logisticsNameController.text,

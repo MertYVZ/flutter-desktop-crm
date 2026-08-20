@@ -7,6 +7,7 @@ class ExportRecords extends Table {
   TextColumn get customerNameSnapshot => text().nullable()();
   TextColumn get productName => text()();
   TextColumn get productId => text().nullable()();
+  TextColumn get currency => text().withDefault(const Constant('TRY'))();
   RealColumn get quantityTon => real()();
   IntColumn get unitPriceMinor => integer()();
   IntColumn get totalPriceMinor => integer()();

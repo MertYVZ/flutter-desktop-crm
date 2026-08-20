@@ -1,12 +1,13 @@
 import 'package:Ok/feature/export/controllers/export_controller.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/widgets/export_items_editor.dart';
 import 'package:Ok/feature/export/widgets/export_record_form.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/navigation/app_pages.dart';
 import 'package:Ok/product/navigation/app_route_args.dart';
 import 'package:Ok/product/state/base/state/base_state.dart';
 import 'package:Ok/product/state/base/view/base_view.dart';
-import 'package:Ok/product/utility/money_utils.dart';
-import 'package:Ok/product/utility/quantity_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_form_page_header.dart';
 import 'package:Ok/product/widgets/panel/panel_form_scroll_view.dart';
 import 'package:Ok/product/widgets/panel/panel_message.dart';
@@ -24,21 +25,18 @@ final class ExportCreatePage extends StatefulWidget {
 class _ExportCreatePageState extends BaseState<ExportCreatePage> {
   late final TextEditingController _titleController;
   late final TextEditingController _guestCustomerNameController;
-  late final List<TextEditingController> _productControllers;
-  late final TextEditingController _quantityTonController;
-  late final TextEditingController _unitPriceController;
+  late final List<ExportItemFormRow> _itemRows;
   late final TextEditingController _paymentMethodController;
   late final TextEditingController _bankController;
   late final TextEditingController _firstPaymentAmountController;
   late final TextEditingController _lastPaymentAmountController;
-  late final TextEditingController _wasteKgController;
-  late final TextEditingController _netTotalAmountController;
   late final TextEditingController _logisticsNameController;
   late final TextEditingController _logisticsCostController;
   late final TextEditingController _customsCostController;
   late final TextEditingController _insuranceCostController;
   late final TextEditingController _notesController;
   String? _selectedCustomerId;
+  PriceOfferCurrencyType _currency = PriceOfferCurrencyType.try_;
   DateTime? _firstPaymentDate;
   DateTime? _lastPaymentDate;
   DateTime? _shipmentDate;
@@ -50,15 +48,11 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
     _selectedCustomerId = AppRouteArgs.readCustomerId();
     _titleController = TextEditingController();
     _guestCustomerNameController = TextEditingController();
-    _productControllers = [TextEditingController()];
-    _quantityTonController = TextEditingController();
-    _unitPriceController = TextEditingController();
+    _itemRows = [ExportItemFormRow()];
     _paymentMethodController = TextEditingController();
     _bankController = TextEditingController();
     _firstPaymentAmountController = TextEditingController();
     _lastPaymentAmountController = TextEditingController();
-    _wasteKgController = TextEditingController();
-    _netTotalAmountController = TextEditingController();
     _logisticsNameController = TextEditingController();
     _logisticsCostController = TextEditingController();
     _customsCostController = TextEditingController();
@@ -70,17 +64,13 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
   void dispose() {
     _titleController.dispose();
     _guestCustomerNameController.dispose();
-    for (final controller in _productControllers) {
-      controller.dispose();
+    for (final row in _itemRows) {
+      row.dispose();
     }
-    _quantityTonController.dispose();
-    _unitPriceController.dispose();
     _paymentMethodController.dispose();
     _bankController.dispose();
     _firstPaymentAmountController.dispose();
     _lastPaymentAmountController.dispose();
-    _wasteKgController.dispose();
-    _netTotalAmountController.dispose();
     _logisticsNameController.dispose();
     _logisticsCostController.dispose();
     _customsCostController.dispose();
@@ -89,32 +79,15 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
     super.dispose();
   }
 
-  void _addProduct() {
-    setState(() {
-      _productControllers.add(TextEditingController());
-    });
-  }
-
-  void _removeProduct(int index) {
-    if (_productControllers.length <= 1) {
-      return;
+  List<ExportItemData> get _items {
+    final items = <ExportItemData>[];
+    for (var index = 0; index < _itemRows.length; index++) {
+      final item = _itemRows[index].toItemData(sortOrder: index);
+      if (item != null) {
+        items.add(item);
+      }
     }
-
-    setState(() {
-      _productControllers.removeAt(index).dispose();
-    });
-  }
-
-  String get _totalPriceText {
-    final quantity = QuantityUtils.parseQuantity(_quantityTonController.text);
-    final unitPrice = MoneyUtils.parseAmountToMinor(_unitPriceController.text);
-    if (quantity == null || unitPrice == null) {
-      return '';
-    }
-
-    return MoneyUtils.formatAmountInputFromMinor(
-      (quantity * unitPrice).round(),
-    );
+    return items;
   }
 
   @override
@@ -161,13 +134,9 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
                         selectedCustomerId: _selectedCustomerId,
                         guestCustomerNameController:
                             _guestCustomerNameController,
-                        productControllers: _productControllers,
-                        onAddProduct: _addProduct,
-                        onRemoveProduct: _removeProduct,
+                        itemRows: _itemRows,
+                        currency: _currency,
                         titleController: _titleController,
-                        quantityTonController: _quantityTonController,
-                        unitPriceController: _unitPriceController,
-                        totalPriceText: _totalPriceText,
                         paymentMethodController: _paymentMethodController,
                         bankController: _bankController,
                         firstPaymentDate: _firstPaymentDate,
@@ -176,8 +145,6 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
                         lastPaymentDate: _lastPaymentDate,
                         lastPaymentAmountController:
                             _lastPaymentAmountController,
-                        wasteKgController: _wasteKgController,
-                        netTotalAmountController: _netTotalAmountController,
                         logisticsNameController: _logisticsNameController,
                         shipmentDate: _shipmentDate,
                         deliveryDate: _deliveryDate,
@@ -191,6 +158,12 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
                         onGuestCustomerNameChanged: (value) => setState(() {
                           _guestCustomerNameController.text = value;
                         }),
+                        onCurrencyChanged: (value) => setState(() {
+                          if (value != null) {
+                            _currency = value;
+                          }
+                        }),
+                        onItemsChanged: () => setState(() {}),
                         onFirstPaymentDateChanged: (value) => setState(() {
                           _firstPaymentDate = value;
                         }),
@@ -215,8 +188,7 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
                             : () => _submit(controller),
                         onCancel: controller.isSaving.value
                             ? () {}
-                            : () =>
-                                Get.offNamed<void>(AppRoutes.exports.value),
+                            : () => Get.offNamed<void>(AppRoutes.exports.value),
                       ),
                     ),
                   ],
@@ -234,18 +206,15 @@ class _ExportCreatePageState extends BaseState<ExportCreatePage> {
       title: _titleController.text,
       customerId: _selectedCustomerId,
       guestCustomerName: _guestCustomerNameController.text,
-      productNames:
-          _productControllers.map((controller) => controller.text).toList(),
-      quantityTonText: _quantityTonController.text,
-      unitPriceText: _unitPriceController.text,
+      currency: _currency,
+      items: _items,
+      itemInputs: _itemRows.map((row) => row.toValidationInput()).toList(),
       paymentMethod: _paymentMethodController.text,
       bank: _bankController.text,
       firstPaymentDate: _firstPaymentDate,
       firstPaymentAmountText: _firstPaymentAmountController.text,
       lastPaymentDate: _lastPaymentDate,
       lastPaymentAmountText: _lastPaymentAmountController.text,
-      wasteKgText: _wasteKgController.text,
-      netTotalAmountText: _netTotalAmountController.text,
       logisticsName: _logisticsNameController.text,
       shipmentDate: _shipmentDate,
       deliveryDate: _deliveryDate,

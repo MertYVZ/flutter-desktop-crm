@@ -8068,6 +8068,14 @@ class $ExportRecordsTable extends ExportRecords
   late final GeneratedColumn<String> productId = GeneratedColumn<String>(
       'product_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('TRY'));
   static const VerificationMeta _quantityTonMeta =
       const VerificationMeta('quantityTon');
   @override
@@ -8200,6 +8208,7 @@ class $ExportRecordsTable extends ExportRecords
         customerNameSnapshot,
         productName,
         productId,
+        currency,
         quantityTon,
         unitPriceMinor,
         totalPriceMinor,
@@ -8268,6 +8277,10 @@ class $ExportRecordsTable extends ExportRecords
     if (data.containsKey('product_id')) {
       context.handle(_productIdMeta,
           productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta));
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
     }
     if (data.containsKey('quantity_ton')) {
       context.handle(
@@ -8416,6 +8429,8 @@ class $ExportRecordsTable extends ExportRecords
           .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
       productId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}product_id']),
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
       quantityTon: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}quantity_ton'])!,
       unitPriceMinor: attachedDatabase.typeMapping
@@ -8476,6 +8491,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
   final String? customerNameSnapshot;
   final String productName;
   final String? productId;
+  final String currency;
   final double quantityTon;
   final int unitPriceMinor;
   final int totalPriceMinor;
@@ -8504,6 +8520,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
       this.customerNameSnapshot,
       required this.productName,
       this.productId,
+      required this.currency,
       required this.quantityTon,
       required this.unitPriceMinor,
       required this.totalPriceMinor,
@@ -8538,6 +8555,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
     if (!nullToAbsent || productId != null) {
       map['product_id'] = Variable<String>(productId);
     }
+    map['currency'] = Variable<String>(currency);
     map['quantity_ton'] = Variable<double>(quantityTon);
     map['unit_price_minor'] = Variable<int>(unitPriceMinor);
     map['total_price_minor'] = Variable<int>(totalPriceMinor);
@@ -8607,6 +8625,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
       productId: productId == null && nullToAbsent
           ? const Value.absent()
           : Value(productId),
+      currency: Value(currency),
       quantityTon: Value(quantityTon),
       unitPriceMinor: Value(unitPriceMinor),
       totalPriceMinor: Value(totalPriceMinor),
@@ -8671,6 +8690,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
           serializer.fromJson<String?>(json['customerNameSnapshot']),
       productName: serializer.fromJson<String>(json['productName']),
       productId: serializer.fromJson<String?>(json['productId']),
+      currency: serializer.fromJson<String>(json['currency']),
       quantityTon: serializer.fromJson<double>(json['quantityTon']),
       unitPriceMinor: serializer.fromJson<int>(json['unitPriceMinor']),
       totalPriceMinor: serializer.fromJson<int>(json['totalPriceMinor']),
@@ -8708,6 +8728,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
       'customerNameSnapshot': serializer.toJson<String?>(customerNameSnapshot),
       'productName': serializer.toJson<String>(productName),
       'productId': serializer.toJson<String?>(productId),
+      'currency': serializer.toJson<String>(currency),
       'quantityTon': serializer.toJson<double>(quantityTon),
       'unitPriceMinor': serializer.toJson<int>(unitPriceMinor),
       'totalPriceMinor': serializer.toJson<int>(totalPriceMinor),
@@ -8740,6 +8761,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
           Value<String?> customerNameSnapshot = const Value.absent(),
           String? productName,
           Value<String?> productId = const Value.absent(),
+          String? currency,
           double? quantityTon,
           int? unitPriceMinor,
           int? totalPriceMinor,
@@ -8770,6 +8792,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
             : this.customerNameSnapshot,
         productName: productName ?? this.productName,
         productId: productId.present ? productId.value : this.productId,
+        currency: currency ?? this.currency,
         quantityTon: quantityTon ?? this.quantityTon,
         unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
         totalPriceMinor: totalPriceMinor ?? this.totalPriceMinor,
@@ -8824,6 +8847,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
       productName:
           data.productName.present ? data.productName.value : this.productName,
       productId: data.productId.present ? data.productId.value : this.productId,
+      currency: data.currency.present ? data.currency.value : this.currency,
       quantityTon:
           data.quantityTon.present ? data.quantityTon.value : this.quantityTon,
       unitPriceMinor: data.unitPriceMinor.present
@@ -8886,6 +8910,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
           ..write('customerNameSnapshot: $customerNameSnapshot, ')
           ..write('productName: $productName, ')
           ..write('productId: $productId, ')
+          ..write('currency: $currency, ')
           ..write('quantityTon: $quantityTon, ')
           ..write('unitPriceMinor: $unitPriceMinor, ')
           ..write('totalPriceMinor: $totalPriceMinor, ')
@@ -8919,6 +8944,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
         customerNameSnapshot,
         productName,
         productId,
+        currency,
         quantityTon,
         unitPriceMinor,
         totalPriceMinor,
@@ -8951,6 +8977,7 @@ class ExportRecord extends DataClass implements Insertable<ExportRecord> {
           other.customerNameSnapshot == this.customerNameSnapshot &&
           other.productName == this.productName &&
           other.productId == this.productId &&
+          other.currency == this.currency &&
           other.quantityTon == this.quantityTon &&
           other.unitPriceMinor == this.unitPriceMinor &&
           other.totalPriceMinor == this.totalPriceMinor &&
@@ -8981,6 +9008,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
   final Value<String?> customerNameSnapshot;
   final Value<String> productName;
   final Value<String?> productId;
+  final Value<String> currency;
   final Value<double> quantityTon;
   final Value<int> unitPriceMinor;
   final Value<int> totalPriceMinor;
@@ -9010,6 +9038,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
     this.customerNameSnapshot = const Value.absent(),
     this.productName = const Value.absent(),
     this.productId = const Value.absent(),
+    this.currency = const Value.absent(),
     this.quantityTon = const Value.absent(),
     this.unitPriceMinor = const Value.absent(),
     this.totalPriceMinor = const Value.absent(),
@@ -9040,6 +9069,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
     this.customerNameSnapshot = const Value.absent(),
     required String productName,
     this.productId = const Value.absent(),
+    this.currency = const Value.absent(),
     required double quantityTon,
     required int unitPriceMinor,
     required int totalPriceMinor,
@@ -9078,6 +9108,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
     Expression<String>? customerNameSnapshot,
     Expression<String>? productName,
     Expression<String>? productId,
+    Expression<String>? currency,
     Expression<double>? quantityTon,
     Expression<int>? unitPriceMinor,
     Expression<int>? totalPriceMinor,
@@ -9109,6 +9140,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
         'customer_name_snapshot': customerNameSnapshot,
       if (productName != null) 'product_name': productName,
       if (productId != null) 'product_id': productId,
+      if (currency != null) 'currency': currency,
       if (quantityTon != null) 'quantity_ton': quantityTon,
       if (unitPriceMinor != null) 'unit_price_minor': unitPriceMinor,
       if (totalPriceMinor != null) 'total_price_minor': totalPriceMinor,
@@ -9146,6 +9178,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
       Value<String?>? customerNameSnapshot,
       Value<String>? productName,
       Value<String?>? productId,
+      Value<String>? currency,
       Value<double>? quantityTon,
       Value<int>? unitPriceMinor,
       Value<int>? totalPriceMinor,
@@ -9175,6 +9208,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
       customerNameSnapshot: customerNameSnapshot ?? this.customerNameSnapshot,
       productName: productName ?? this.productName,
       productId: productId ?? this.productId,
+      currency: currency ?? this.currency,
       quantityTon: quantityTon ?? this.quantityTon,
       unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
       totalPriceMinor: totalPriceMinor ?? this.totalPriceMinor,
@@ -9223,6 +9257,9 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
     }
     if (productId.present) {
       map['product_id'] = Variable<String>(productId.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
     }
     if (quantityTon.present) {
       map['quantity_ton'] = Variable<double>(quantityTon.value);
@@ -9304,6 +9341,7 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
           ..write('customerNameSnapshot: $customerNameSnapshot, ')
           ..write('productName: $productName, ')
           ..write('productId: $productId, ')
+          ..write('currency: $currency, ')
           ..write('quantityTon: $quantityTon, ')
           ..write('unitPriceMinor: $unitPriceMinor, ')
           ..write('totalPriceMinor: $totalPriceMinor, ')
@@ -9322,6 +9360,615 @@ class ExportRecordsCompanion extends UpdateCompanion<ExportRecord> {
           ..write('customsCostMinor: $customsCostMinor, ')
           ..write('insuranceCostMinor: $insuranceCostMinor, ')
           ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExportRecordItemsTable extends ExportRecordItems
+    with TableInfo<$ExportRecordItemsTable, ExportRecordItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExportRecordItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _exportIdMeta =
+      const VerificationMeta('exportId');
+  @override
+  late final GeneratedColumn<String> exportId = GeneratedColumn<String>(
+      'export_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productNameMeta =
+      const VerificationMeta('productName');
+  @override
+  late final GeneratedColumn<String> productName = GeneratedColumn<String>(
+      'product_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _unitTypeMeta =
+      const VerificationMeta('unitType');
+  @override
+  late final GeneratedColumn<String> unitType = GeneratedColumn<String>(
+      'unit_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+      'quantity', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _wasteUnitTypeMeta =
+      const VerificationMeta('wasteUnitType');
+  @override
+  late final GeneratedColumn<String> wasteUnitType = GeneratedColumn<String>(
+      'waste_unit_type', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _wasteQuantityMeta =
+      const VerificationMeta('wasteQuantity');
+  @override
+  late final GeneratedColumn<double> wasteQuantity = GeneratedColumn<double>(
+      'waste_quantity', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _priceMinorMeta =
+      const VerificationMeta('priceMinor');
+  @override
+  late final GeneratedColumn<int> priceMinor = GeneratedColumn<int>(
+      'price_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        exportId,
+        productName,
+        unitType,
+        quantity,
+        wasteUnitType,
+        wasteQuantity,
+        priceMinor,
+        sortOrder,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'export_record_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<ExportRecordItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('export_id')) {
+      context.handle(_exportIdMeta,
+          exportId.isAcceptableOrUnknown(data['export_id']!, _exportIdMeta));
+    } else if (isInserting) {
+      context.missing(_exportIdMeta);
+    }
+    if (data.containsKey('product_name')) {
+      context.handle(
+          _productNameMeta,
+          productName.isAcceptableOrUnknown(
+              data['product_name']!, _productNameMeta));
+    } else if (isInserting) {
+      context.missing(_productNameMeta);
+    }
+    if (data.containsKey('unit_type')) {
+      context.handle(_unitTypeMeta,
+          unitType.isAcceptableOrUnknown(data['unit_type']!, _unitTypeMeta));
+    } else if (isInserting) {
+      context.missing(_unitTypeMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('waste_unit_type')) {
+      context.handle(
+          _wasteUnitTypeMeta,
+          wasteUnitType.isAcceptableOrUnknown(
+              data['waste_unit_type']!, _wasteUnitTypeMeta));
+    }
+    if (data.containsKey('waste_quantity')) {
+      context.handle(
+          _wasteQuantityMeta,
+          wasteQuantity.isAcceptableOrUnknown(
+              data['waste_quantity']!, _wasteQuantityMeta));
+    }
+    if (data.containsKey('price_minor')) {
+      context.handle(
+          _priceMinorMeta,
+          priceMinor.isAcceptableOrUnknown(
+              data['price_minor']!, _priceMinorMeta));
+    } else if (isInserting) {
+      context.missing(_priceMinorMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExportRecordItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExportRecordItem(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      exportId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}export_id'])!,
+      productName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
+      unitType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit_type'])!,
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
+      wasteUnitType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}waste_unit_type']),
+      wasteQuantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}waste_quantity'])!,
+      priceMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}price_minor'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $ExportRecordItemsTable createAlias(String alias) {
+    return $ExportRecordItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ExportRecordItem extends DataClass
+    implements Insertable<ExportRecordItem> {
+  final String id;
+  final String exportId;
+  final String productName;
+  final String unitType;
+  final double quantity;
+  final String? wasteUnitType;
+  final double wasteQuantity;
+  final int priceMinor;
+  final int sortOrder;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const ExportRecordItem(
+      {required this.id,
+      required this.exportId,
+      required this.productName,
+      required this.unitType,
+      required this.quantity,
+      this.wasteUnitType,
+      required this.wasteQuantity,
+      required this.priceMinor,
+      required this.sortOrder,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['export_id'] = Variable<String>(exportId);
+    map['product_name'] = Variable<String>(productName);
+    map['unit_type'] = Variable<String>(unitType);
+    map['quantity'] = Variable<double>(quantity);
+    if (!nullToAbsent || wasteUnitType != null) {
+      map['waste_unit_type'] = Variable<String>(wasteUnitType);
+    }
+    map['waste_quantity'] = Variable<double>(wasteQuantity);
+    map['price_minor'] = Variable<int>(priceMinor);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  ExportRecordItemsCompanion toCompanion(bool nullToAbsent) {
+    return ExportRecordItemsCompanion(
+      id: Value(id),
+      exportId: Value(exportId),
+      productName: Value(productName),
+      unitType: Value(unitType),
+      quantity: Value(quantity),
+      wasteUnitType: wasteUnitType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(wasteUnitType),
+      wasteQuantity: Value(wasteQuantity),
+      priceMinor: Value(priceMinor),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory ExportRecordItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExportRecordItem(
+      id: serializer.fromJson<String>(json['id']),
+      exportId: serializer.fromJson<String>(json['exportId']),
+      productName: serializer.fromJson<String>(json['productName']),
+      unitType: serializer.fromJson<String>(json['unitType']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      wasteUnitType: serializer.fromJson<String?>(json['wasteUnitType']),
+      wasteQuantity: serializer.fromJson<double>(json['wasteQuantity']),
+      priceMinor: serializer.fromJson<int>(json['priceMinor']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'exportId': serializer.toJson<String>(exportId),
+      'productName': serializer.toJson<String>(productName),
+      'unitType': serializer.toJson<String>(unitType),
+      'quantity': serializer.toJson<double>(quantity),
+      'wasteUnitType': serializer.toJson<String?>(wasteUnitType),
+      'wasteQuantity': serializer.toJson<double>(wasteQuantity),
+      'priceMinor': serializer.toJson<int>(priceMinor),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  ExportRecordItem copyWith(
+          {String? id,
+          String? exportId,
+          String? productName,
+          String? unitType,
+          double? quantity,
+          Value<String?> wasteUnitType = const Value.absent(),
+          double? wasteQuantity,
+          int? priceMinor,
+          int? sortOrder,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      ExportRecordItem(
+        id: id ?? this.id,
+        exportId: exportId ?? this.exportId,
+        productName: productName ?? this.productName,
+        unitType: unitType ?? this.unitType,
+        quantity: quantity ?? this.quantity,
+        wasteUnitType:
+            wasteUnitType.present ? wasteUnitType.value : this.wasteUnitType,
+        wasteQuantity: wasteQuantity ?? this.wasteQuantity,
+        priceMinor: priceMinor ?? this.priceMinor,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  ExportRecordItem copyWithCompanion(ExportRecordItemsCompanion data) {
+    return ExportRecordItem(
+      id: data.id.present ? data.id.value : this.id,
+      exportId: data.exportId.present ? data.exportId.value : this.exportId,
+      productName:
+          data.productName.present ? data.productName.value : this.productName,
+      unitType: data.unitType.present ? data.unitType.value : this.unitType,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      wasteUnitType: data.wasteUnitType.present
+          ? data.wasteUnitType.value
+          : this.wasteUnitType,
+      wasteQuantity: data.wasteQuantity.present
+          ? data.wasteQuantity.value
+          : this.wasteQuantity,
+      priceMinor:
+          data.priceMinor.present ? data.priceMinor.value : this.priceMinor,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExportRecordItem(')
+          ..write('id: $id, ')
+          ..write('exportId: $exportId, ')
+          ..write('productName: $productName, ')
+          ..write('unitType: $unitType, ')
+          ..write('quantity: $quantity, ')
+          ..write('wasteUnitType: $wasteUnitType, ')
+          ..write('wasteQuantity: $wasteQuantity, ')
+          ..write('priceMinor: $priceMinor, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      exportId,
+      productName,
+      unitType,
+      quantity,
+      wasteUnitType,
+      wasteQuantity,
+      priceMinor,
+      sortOrder,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExportRecordItem &&
+          other.id == this.id &&
+          other.exportId == this.exportId &&
+          other.productName == this.productName &&
+          other.unitType == this.unitType &&
+          other.quantity == this.quantity &&
+          other.wasteUnitType == this.wasteUnitType &&
+          other.wasteQuantity == this.wasteQuantity &&
+          other.priceMinor == this.priceMinor &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class ExportRecordItemsCompanion extends UpdateCompanion<ExportRecordItem> {
+  final Value<String> id;
+  final Value<String> exportId;
+  final Value<String> productName;
+  final Value<String> unitType;
+  final Value<double> quantity;
+  final Value<String?> wasteUnitType;
+  final Value<double> wasteQuantity;
+  final Value<int> priceMinor;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const ExportRecordItemsCompanion({
+    this.id = const Value.absent(),
+    this.exportId = const Value.absent(),
+    this.productName = const Value.absent(),
+    this.unitType = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.wasteUnitType = const Value.absent(),
+    this.wasteQuantity = const Value.absent(),
+    this.priceMinor = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExportRecordItemsCompanion.insert({
+    required String id,
+    required String exportId,
+    required String productName,
+    required String unitType,
+    required double quantity,
+    this.wasteUnitType = const Value.absent(),
+    this.wasteQuantity = const Value.absent(),
+    required int priceMinor,
+    required int sortOrder,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        exportId = Value(exportId),
+        productName = Value(productName),
+        unitType = Value(unitType),
+        quantity = Value(quantity),
+        priceMinor = Value(priceMinor),
+        sortOrder = Value(sortOrder),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<ExportRecordItem> custom({
+    Expression<String>? id,
+    Expression<String>? exportId,
+    Expression<String>? productName,
+    Expression<String>? unitType,
+    Expression<double>? quantity,
+    Expression<String>? wasteUnitType,
+    Expression<double>? wasteQuantity,
+    Expression<int>? priceMinor,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (exportId != null) 'export_id': exportId,
+      if (productName != null) 'product_name': productName,
+      if (unitType != null) 'unit_type': unitType,
+      if (quantity != null) 'quantity': quantity,
+      if (wasteUnitType != null) 'waste_unit_type': wasteUnitType,
+      if (wasteQuantity != null) 'waste_quantity': wasteQuantity,
+      if (priceMinor != null) 'price_minor': priceMinor,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExportRecordItemsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? exportId,
+      Value<String>? productName,
+      Value<String>? unitType,
+      Value<double>? quantity,
+      Value<String?>? wasteUnitType,
+      Value<double>? wasteQuantity,
+      Value<int>? priceMinor,
+      Value<int>? sortOrder,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return ExportRecordItemsCompanion(
+      id: id ?? this.id,
+      exportId: exportId ?? this.exportId,
+      productName: productName ?? this.productName,
+      unitType: unitType ?? this.unitType,
+      quantity: quantity ?? this.quantity,
+      wasteUnitType: wasteUnitType ?? this.wasteUnitType,
+      wasteQuantity: wasteQuantity ?? this.wasteQuantity,
+      priceMinor: priceMinor ?? this.priceMinor,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (exportId.present) {
+      map['export_id'] = Variable<String>(exportId.value);
+    }
+    if (productName.present) {
+      map['product_name'] = Variable<String>(productName.value);
+    }
+    if (unitType.present) {
+      map['unit_type'] = Variable<String>(unitType.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (wasteUnitType.present) {
+      map['waste_unit_type'] = Variable<String>(wasteUnitType.value);
+    }
+    if (wasteQuantity.present) {
+      map['waste_quantity'] = Variable<double>(wasteQuantity.value);
+    }
+    if (priceMinor.present) {
+      map['price_minor'] = Variable<int>(priceMinor.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExportRecordItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('exportId: $exportId, ')
+          ..write('productName: $productName, ')
+          ..write('unitType: $unitType, ')
+          ..write('quantity: $quantity, ')
+          ..write('wasteUnitType: $wasteUnitType, ')
+          ..write('wasteQuantity: $wasteQuantity, ')
+          ..write('priceMinor: $priceMinor, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -9359,6 +10006,14 @@ class $ImportRecordsTable extends ImportRecords
   late final GeneratedColumn<String> products = GeneratedColumn<String>(
       'products', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('TRY'));
   static const VerificationMeta _totalAmountMinorMeta =
       const VerificationMeta('totalAmountMinor');
   @override
@@ -9430,6 +10085,7 @@ class $ImportRecordsTable extends ImportRecords
         title,
         supplierName,
         products,
+        currency,
         totalAmountMinor,
         shipmentDate,
         deliveryDate,
@@ -9476,6 +10132,10 @@ class $ImportRecordsTable extends ImportRecords
           products.isAcceptableOrUnknown(data['products']!, _productsMeta));
     } else if (isInserting) {
       context.missing(_productsMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
     }
     if (data.containsKey('total_amount_minor')) {
       context.handle(
@@ -9558,6 +10218,8 @@ class $ImportRecordsTable extends ImportRecords
           .read(DriftSqlType.string, data['${effectivePrefix}supplier_name'])!,
       products: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}products'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
       totalAmountMinor: attachedDatabase.typeMapping.read(
           DriftSqlType.int, data['${effectivePrefix}total_amount_minor'])!,
       shipmentDate: attachedDatabase.typeMapping
@@ -9594,6 +10256,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
   final String title;
   final String supplierName;
   final String products;
+  final String currency;
   final int totalAmountMinor;
   final DateTime? shipmentDate;
   final DateTime? deliveryDate;
@@ -9610,6 +10273,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
       required this.title,
       required this.supplierName,
       required this.products,
+      required this.currency,
       required this.totalAmountMinor,
       this.shipmentDate,
       this.deliveryDate,
@@ -9628,6 +10292,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
     map['title'] = Variable<String>(title);
     map['supplier_name'] = Variable<String>(supplierName);
     map['products'] = Variable<String>(products);
+    map['currency'] = Variable<String>(currency);
     map['total_amount_minor'] = Variable<int>(totalAmountMinor);
     if (!nullToAbsent || shipmentDate != null) {
       map['shipment_date'] = Variable<DateTime>(shipmentDate);
@@ -9664,6 +10329,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
       title: Value(title),
       supplierName: Value(supplierName),
       products: Value(products),
+      currency: Value(currency),
       totalAmountMinor: Value(totalAmountMinor),
       shipmentDate: shipmentDate == null && nullToAbsent
           ? const Value.absent()
@@ -9701,6 +10367,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
       title: serializer.fromJson<String>(json['title']),
       supplierName: serializer.fromJson<String>(json['supplierName']),
       products: serializer.fromJson<String>(json['products']),
+      currency: serializer.fromJson<String>(json['currency']),
       totalAmountMinor: serializer.fromJson<int>(json['totalAmountMinor']),
       shipmentDate: serializer.fromJson<DateTime?>(json['shipmentDate']),
       deliveryDate: serializer.fromJson<DateTime?>(json['deliveryDate']),
@@ -9722,6 +10389,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
       'title': serializer.toJson<String>(title),
       'supplierName': serializer.toJson<String>(supplierName),
       'products': serializer.toJson<String>(products),
+      'currency': serializer.toJson<String>(currency),
       'totalAmountMinor': serializer.toJson<int>(totalAmountMinor),
       'shipmentDate': serializer.toJson<DateTime?>(shipmentDate),
       'deliveryDate': serializer.toJson<DateTime?>(deliveryDate),
@@ -9741,6 +10409,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
           String? title,
           String? supplierName,
           String? products,
+          String? currency,
           int? totalAmountMinor,
           Value<DateTime?> shipmentDate = const Value.absent(),
           Value<DateTime?> deliveryDate = const Value.absent(),
@@ -9757,6 +10426,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
         title: title ?? this.title,
         supplierName: supplierName ?? this.supplierName,
         products: products ?? this.products,
+        currency: currency ?? this.currency,
         totalAmountMinor: totalAmountMinor ?? this.totalAmountMinor,
         shipmentDate:
             shipmentDate.present ? shipmentDate.value : this.shipmentDate,
@@ -9786,6 +10456,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
           ? data.supplierName.value
           : this.supplierName,
       products: data.products.present ? data.products.value : this.products,
+      currency: data.currency.present ? data.currency.value : this.currency,
       totalAmountMinor: data.totalAmountMinor.present
           ? data.totalAmountMinor.value
           : this.totalAmountMinor,
@@ -9821,6 +10492,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
           ..write('title: $title, ')
           ..write('supplierName: $supplierName, ')
           ..write('products: $products, ')
+          ..write('currency: $currency, ')
           ..write('totalAmountMinor: $totalAmountMinor, ')
           ..write('shipmentDate: $shipmentDate, ')
           ..write('deliveryDate: $deliveryDate, ')
@@ -9842,6 +10514,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
       title,
       supplierName,
       products,
+      currency,
       totalAmountMinor,
       shipmentDate,
       deliveryDate,
@@ -9861,6 +10534,7 @@ class ImportRecord extends DataClass implements Insertable<ImportRecord> {
           other.title == this.title &&
           other.supplierName == this.supplierName &&
           other.products == this.products &&
+          other.currency == this.currency &&
           other.totalAmountMinor == this.totalAmountMinor &&
           other.shipmentDate == this.shipmentDate &&
           other.deliveryDate == this.deliveryDate &&
@@ -9879,6 +10553,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
   final Value<String> title;
   final Value<String> supplierName;
   final Value<String> products;
+  final Value<String> currency;
   final Value<int> totalAmountMinor;
   final Value<DateTime?> shipmentDate;
   final Value<DateTime?> deliveryDate;
@@ -9896,6 +10571,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
     this.title = const Value.absent(),
     this.supplierName = const Value.absent(),
     this.products = const Value.absent(),
+    this.currency = const Value.absent(),
     this.totalAmountMinor = const Value.absent(),
     this.shipmentDate = const Value.absent(),
     this.deliveryDate = const Value.absent(),
@@ -9914,6 +10590,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
     required String title,
     required String supplierName,
     required String products,
+    this.currency = const Value.absent(),
     required int totalAmountMinor,
     this.shipmentDate = const Value.absent(),
     this.deliveryDate = const Value.absent(),
@@ -9938,6 +10615,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
     Expression<String>? title,
     Expression<String>? supplierName,
     Expression<String>? products,
+    Expression<String>? currency,
     Expression<int>? totalAmountMinor,
     Expression<DateTime>? shipmentDate,
     Expression<DateTime>? deliveryDate,
@@ -9956,6 +10634,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
       if (title != null) 'title': title,
       if (supplierName != null) 'supplier_name': supplierName,
       if (products != null) 'products': products,
+      if (currency != null) 'currency': currency,
       if (totalAmountMinor != null) 'total_amount_minor': totalAmountMinor,
       if (shipmentDate != null) 'shipment_date': shipmentDate,
       if (deliveryDate != null) 'delivery_date': deliveryDate,
@@ -9978,6 +10657,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
       Value<String>? title,
       Value<String>? supplierName,
       Value<String>? products,
+      Value<String>? currency,
       Value<int>? totalAmountMinor,
       Value<DateTime?>? shipmentDate,
       Value<DateTime?>? deliveryDate,
@@ -9995,6 +10675,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
       title: title ?? this.title,
       supplierName: supplierName ?? this.supplierName,
       products: products ?? this.products,
+      currency: currency ?? this.currency,
       totalAmountMinor: totalAmountMinor ?? this.totalAmountMinor,
       shipmentDate: shipmentDate ?? this.shipmentDate,
       deliveryDate: deliveryDate ?? this.deliveryDate,
@@ -10024,6 +10705,9 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
     }
     if (products.present) {
       map['products'] = Variable<String>(products.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
     }
     if (totalAmountMinor.present) {
       map['total_amount_minor'] = Variable<int>(totalAmountMinor.value);
@@ -10071,6 +10755,7 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
           ..write('title: $title, ')
           ..write('supplierName: $supplierName, ')
           ..write('products: $products, ')
+          ..write('currency: $currency, ')
           ..write('totalAmountMinor: $totalAmountMinor, ')
           ..write('shipmentDate: $shipmentDate, ')
           ..write('deliveryDate: $deliveryDate, ')
@@ -10079,6 +10764,615 @@ class ImportRecordsCompanion extends UpdateCompanion<ImportRecord> {
           ..write('customsCostMinor: $customsCostMinor, ')
           ..write('insuranceCostMinor: $insuranceCostMinor, ')
           ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ImportRecordItemsTable extends ImportRecordItems
+    with TableInfo<$ImportRecordItemsTable, ImportRecordItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportRecordItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _importIdMeta =
+      const VerificationMeta('importId');
+  @override
+  late final GeneratedColumn<String> importId = GeneratedColumn<String>(
+      'import_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productNameMeta =
+      const VerificationMeta('productName');
+  @override
+  late final GeneratedColumn<String> productName = GeneratedColumn<String>(
+      'product_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _unitTypeMeta =
+      const VerificationMeta('unitType');
+  @override
+  late final GeneratedColumn<String> unitType = GeneratedColumn<String>(
+      'unit_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+      'quantity', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _wasteUnitTypeMeta =
+      const VerificationMeta('wasteUnitType');
+  @override
+  late final GeneratedColumn<String> wasteUnitType = GeneratedColumn<String>(
+      'waste_unit_type', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _wasteQuantityMeta =
+      const VerificationMeta('wasteQuantity');
+  @override
+  late final GeneratedColumn<double> wasteQuantity = GeneratedColumn<double>(
+      'waste_quantity', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _priceMinorMeta =
+      const VerificationMeta('priceMinor');
+  @override
+  late final GeneratedColumn<int> priceMinor = GeneratedColumn<int>(
+      'price_minor', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        importId,
+        productName,
+        unitType,
+        quantity,
+        wasteUnitType,
+        wasteQuantity,
+        priceMinor,
+        sortOrder,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'import_record_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<ImportRecordItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('import_id')) {
+      context.handle(_importIdMeta,
+          importId.isAcceptableOrUnknown(data['import_id']!, _importIdMeta));
+    } else if (isInserting) {
+      context.missing(_importIdMeta);
+    }
+    if (data.containsKey('product_name')) {
+      context.handle(
+          _productNameMeta,
+          productName.isAcceptableOrUnknown(
+              data['product_name']!, _productNameMeta));
+    } else if (isInserting) {
+      context.missing(_productNameMeta);
+    }
+    if (data.containsKey('unit_type')) {
+      context.handle(_unitTypeMeta,
+          unitType.isAcceptableOrUnknown(data['unit_type']!, _unitTypeMeta));
+    } else if (isInserting) {
+      context.missing(_unitTypeMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('waste_unit_type')) {
+      context.handle(
+          _wasteUnitTypeMeta,
+          wasteUnitType.isAcceptableOrUnknown(
+              data['waste_unit_type']!, _wasteUnitTypeMeta));
+    }
+    if (data.containsKey('waste_quantity')) {
+      context.handle(
+          _wasteQuantityMeta,
+          wasteQuantity.isAcceptableOrUnknown(
+              data['waste_quantity']!, _wasteQuantityMeta));
+    }
+    if (data.containsKey('price_minor')) {
+      context.handle(
+          _priceMinorMeta,
+          priceMinor.isAcceptableOrUnknown(
+              data['price_minor']!, _priceMinorMeta));
+    } else if (isInserting) {
+      context.missing(_priceMinorMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ImportRecordItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportRecordItem(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      importId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}import_id'])!,
+      productName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
+      unitType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit_type'])!,
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
+      wasteUnitType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}waste_unit_type']),
+      wasteQuantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}waste_quantity'])!,
+      priceMinor: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}price_minor'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $ImportRecordItemsTable createAlias(String alias) {
+    return $ImportRecordItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ImportRecordItem extends DataClass
+    implements Insertable<ImportRecordItem> {
+  final String id;
+  final String importId;
+  final String productName;
+  final String unitType;
+  final double quantity;
+  final String? wasteUnitType;
+  final double wasteQuantity;
+  final int priceMinor;
+  final int sortOrder;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const ImportRecordItem(
+      {required this.id,
+      required this.importId,
+      required this.productName,
+      required this.unitType,
+      required this.quantity,
+      this.wasteUnitType,
+      required this.wasteQuantity,
+      required this.priceMinor,
+      required this.sortOrder,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['import_id'] = Variable<String>(importId);
+    map['product_name'] = Variable<String>(productName);
+    map['unit_type'] = Variable<String>(unitType);
+    map['quantity'] = Variable<double>(quantity);
+    if (!nullToAbsent || wasteUnitType != null) {
+      map['waste_unit_type'] = Variable<String>(wasteUnitType);
+    }
+    map['waste_quantity'] = Variable<double>(wasteQuantity);
+    map['price_minor'] = Variable<int>(priceMinor);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  ImportRecordItemsCompanion toCompanion(bool nullToAbsent) {
+    return ImportRecordItemsCompanion(
+      id: Value(id),
+      importId: Value(importId),
+      productName: Value(productName),
+      unitType: Value(unitType),
+      quantity: Value(quantity),
+      wasteUnitType: wasteUnitType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(wasteUnitType),
+      wasteQuantity: Value(wasteQuantity),
+      priceMinor: Value(priceMinor),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory ImportRecordItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportRecordItem(
+      id: serializer.fromJson<String>(json['id']),
+      importId: serializer.fromJson<String>(json['importId']),
+      productName: serializer.fromJson<String>(json['productName']),
+      unitType: serializer.fromJson<String>(json['unitType']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      wasteUnitType: serializer.fromJson<String?>(json['wasteUnitType']),
+      wasteQuantity: serializer.fromJson<double>(json['wasteQuantity']),
+      priceMinor: serializer.fromJson<int>(json['priceMinor']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'importId': serializer.toJson<String>(importId),
+      'productName': serializer.toJson<String>(productName),
+      'unitType': serializer.toJson<String>(unitType),
+      'quantity': serializer.toJson<double>(quantity),
+      'wasteUnitType': serializer.toJson<String?>(wasteUnitType),
+      'wasteQuantity': serializer.toJson<double>(wasteQuantity),
+      'priceMinor': serializer.toJson<int>(priceMinor),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  ImportRecordItem copyWith(
+          {String? id,
+          String? importId,
+          String? productName,
+          String? unitType,
+          double? quantity,
+          Value<String?> wasteUnitType = const Value.absent(),
+          double? wasteQuantity,
+          int? priceMinor,
+          int? sortOrder,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent()}) =>
+      ImportRecordItem(
+        id: id ?? this.id,
+        importId: importId ?? this.importId,
+        productName: productName ?? this.productName,
+        unitType: unitType ?? this.unitType,
+        quantity: quantity ?? this.quantity,
+        wasteUnitType:
+            wasteUnitType.present ? wasteUnitType.value : this.wasteUnitType,
+        wasteQuantity: wasteQuantity ?? this.wasteQuantity,
+        priceMinor: priceMinor ?? this.priceMinor,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  ImportRecordItem copyWithCompanion(ImportRecordItemsCompanion data) {
+    return ImportRecordItem(
+      id: data.id.present ? data.id.value : this.id,
+      importId: data.importId.present ? data.importId.value : this.importId,
+      productName:
+          data.productName.present ? data.productName.value : this.productName,
+      unitType: data.unitType.present ? data.unitType.value : this.unitType,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      wasteUnitType: data.wasteUnitType.present
+          ? data.wasteUnitType.value
+          : this.wasteUnitType,
+      wasteQuantity: data.wasteQuantity.present
+          ? data.wasteQuantity.value
+          : this.wasteQuantity,
+      priceMinor:
+          data.priceMinor.present ? data.priceMinor.value : this.priceMinor,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportRecordItem(')
+          ..write('id: $id, ')
+          ..write('importId: $importId, ')
+          ..write('productName: $productName, ')
+          ..write('unitType: $unitType, ')
+          ..write('quantity: $quantity, ')
+          ..write('wasteUnitType: $wasteUnitType, ')
+          ..write('wasteQuantity: $wasteQuantity, ')
+          ..write('priceMinor: $priceMinor, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      importId,
+      productName,
+      unitType,
+      quantity,
+      wasteUnitType,
+      wasteQuantity,
+      priceMinor,
+      sortOrder,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportRecordItem &&
+          other.id == this.id &&
+          other.importId == this.importId &&
+          other.productName == this.productName &&
+          other.unitType == this.unitType &&
+          other.quantity == this.quantity &&
+          other.wasteUnitType == this.wasteUnitType &&
+          other.wasteQuantity == this.wasteQuantity &&
+          other.priceMinor == this.priceMinor &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class ImportRecordItemsCompanion extends UpdateCompanion<ImportRecordItem> {
+  final Value<String> id;
+  final Value<String> importId;
+  final Value<String> productName;
+  final Value<String> unitType;
+  final Value<double> quantity;
+  final Value<String?> wasteUnitType;
+  final Value<double> wasteQuantity;
+  final Value<int> priceMinor;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const ImportRecordItemsCompanion({
+    this.id = const Value.absent(),
+    this.importId = const Value.absent(),
+    this.productName = const Value.absent(),
+    this.unitType = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.wasteUnitType = const Value.absent(),
+    this.wasteQuantity = const Value.absent(),
+    this.priceMinor = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImportRecordItemsCompanion.insert({
+    required String id,
+    required String importId,
+    required String productName,
+    required String unitType,
+    required double quantity,
+    this.wasteUnitType = const Value.absent(),
+    this.wasteQuantity = const Value.absent(),
+    required int priceMinor,
+    required int sortOrder,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        importId = Value(importId),
+        productName = Value(productName),
+        unitType = Value(unitType),
+        quantity = Value(quantity),
+        priceMinor = Value(priceMinor),
+        sortOrder = Value(sortOrder),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<ImportRecordItem> custom({
+    Expression<String>? id,
+    Expression<String>? importId,
+    Expression<String>? productName,
+    Expression<String>? unitType,
+    Expression<double>? quantity,
+    Expression<String>? wasteUnitType,
+    Expression<double>? wasteQuantity,
+    Expression<int>? priceMinor,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (importId != null) 'import_id': importId,
+      if (productName != null) 'product_name': productName,
+      if (unitType != null) 'unit_type': unitType,
+      if (quantity != null) 'quantity': quantity,
+      if (wasteUnitType != null) 'waste_unit_type': wasteUnitType,
+      if (wasteQuantity != null) 'waste_quantity': wasteQuantity,
+      if (priceMinor != null) 'price_minor': priceMinor,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImportRecordItemsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? importId,
+      Value<String>? productName,
+      Value<String>? unitType,
+      Value<double>? quantity,
+      Value<String?>? wasteUnitType,
+      Value<double>? wasteQuantity,
+      Value<int>? priceMinor,
+      Value<int>? sortOrder,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? rowid}) {
+    return ImportRecordItemsCompanion(
+      id: id ?? this.id,
+      importId: importId ?? this.importId,
+      productName: productName ?? this.productName,
+      unitType: unitType ?? this.unitType,
+      quantity: quantity ?? this.quantity,
+      wasteUnitType: wasteUnitType ?? this.wasteUnitType,
+      wasteQuantity: wasteQuantity ?? this.wasteQuantity,
+      priceMinor: priceMinor ?? this.priceMinor,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (importId.present) {
+      map['import_id'] = Variable<String>(importId.value);
+    }
+    if (productName.present) {
+      map['product_name'] = Variable<String>(productName.value);
+    }
+    if (unitType.present) {
+      map['unit_type'] = Variable<String>(unitType.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (wasteUnitType.present) {
+      map['waste_unit_type'] = Variable<String>(wasteUnitType.value);
+    }
+    if (wasteQuantity.present) {
+      map['waste_quantity'] = Variable<double>(wasteQuantity.value);
+    }
+    if (priceMinor.present) {
+      map['price_minor'] = Variable<int>(priceMinor.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportRecordItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('importId: $importId, ')
+          ..write('productName: $productName, ')
+          ..write('unitType: $unitType, ')
+          ..write('quantity: $quantity, ')
+          ..write('wasteUnitType: $wasteUnitType, ')
+          ..write('wasteQuantity: $wasteQuantity, ')
+          ..write('priceMinor: $priceMinor, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -10111,7 +11405,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PriceListsTable priceLists = $PriceListsTable(this);
   late final $PriceListItemsTable priceListItems = $PriceListItemsTable(this);
   late final $ExportRecordsTable exportRecords = $ExportRecordsTable(this);
+  late final $ExportRecordItemsTable exportRecordItems =
+      $ExportRecordItemsTable(this);
   late final $ImportRecordsTable importRecords = $ImportRecordsTable(this);
+  late final $ImportRecordItemsTable importRecordItems =
+      $ImportRecordItemsTable(this);
   late final UserDao userDao = UserDao(this as AppDatabase);
   late final AuthSessionDao authSessionDao =
       AuthSessionDao(this as AppDatabase);
@@ -10155,7 +11453,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         priceLists,
         priceListItems,
         exportRecords,
-        importRecords
+        exportRecordItems,
+        importRecords,
+        importRecordItems
       ];
 }
 
@@ -14134,6 +15434,7 @@ typedef $$ExportRecordsTableCreateCompanionBuilder = ExportRecordsCompanion
   Value<String?> customerNameSnapshot,
   required String productName,
   Value<String?> productId,
+  Value<String> currency,
   required double quantityTon,
   required int unitPriceMinor,
   required int totalPriceMinor,
@@ -14165,6 +15466,7 @@ typedef $$ExportRecordsTableUpdateCompanionBuilder = ExportRecordsCompanion
   Value<String?> customerNameSnapshot,
   Value<String> productName,
   Value<String?> productId,
+  Value<String> currency,
   Value<double> quantityTon,
   Value<int> unitPriceMinor,
   Value<int> totalPriceMinor,
@@ -14216,6 +15518,9 @@ class $$ExportRecordsTableFilterComposer
 
   ColumnFilters<String> get productId => $composableBuilder(
       column: $table.productId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get quantityTon => $composableBuilder(
       column: $table.quantityTon, builder: (column) => ColumnFilters(column));
@@ -14318,6 +15623,9 @@ class $$ExportRecordsTableOrderingComposer
 
   ColumnOrderings<String> get productId => $composableBuilder(
       column: $table.productId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<double> get quantityTon => $composableBuilder(
       column: $table.quantityTon, builder: (column) => ColumnOrderings(column));
@@ -14424,6 +15732,9 @@ class $$ExportRecordsTableAnnotationComposer
   GeneratedColumn<String> get productId =>
       $composableBuilder(column: $table.productId, builder: (column) => column);
 
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
   GeneratedColumn<double> get quantityTon => $composableBuilder(
       column: $table.quantityTon, builder: (column) => column);
 
@@ -14520,6 +15831,7 @@ class $$ExportRecordsTableTableManager extends RootTableManager<
             Value<String?> customerNameSnapshot = const Value.absent(),
             Value<String> productName = const Value.absent(),
             Value<String?> productId = const Value.absent(),
+            Value<String> currency = const Value.absent(),
             Value<double> quantityTon = const Value.absent(),
             Value<int> unitPriceMinor = const Value.absent(),
             Value<int> totalPriceMinor = const Value.absent(),
@@ -14550,6 +15862,7 @@ class $$ExportRecordsTableTableManager extends RootTableManager<
             customerNameSnapshot: customerNameSnapshot,
             productName: productName,
             productId: productId,
+            currency: currency,
             quantityTon: quantityTon,
             unitPriceMinor: unitPriceMinor,
             totalPriceMinor: totalPriceMinor,
@@ -14580,6 +15893,7 @@ class $$ExportRecordsTableTableManager extends RootTableManager<
             Value<String?> customerNameSnapshot = const Value.absent(),
             required String productName,
             Value<String?> productId = const Value.absent(),
+            Value<String> currency = const Value.absent(),
             required double quantityTon,
             required int unitPriceMinor,
             required int totalPriceMinor,
@@ -14610,6 +15924,7 @@ class $$ExportRecordsTableTableManager extends RootTableManager<
             customerNameSnapshot: customerNameSnapshot,
             productName: productName,
             productId: productId,
+            currency: currency,
             quantityTon: quantityTon,
             unitPriceMinor: unitPriceMinor,
             totalPriceMinor: totalPriceMinor,
@@ -14655,12 +15970,295 @@ typedef $$ExportRecordsTableProcessedTableManager = ProcessedTableManager<
     ),
     ExportRecord,
     PrefetchHooks Function()>;
+typedef $$ExportRecordItemsTableCreateCompanionBuilder
+    = ExportRecordItemsCompanion Function({
+  required String id,
+  required String exportId,
+  required String productName,
+  required String unitType,
+  required double quantity,
+  Value<String?> wasteUnitType,
+  Value<double> wasteQuantity,
+  required int priceMinor,
+  required int sortOrder,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$ExportRecordItemsTableUpdateCompanionBuilder
+    = ExportRecordItemsCompanion Function({
+  Value<String> id,
+  Value<String> exportId,
+  Value<String> productName,
+  Value<String> unitType,
+  Value<double> quantity,
+  Value<String?> wasteUnitType,
+  Value<double> wasteQuantity,
+  Value<int> priceMinor,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$ExportRecordItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ExportRecordItemsTable> {
+  $$ExportRecordItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get exportId => $composableBuilder(
+      column: $table.exportId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unitType => $composableBuilder(
+      column: $table.unitType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get wasteUnitType => $composableBuilder(
+      column: $table.wasteUnitType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get wasteQuantity => $composableBuilder(
+      column: $table.wasteQuantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get priceMinor => $composableBuilder(
+      column: $table.priceMinor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ExportRecordItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExportRecordItemsTable> {
+  $$ExportRecordItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get exportId => $composableBuilder(
+      column: $table.exportId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unitType => $composableBuilder(
+      column: $table.unitType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get wasteUnitType => $composableBuilder(
+      column: $table.wasteUnitType,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get wasteQuantity => $composableBuilder(
+      column: $table.wasteQuantity,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get priceMinor => $composableBuilder(
+      column: $table.priceMinor, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ExportRecordItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExportRecordItemsTable> {
+  $$ExportRecordItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get exportId =>
+      $composableBuilder(column: $table.exportId, builder: (column) => column);
+
+  GeneratedColumn<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => column);
+
+  GeneratedColumn<String> get unitType =>
+      $composableBuilder(column: $table.unitType, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get wasteUnitType => $composableBuilder(
+      column: $table.wasteUnitType, builder: (column) => column);
+
+  GeneratedColumn<double> get wasteQuantity => $composableBuilder(
+      column: $table.wasteQuantity, builder: (column) => column);
+
+  GeneratedColumn<int> get priceMinor => $composableBuilder(
+      column: $table.priceMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$ExportRecordItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ExportRecordItemsTable,
+    ExportRecordItem,
+    $$ExportRecordItemsTableFilterComposer,
+    $$ExportRecordItemsTableOrderingComposer,
+    $$ExportRecordItemsTableAnnotationComposer,
+    $$ExportRecordItemsTableCreateCompanionBuilder,
+    $$ExportRecordItemsTableUpdateCompanionBuilder,
+    (
+      ExportRecordItem,
+      BaseReferences<_$AppDatabase, $ExportRecordItemsTable, ExportRecordItem>
+    ),
+    ExportRecordItem,
+    PrefetchHooks Function()> {
+  $$ExportRecordItemsTableTableManager(
+      _$AppDatabase db, $ExportRecordItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExportRecordItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExportRecordItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExportRecordItemsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> exportId = const Value.absent(),
+            Value<String> productName = const Value.absent(),
+            Value<String> unitType = const Value.absent(),
+            Value<double> quantity = const Value.absent(),
+            Value<String?> wasteUnitType = const Value.absent(),
+            Value<double> wasteQuantity = const Value.absent(),
+            Value<int> priceMinor = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExportRecordItemsCompanion(
+            id: id,
+            exportId: exportId,
+            productName: productName,
+            unitType: unitType,
+            quantity: quantity,
+            wasteUnitType: wasteUnitType,
+            wasteQuantity: wasteQuantity,
+            priceMinor: priceMinor,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String exportId,
+            required String productName,
+            required String unitType,
+            required double quantity,
+            Value<String?> wasteUnitType = const Value.absent(),
+            Value<double> wasteQuantity = const Value.absent(),
+            required int priceMinor,
+            required int sortOrder,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExportRecordItemsCompanion.insert(
+            id: id,
+            exportId: exportId,
+            productName: productName,
+            unitType: unitType,
+            quantity: quantity,
+            wasteUnitType: wasteUnitType,
+            wasteQuantity: wasteQuantity,
+            priceMinor: priceMinor,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ExportRecordItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ExportRecordItemsTable,
+    ExportRecordItem,
+    $$ExportRecordItemsTableFilterComposer,
+    $$ExportRecordItemsTableOrderingComposer,
+    $$ExportRecordItemsTableAnnotationComposer,
+    $$ExportRecordItemsTableCreateCompanionBuilder,
+    $$ExportRecordItemsTableUpdateCompanionBuilder,
+    (
+      ExportRecordItem,
+      BaseReferences<_$AppDatabase, $ExportRecordItemsTable, ExportRecordItem>
+    ),
+    ExportRecordItem,
+    PrefetchHooks Function()>;
 typedef $$ImportRecordsTableCreateCompanionBuilder = ImportRecordsCompanion
     Function({
   required String id,
   required String title,
   required String supplierName,
   required String products,
+  Value<String> currency,
   required int totalAmountMinor,
   Value<DateTime?> shipmentDate,
   Value<DateTime?> deliveryDate,
@@ -14680,6 +16278,7 @@ typedef $$ImportRecordsTableUpdateCompanionBuilder = ImportRecordsCompanion
   Value<String> title,
   Value<String> supplierName,
   Value<String> products,
+  Value<String> currency,
   Value<int> totalAmountMinor,
   Value<DateTime?> shipmentDate,
   Value<DateTime?> deliveryDate,
@@ -14714,6 +16313,9 @@ class $$ImportRecordsTableFilterComposer
 
   ColumnFilters<String> get products => $composableBuilder(
       column: $table.products, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get totalAmountMinor => $composableBuilder(
       column: $table.totalAmountMinor,
@@ -14774,6 +16376,9 @@ class $$ImportRecordsTableOrderingComposer
 
   ColumnOrderings<String> get products => $composableBuilder(
       column: $table.products, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get totalAmountMinor => $composableBuilder(
       column: $table.totalAmountMinor,
@@ -14836,6 +16441,9 @@ class $$ImportRecordsTableAnnotationComposer
 
   GeneratedColumn<String> get products =>
       $composableBuilder(column: $table.products, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
 
   GeneratedColumn<int> get totalAmountMinor => $composableBuilder(
       column: $table.totalAmountMinor, builder: (column) => column);
@@ -14901,6 +16509,7 @@ class $$ImportRecordsTableTableManager extends RootTableManager<
             Value<String> title = const Value.absent(),
             Value<String> supplierName = const Value.absent(),
             Value<String> products = const Value.absent(),
+            Value<String> currency = const Value.absent(),
             Value<int> totalAmountMinor = const Value.absent(),
             Value<DateTime?> shipmentDate = const Value.absent(),
             Value<DateTime?> deliveryDate = const Value.absent(),
@@ -14919,6 +16528,7 @@ class $$ImportRecordsTableTableManager extends RootTableManager<
             title: title,
             supplierName: supplierName,
             products: products,
+            currency: currency,
             totalAmountMinor: totalAmountMinor,
             shipmentDate: shipmentDate,
             deliveryDate: deliveryDate,
@@ -14937,6 +16547,7 @@ class $$ImportRecordsTableTableManager extends RootTableManager<
             required String title,
             required String supplierName,
             required String products,
+            Value<String> currency = const Value.absent(),
             required int totalAmountMinor,
             Value<DateTime?> shipmentDate = const Value.absent(),
             Value<DateTime?> deliveryDate = const Value.absent(),
@@ -14955,6 +16566,7 @@ class $$ImportRecordsTableTableManager extends RootTableManager<
             title: title,
             supplierName: supplierName,
             products: products,
+            currency: currency,
             totalAmountMinor: totalAmountMinor,
             shipmentDate: shipmentDate,
             deliveryDate: deliveryDate,
@@ -14989,6 +16601,288 @@ typedef $$ImportRecordsTableProcessedTableManager = ProcessedTableManager<
       BaseReferences<_$AppDatabase, $ImportRecordsTable, ImportRecord>
     ),
     ImportRecord,
+    PrefetchHooks Function()>;
+typedef $$ImportRecordItemsTableCreateCompanionBuilder
+    = ImportRecordItemsCompanion Function({
+  required String id,
+  required String importId,
+  required String productName,
+  required String unitType,
+  required double quantity,
+  Value<String?> wasteUnitType,
+  Value<double> wasteQuantity,
+  required int priceMinor,
+  required int sortOrder,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$ImportRecordItemsTableUpdateCompanionBuilder
+    = ImportRecordItemsCompanion Function({
+  Value<String> id,
+  Value<String> importId,
+  Value<String> productName,
+  Value<String> unitType,
+  Value<double> quantity,
+  Value<String?> wasteUnitType,
+  Value<double> wasteQuantity,
+  Value<int> priceMinor,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$ImportRecordItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ImportRecordItemsTable> {
+  $$ImportRecordItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get importId => $composableBuilder(
+      column: $table.importId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unitType => $composableBuilder(
+      column: $table.unitType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get wasteUnitType => $composableBuilder(
+      column: $table.wasteUnitType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get wasteQuantity => $composableBuilder(
+      column: $table.wasteQuantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get priceMinor => $composableBuilder(
+      column: $table.priceMinor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ImportRecordItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ImportRecordItemsTable> {
+  $$ImportRecordItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get importId => $composableBuilder(
+      column: $table.importId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unitType => $composableBuilder(
+      column: $table.unitType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get wasteUnitType => $composableBuilder(
+      column: $table.wasteUnitType,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get wasteQuantity => $composableBuilder(
+      column: $table.wasteQuantity,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get priceMinor => $composableBuilder(
+      column: $table.priceMinor, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ImportRecordItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ImportRecordItemsTable> {
+  $$ImportRecordItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get importId =>
+      $composableBuilder(column: $table.importId, builder: (column) => column);
+
+  GeneratedColumn<String> get productName => $composableBuilder(
+      column: $table.productName, builder: (column) => column);
+
+  GeneratedColumn<String> get unitType =>
+      $composableBuilder(column: $table.unitType, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get wasteUnitType => $composableBuilder(
+      column: $table.wasteUnitType, builder: (column) => column);
+
+  GeneratedColumn<double> get wasteQuantity => $composableBuilder(
+      column: $table.wasteQuantity, builder: (column) => column);
+
+  GeneratedColumn<int> get priceMinor => $composableBuilder(
+      column: $table.priceMinor, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$ImportRecordItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ImportRecordItemsTable,
+    ImportRecordItem,
+    $$ImportRecordItemsTableFilterComposer,
+    $$ImportRecordItemsTableOrderingComposer,
+    $$ImportRecordItemsTableAnnotationComposer,
+    $$ImportRecordItemsTableCreateCompanionBuilder,
+    $$ImportRecordItemsTableUpdateCompanionBuilder,
+    (
+      ImportRecordItem,
+      BaseReferences<_$AppDatabase, $ImportRecordItemsTable, ImportRecordItem>
+    ),
+    ImportRecordItem,
+    PrefetchHooks Function()> {
+  $$ImportRecordItemsTableTableManager(
+      _$AppDatabase db, $ImportRecordItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportRecordItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImportRecordItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImportRecordItemsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> importId = const Value.absent(),
+            Value<String> productName = const Value.absent(),
+            Value<String> unitType = const Value.absent(),
+            Value<double> quantity = const Value.absent(),
+            Value<String?> wasteUnitType = const Value.absent(),
+            Value<double> wasteQuantity = const Value.absent(),
+            Value<int> priceMinor = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ImportRecordItemsCompanion(
+            id: id,
+            importId: importId,
+            productName: productName,
+            unitType: unitType,
+            quantity: quantity,
+            wasteUnitType: wasteUnitType,
+            wasteQuantity: wasteQuantity,
+            priceMinor: priceMinor,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String importId,
+            required String productName,
+            required String unitType,
+            required double quantity,
+            Value<String?> wasteUnitType = const Value.absent(),
+            Value<double> wasteQuantity = const Value.absent(),
+            required int priceMinor,
+            required int sortOrder,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ImportRecordItemsCompanion.insert(
+            id: id,
+            importId: importId,
+            productName: productName,
+            unitType: unitType,
+            quantity: quantity,
+            wasteUnitType: wasteUnitType,
+            wasteQuantity: wasteQuantity,
+            priceMinor: priceMinor,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ImportRecordItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ImportRecordItemsTable,
+    ImportRecordItem,
+    $$ImportRecordItemsTableFilterComposer,
+    $$ImportRecordItemsTableOrderingComposer,
+    $$ImportRecordItemsTableAnnotationComposer,
+    $$ImportRecordItemsTableCreateCompanionBuilder,
+    $$ImportRecordItemsTableUpdateCompanionBuilder,
+    (
+      ImportRecordItem,
+      BaseReferences<_$AppDatabase, $ImportRecordItemsTable, ImportRecordItem>
+    ),
+    ImportRecordItem,
     PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
@@ -15026,6 +16920,10 @@ class $AppDatabaseManager {
       $$PriceListItemsTableTableManager(_db, _db.priceListItems);
   $$ExportRecordsTableTableManager get exportRecords =>
       $$ExportRecordsTableTableManager(_db, _db.exportRecords);
+  $$ExportRecordItemsTableTableManager get exportRecordItems =>
+      $$ExportRecordItemsTableTableManager(_db, _db.exportRecordItems);
   $$ImportRecordsTableTableManager get importRecords =>
       $$ImportRecordsTableTableManager(_db, _db.importRecords);
+  $$ImportRecordItemsTableTableManager get importRecordItems =>
+      $$ImportRecordItemsTableTableManager(_db, _db.importRecordItems);
 }

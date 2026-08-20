@@ -1,6 +1,9 @@
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/models/export_totals.dart';
+import 'package:Ok/feature/import/models/import_detail.dart';
 import 'package:Ok/feature/import/models/import_record_list_item.dart';
 import 'package:Ok/feature/import/services/import_service.dart';
-import 'package:Ok/product/database/app_database.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
 import 'package:Ok/product/utility/constants/import_messages.dart';
@@ -19,7 +22,7 @@ final class ImportController extends GetxController {
   final RxBool isSaving = false.obs;
   final RxBool isDeleting = false.obs;
   final RxList<ImportRecordListItem> imports = <ImportRecordListItem>[].obs;
-  final Rxn<ImportRecord> selectedImport = Rxn<ImportRecord>();
+  final Rxn<ImportDetail> selectedImport = Rxn<ImportDetail>();
   final RxString searchQuery = ''.obs;
   final RxnString errorMessage = RxnString();
   final RxnString successMessage = RxnString();
@@ -59,8 +62,9 @@ final class ImportController extends GetxController {
   Future<String?> createImport({
     required String title,
     required String supplierName,
-    required String products,
-    required String totalAmountText,
+    required PriceOfferCurrencyType currency,
+    required List<ExportItemData> items,
+    required List<ExportItemValidationInput> itemInputs,
     required DateTime? shipmentDate,
     required DateTime? deliveryDate,
     required String logisticsName,
@@ -76,14 +80,13 @@ final class ImportController extends GetxController {
     clearMessages();
 
     final validationError = Validators.validateImportForm(
-      title: title,
-      supplierName: supplierName,
-      products: products,
-      totalAmountText: totalAmountText,
-      logisticsCostText: logisticsCostText,
-      customsCostText: customsCostText,
-      insuranceCostText: insuranceCostText,
-    );
+          title: title,
+          supplierName: supplierName,
+          logisticsCostText: logisticsCostText,
+          customsCostText: customsCostText,
+          insuranceCostText: insuranceCostText,
+        ) ??
+        Validators.validateExportItems(items: itemInputs);
     if (validationError != null) {
       errorMessage.value = validationError;
       return null;
@@ -91,11 +94,18 @@ final class ImportController extends GetxController {
 
     isSaving.value = true;
     try {
+      final totals = ExportTotals.fromCostTexts(
+        items: items,
+        logisticsCostText: logisticsCostText,
+        customsCostText: customsCostText,
+        insuranceCostText: insuranceCostText,
+      );
       final id = await _importService.createImport(
         title: title,
         supplierName: supplierName,
-        products: products,
-        totalAmountMinor: MoneyUtils.parseAmountToMinor(totalAmountText.trim())!,
+        currency: currency,
+        items: items,
+        totals: totals,
         shipmentDate: shipmentDate,
         deliveryDate: deliveryDate,
         logisticsName: logisticsName,
@@ -123,14 +133,14 @@ final class ImportController extends GetxController {
     selectedImport.value = null;
     isLoading.value = true;
     try {
-      final record = await _importService.getImportById(id);
-      if (record == null) {
+      final detail = await _importService.getImportById(id);
+      if (detail == null) {
         errorMessage.value = ImportMessages.notFound;
         selectedImport.value = null;
         return false;
       }
 
-      selectedImport.value = record;
+      selectedImport.value = detail;
       return true;
     } catch (_) {
       errorMessage.value = ImportMessages.notFound;
@@ -145,8 +155,9 @@ final class ImportController extends GetxController {
     required String id,
     required String title,
     required String supplierName,
-    required String products,
-    required String totalAmountText,
+    required PriceOfferCurrencyType currency,
+    required List<ExportItemData> items,
+    required List<ExportItemValidationInput> itemInputs,
     required DateTime? shipmentDate,
     required DateTime? deliveryDate,
     required String logisticsName,
@@ -162,14 +173,13 @@ final class ImportController extends GetxController {
     clearMessages();
 
     final validationError = Validators.validateImportForm(
-      title: title,
-      supplierName: supplierName,
-      products: products,
-      totalAmountText: totalAmountText,
-      logisticsCostText: logisticsCostText,
-      customsCostText: customsCostText,
-      insuranceCostText: insuranceCostText,
-    );
+          title: title,
+          supplierName: supplierName,
+          logisticsCostText: logisticsCostText,
+          customsCostText: customsCostText,
+          insuranceCostText: insuranceCostText,
+        ) ??
+        Validators.validateExportItems(items: itemInputs);
     if (validationError != null) {
       errorMessage.value = validationError;
       return false;
@@ -177,12 +187,19 @@ final class ImportController extends GetxController {
 
     isSaving.value = true;
     try {
+      final totals = ExportTotals.fromCostTexts(
+        items: items,
+        logisticsCostText: logisticsCostText,
+        customsCostText: customsCostText,
+        insuranceCostText: insuranceCostText,
+      );
       await _importService.updateImport(
         id: id,
         title: title,
         supplierName: supplierName,
-        products: products,
-        totalAmountMinor: MoneyUtils.parseAmountToMinor(totalAmountText.trim())!,
+        currency: currency,
+        items: items,
+        totals: totals,
         shipmentDate: shipmentDate,
         deliveryDate: deliveryDate,
         logisticsName: logisticsName,
@@ -234,7 +251,8 @@ final class ImportController extends GetxController {
     final result = await Get.dialog<bool>(
       Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: AppUiTokens.space24),
+        insetPadding:
+            const EdgeInsets.symmetric(horizontal: AppUiTokens.space24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: DecoratedBox(

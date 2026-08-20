@@ -9,6 +9,7 @@ final class ExportRecordListItem extends Equatable {
     required this.productName,
     required this.quantityTon,
     required this.totalPriceMinor,
+    required this.currency,
     required this.shipmentDate,
     required this.deliveryDate,
     required this.createdAt,
@@ -22,6 +23,7 @@ final class ExportRecordListItem extends Equatable {
   final String productName;
   final double quantityTon;
   final int totalPriceMinor;
+  final String currency;
   final DateTime? shipmentDate;
   final DateTime? deliveryDate;
   final DateTime createdAt;
@@ -36,6 +38,7 @@ final class ExportRecordListItem extends Equatable {
         productName,
         quantityTon,
         totalPriceMinor,
+        currency,
         shipmentDate,
         deliveryDate,
         createdAt,

@@ -195,13 +195,8 @@ abstract final class Validators {
     required String title,
     required String? customerId,
     required String guestCustomerName,
-    required List<String> productNames,
-    required String quantityTonText,
-    required String unitPriceText,
     String firstPaymentAmountText = '',
     String lastPaymentAmountText = '',
-    String wasteKgText = '',
-    String netTotalAmountText = '',
     String logisticsCostText = '',
     String customsCostText = '',
     String insuranceCostText = '',
@@ -220,42 +215,12 @@ abstract final class Validators {
       return ExportMessages.customerRequired;
     }
 
-    final hasProduct = productNames.any((name) => name.trim().isNotEmpty);
-    if (!hasProduct) {
-      return ExportMessages.productRequired;
-    }
-
-    final trimmedQuantity = quantityTonText.trim();
-    if (trimmedQuantity.isEmpty) {
-      return ExportMessages.quantityRequired;
-    }
-
-    final quantity = QuantityUtils.parseQuantity(trimmedQuantity);
-    if (quantity == null || quantity <= 0) {
-      return ExportMessages.quantityPositive;
-    }
-
-    final trimmedUnitPrice = unitPriceText.trim();
-    if (trimmedUnitPrice.isEmpty) {
-      return ExportMessages.unitPriceRequired;
-    }
-
-    final unitPriceMinor = MoneyUtils.parseAmountToMinor(trimmedUnitPrice);
-    if (unitPriceMinor == null || unitPriceMinor <= 0) {
-      return ExportMessages.unitPricePositive;
-    }
-
-    final optionalAmountError =
-        _validateOptionalAmount(
+    return _validateOptionalAmount(
           firstPaymentAmountText,
           ExportMessages.amountInvalid,
         ) ??
         _validateOptionalAmount(
           lastPaymentAmountText,
-          ExportMessages.amountInvalid,
-        ) ??
-        _validateOptionalAmount(
-          netTotalAmountText,
           ExportMessages.amountInvalid,
         ) ??
         _validateOptionalAmount(
@@ -270,15 +235,44 @@ abstract final class Validators {
           insuranceCostText,
           ExportMessages.amountInvalid,
         );
-    if (optionalAmountError != null) {
-      return optionalAmountError;
+  }
+
+  static String? validateExportItems({
+    required List<ExportItemValidationInput> items,
+  }) {
+    final filledItems =
+        items.where((item) => item.productName.trim().isNotEmpty).toList();
+    if (filledItems.isEmpty) {
+      return ExportMessages.productRequired;
     }
 
-    final trimmedWaste = wasteKgText.trim();
-    if (trimmedWaste.isNotEmpty) {
-      final waste = QuantityUtils.parseQuantity(trimmedWaste);
-      if (waste == null || waste < 0) {
-        return ExportMessages.wasteInvalid;
+    for (final item in filledItems) {
+      if (item.unitType == null || item.unitType!.trim().isEmpty) {
+        return ExportMessages.unitRequired;
+      }
+
+      final quantity = QuantityUtils.parseQuantity(item.quantityText);
+      if (quantity == null || quantity <= 0) {
+        return ExportMessages.quantityPositive;
+      }
+
+      final priceMinor = MoneyUtils.parseAmountToMinor(item.priceText);
+      if (priceMinor == null || priceMinor <= 0) {
+        return ExportMessages.unitPricePositive;
+      }
+
+      final wasteText = item.wasteQuantityText.trim();
+      if (wasteText.isNotEmpty) {
+        final waste = QuantityUtils.parseQuantity(wasteText);
+        if (waste == null || waste < 0) {
+          return ExportMessages.wasteInvalid;
+        }
+
+        if (waste > 0 &&
+            (item.wasteUnitType == null ||
+                item.wasteUnitType!.trim().isEmpty)) {
+          return ExportMessages.wasteUnitRequired;
+        }
       }
     }
 
@@ -288,8 +282,6 @@ abstract final class Validators {
   static String? validateImportForm({
     required String title,
     required String supplierName,
-    required String products,
-    required String totalAmountText,
     String logisticsCostText = '',
     String customsCostText = '',
     String insuranceCostText = '',
@@ -305,20 +297,6 @@ abstract final class Validators {
 
     if (supplierName.trim().isEmpty) {
       return ImportMessages.supplierRequired;
-    }
-
-    if (products.trim().isEmpty) {
-      return ImportMessages.productsRequired;
-    }
-
-    final trimmedTotal = totalAmountText.trim();
-    if (trimmedTotal.isEmpty) {
-      return ImportMessages.totalAmountRequired;
-    }
-
-    final totalMinor = MoneyUtils.parseAmountToMinor(trimmedTotal);
-    if (totalMinor == null || totalMinor <= 0) {
-      return ImportMessages.totalAmountPositive;
     }
 
     return _validateOptionalAmount(
@@ -728,4 +706,22 @@ final class PriceOfferItemFormValidation {
   final String quantityText;
   final String priceText;
   final PriceOfferCurrencyType? currency;
+}
+
+final class ExportItemValidationInput {
+  const ExportItemValidationInput({
+    required this.productName,
+    required this.unitType,
+    required this.quantityText,
+    required this.priceText,
+    required this.wasteUnitType,
+    required this.wasteQuantityText,
+  });
+
+  final String productName;
+  final String? unitType;
+  final String quantityText;
+  final String priceText;
+  final String? wasteUnitType;
+  final String wasteQuantityText;
 }

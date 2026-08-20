@@ -21,7 +21,9 @@ import 'package:Ok/product/database/tables/auth_sessions_table.dart';
 import 'package:Ok/product/database/tables/customer_contacts_table.dart';
 import 'package:Ok/product/database/tables/customers_table.dart';
 import 'package:Ok/product/database/tables/due_records_table.dart';
+import 'package:Ok/product/database/tables/export_record_items_table.dart';
 import 'package:Ok/product/database/tables/export_records_table.dart';
+import 'package:Ok/product/database/tables/import_record_items_table.dart';
 import 'package:Ok/product/database/tables/import_records_table.dart';
 import 'package:Ok/product/database/tables/meetings_table.dart';
 import 'package:Ok/product/database/tables/notes_table.dart';
@@ -54,7 +56,9 @@ part 'app_database.g.dart';
     PriceLists,
     PriceListItems,
     ExportRecords,
+    ExportRecordItems,
     ImportRecords,
+    ImportRecordItems,
   ],
   daos: [
     UserDao,
@@ -80,7 +84,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -286,6 +290,101 @@ class AppDatabase extends _$AppDatabase {
                 AND TRIM(customer_id) != ''
             ''');
           }
+          if (from < 21) {
+            await _addColumnIfNotExists(
+              'export_records',
+              'currency',
+              "TEXT DEFAULT 'TRY'",
+            );
+            await customStatement('''
+              UPDATE export_records
+              SET currency = 'TRY'
+              WHERE currency IS NULL OR TRIM(currency) = ''
+            ''');
+            await m.createTable(exportRecordItems);
+            await customStatement('''
+              INSERT INTO export_record_items (
+                id,
+                export_id,
+                product_name,
+                unit_type,
+                quantity,
+                waste_unit_type,
+                waste_quantity,
+                price_minor,
+                sort_order,
+                created_at,
+                updated_at
+              )
+              SELECT
+                id || '-item',
+                id,
+                product_name,
+                'Ton',
+                quantity_ton,
+                'KG',
+                COALESCE(waste_kg, 0),
+                unit_price_minor,
+                0,
+                created_at,
+                updated_at
+              FROM export_records
+              WHERE NOT EXISTS (
+                SELECT 1
+                FROM export_record_items
+                WHERE export_record_items.export_id = export_records.id
+              )
+            ''');
+          }
+          if (from < 22) {
+            await _addColumnIfNotExists(
+              'import_records',
+              'currency',
+              "TEXT DEFAULT 'TRY'",
+            );
+            await customStatement('''
+              UPDATE import_records
+              SET currency = 'TRY'
+              WHERE currency IS NULL OR TRIM(currency) = ''
+            ''');
+            await m.createTable(importRecordItems);
+            await customStatement('''
+              INSERT INTO import_record_items (
+                id,
+                import_id,
+                product_name,
+                unit_type,
+                quantity,
+                waste_unit_type,
+                waste_quantity,
+                price_minor,
+                sort_order,
+                created_at,
+                updated_at
+              )
+              SELECT
+                id || '-item',
+                id,
+                CASE
+                  WHEN TRIM(products) = '' THEN 'Ürün'
+                  ELSE products
+                END,
+                'Ton',
+                1,
+                'KG',
+                0,
+                total_amount_minor,
+                0,
+                created_at,
+                updated_at
+              FROM import_records
+              WHERE NOT EXISTS (
+                SELECT 1
+                FROM import_record_items
+                WHERE import_record_items.import_id = import_records.id
+              )
+            ''');
+          }
         },
       );
 
@@ -300,7 +399,8 @@ class AppDatabase extends _$AppDatabase {
     ).getSingleOrNull();
 
     if (exists == null) {
-      await customStatement('ALTER TABLE $table ADD COLUMN $column $definition');
+      await customStatement(
+          'ALTER TABLE $table ADD COLUMN $column $definition');
     }
   }
 }

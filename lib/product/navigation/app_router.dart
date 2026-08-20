@@ -273,6 +273,13 @@ final class AppScreens {
       transition: Transition.fadeIn,
     ),
     GetPage(
+      name: AppRoutes.exportsDetail.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
       name: AppRoutes.exports.value,
       page: () => const ShellView(),
       binding: ShellBinding(),
@@ -288,6 +295,13 @@ final class AppScreens {
     ),
     GetPage(
       name: AppRoutes.importsEdit.value,
+      page: () => const ShellView(),
+      binding: ShellBinding(),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.importsDetail.value,
       page: () => const ShellView(),
       binding: ShellBinding(),
       middlewares: [AuthMiddleware()],

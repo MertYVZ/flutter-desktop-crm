@@ -1,4 +1,9 @@
+import 'package:Ok/feature/export/models/export_detail.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/models/export_product_names.dart';
 import 'package:Ok/feature/export/models/export_record_list_item.dart';
+import 'package:Ok/feature/export/models/export_totals.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/database/app_database.dart';
 import 'package:Ok/product/database/database_service.dart';
 import 'package:drift/drift.dart';
@@ -16,8 +21,8 @@ final class ExportService {
   Future<List<ExportRecordListItem>> searchExports({String? searchQuery}) =>
       _databaseService.exports.searchExports(searchQuery: searchQuery);
 
-  Future<ExportRecord?> getExportById(String id) =>
-      _databaseService.exports.getExportById(id);
+  Future<ExportDetail?> getExportById(String id) =>
+      _databaseService.exports.getExportDetailById(id);
 
   Future<List<ExportRecordListItem>> getExportsByCustomerId(
     String customerId,
@@ -30,20 +35,16 @@ final class ExportService {
   Future<String> createExport({
     required String title,
     required String customerId,
-    required String productName,
-    required double quantityTon,
-    required int unitPriceMinor,
-    required int totalPriceMinor,
+    required PriceOfferCurrencyType currency,
+    required List<ExportItemData> items,
+    required ExportTotals totals,
     String? customerNameSnapshot,
-    String? productId,
     String? paymentMethod,
     String? bank,
     DateTime? firstPaymentDate,
     int? firstPaymentAmountMinor,
     DateTime? lastPaymentDate,
     int? lastPaymentAmountMinor,
-    double? wasteKg,
-    int? netTotalAmountMinor,
     String? logisticsName,
     DateTime? shipmentDate,
     DateTime? deliveryDate,
@@ -55,25 +56,27 @@ final class ExportService {
     final now = DateTime.now();
     final id = _uuid.v4();
 
-    await _databaseService.exports.insertExport(
-      ExportRecordsCompanion.insert(
+    await _databaseService.exports.createExportWithItems(
+      record: ExportRecordsCompanion.insert(
         id: id,
         title: title.trim(),
         customerId: customerId,
         customerNameSnapshot: Value(_nullableTrim(customerNameSnapshot)),
-        productName: productName.trim(),
-        productId: Value(_nullableTrim(productId)),
-        quantityTon: quantityTon,
-        unitPriceMinor: unitPriceMinor,
-        totalPriceMinor: totalPriceMinor,
+        productName: ExportProductNames.join(
+          items.map((item) => item.productName),
+        ),
+        currency: Value(currency.value),
+        quantityTon: snapshotQuantityTon(items),
+        unitPriceMinor: items.first.priceMinor,
+        totalPriceMinor: totals.sentTotalMinor,
         paymentMethod: Value(_nullableTrim(paymentMethod)),
         bank: Value(_nullableTrim(bank)),
         firstPaymentDate: Value(firstPaymentDate),
         firstPaymentAmountMinor: Value(firstPaymentAmountMinor),
         lastPaymentDate: Value(lastPaymentDate),
         lastPaymentAmountMinor: Value(lastPaymentAmountMinor),
-        wasteKg: Value(wasteKg),
-        netTotalAmountMinor: Value(netTotalAmountMinor),
+        wasteKg: Value(snapshotWasteKg(items)),
+        netTotalAmountMinor: Value(totals.netTotalMinor),
         logisticsName: Value(_nullableTrim(logisticsName)),
         shipmentDate: Value(shipmentDate),
         deliveryDate: Value(deliveryDate),
@@ -84,6 +87,7 @@ final class ExportService {
         createdAt: now,
         updatedAt: now,
       ),
+      items: _itemCompanions(exportId: id, items: items, now: now),
     );
 
     return id;
@@ -93,20 +97,16 @@ final class ExportService {
     required String id,
     required String title,
     required String customerId,
-    required String productName,
-    required double quantityTon,
-    required int unitPriceMinor,
-    required int totalPriceMinor,
+    required PriceOfferCurrencyType currency,
+    required List<ExportItemData> items,
+    required ExportTotals totals,
     String? customerNameSnapshot,
-    String? productId,
     String? paymentMethod,
     String? bank,
     DateTime? firstPaymentDate,
     int? firstPaymentAmountMinor,
     DateTime? lastPaymentDate,
     int? lastPaymentAmountMinor,
-    double? wasteKg,
-    int? netTotalAmountMinor,
     String? logisticsName,
     DateTime? shipmentDate,
     DateTime? deliveryDate,
@@ -115,28 +115,31 @@ final class ExportService {
     int? insuranceCostMinor,
     String? notes,
   }) async {
-    final existing = await getExportById(id);
+    final existing = await _databaseService.exports.getExportById(id);
     if (existing == null) {
       throw StateError('Export record not found');
     }
 
+    final now = DateTime.now();
     final updated = existing.copyWith(
       title: title.trim(),
       customerId: customerId,
       customerNameSnapshot: Value(_nullableTrim(customerNameSnapshot)),
-      productName: productName.trim(),
-      productId: Value(_nullableTrim(productId)),
-      quantityTon: quantityTon,
-      unitPriceMinor: unitPriceMinor,
-      totalPriceMinor: totalPriceMinor,
+      productName: ExportProductNames.join(
+        items.map((item) => item.productName),
+      ),
+      currency: currency.value,
+      quantityTon: snapshotQuantityTon(items),
+      unitPriceMinor: items.first.priceMinor,
+      totalPriceMinor: totals.sentTotalMinor,
       paymentMethod: Value(_nullableTrim(paymentMethod)),
       bank: Value(_nullableTrim(bank)),
       firstPaymentDate: Value(firstPaymentDate),
       firstPaymentAmountMinor: Value(firstPaymentAmountMinor),
       lastPaymentDate: Value(lastPaymentDate),
       lastPaymentAmountMinor: Value(lastPaymentAmountMinor),
-      wasteKg: Value(wasteKg),
-      netTotalAmountMinor: Value(netTotalAmountMinor),
+      wasteKg: Value(snapshotWasteKg(items)),
+      netTotalAmountMinor: Value(totals.netTotalMinor),
       logisticsName: Value(_nullableTrim(logisticsName)),
       shipmentDate: Value(shipmentDate),
       deliveryDate: Value(deliveryDate),
@@ -144,13 +147,13 @@ final class ExportService {
       customsCostMinor: Value(customsCostMinor),
       insuranceCostMinor: Value(insuranceCostMinor),
       notes: Value(_nullableTrim(notes)),
-      updatedAt: DateTime.now(),
+      updatedAt: now,
     );
 
-    final success = await _databaseService.exports.updateExport(updated);
-    if (!success) {
-      throw StateError('Export record update failed');
-    }
+    await _databaseService.exports.updateExportWithItems(
+      record: updated,
+      items: _itemCompanions(exportId: id, items: items, now: now),
+    );
   }
 
   Future<void> deleteExport(String id) async {
@@ -158,6 +161,29 @@ final class ExportService {
     if (affectedRows == 0) {
       throw StateError('Export record not found');
     }
+  }
+
+  List<ExportRecordItemsCompanion> _itemCompanions({
+    required String exportId,
+    required List<ExportItemData> items,
+    required DateTime now,
+  }) {
+    return [
+      for (final item in items)
+        ExportRecordItemsCompanion.insert(
+          id: _uuid.v4(),
+          exportId: exportId,
+          productName: item.productName.trim(),
+          unitType: item.unitType,
+          quantity: item.quantity,
+          wasteUnitType: Value(_nullableTrim(item.wasteUnitType)),
+          wasteQuantity: Value(item.wasteQuantity),
+          priceMinor: item.priceMinor,
+          sortOrder: item.sortOrder,
+          createdAt: now,
+          updatedAt: now,
+        ),
+    ];
   }
 
   String? _nullableTrim(String? value) {

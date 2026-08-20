@@ -19,8 +19,10 @@ final class ExportMessages {
   static const productRequired = 'En az bir ürün adı giriniz.';
   static const quantityRequired = 'Gönderilen miktar zorunludur.';
   static const quantityPositive = 'Gönderilen miktar 0\'dan büyük olmalıdır.';
-  static const unitPriceRequired = 'Anlaşılan birim fiyat zorunludur.';
-  static const unitPricePositive = 'Anlaşılan birim fiyat 0\'dan büyük olmalıdır.';
+  static const unitRequired = 'Her ürün için birim tipi seçiniz.';
+  static const unitPriceRequired = 'Her ürün için birim fiyat giriniz.';
+  static const unitPricePositive = 'Birim fiyat 0\'dan büyük olmalıdır.';
   static const amountInvalid = 'Geçerli bir tutar giriniz.';
   static const wasteInvalid = 'Geçerli bir fire miktarı giriniz.';
+  static const wasteUnitRequired = 'Fire miktarı için birim tipi seçiniz.';
 }

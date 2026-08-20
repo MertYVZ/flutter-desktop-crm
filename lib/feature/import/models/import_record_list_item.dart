@@ -7,6 +7,7 @@ final class ImportRecordListItem extends Equatable {
     required this.supplierName,
     required this.products,
     required this.totalAmountMinor,
+    required this.currency,
     required this.shipmentDate,
     required this.deliveryDate,
     required this.createdAt,
@@ -18,6 +19,7 @@ final class ImportRecordListItem extends Equatable {
   final String supplierName;
   final String products;
   final int totalAmountMinor;
+  final String currency;
   final DateTime? shipmentDate;
   final DateTime? deliveryDate;
   final DateTime createdAt;
@@ -30,6 +32,7 @@ final class ImportRecordListItem extends Equatable {
         supplierName,
         products,
         totalAmountMinor,
+        currency,
         shipmentDate,
         deliveryDate,
         createdAt,

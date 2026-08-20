@@ -1,7 +1,13 @@
-import 'package:Ok/feature/export/widgets/export_products_field.dart';
+import 'package:Ok/feature/export/models/export_currency.dart';
+import 'package:Ok/feature/export/models/export_item_data.dart';
+import 'package:Ok/feature/export/models/export_totals.dart';
+import 'package:Ok/feature/export/widgets/export_items_editor.dart';
+import 'package:Ok/feature/price_offers/models/currency_type.dart';
 import 'package:Ok/product/init/theme/app_interactive_theme.dart';
 import 'package:Ok/product/init/theme/app_ui_tokens.dart';
+import 'package:Ok/product/utility/money_utils.dart';
 import 'package:Ok/product/widgets/panel/panel_amount_field.dart';
+import 'package:Ok/product/widgets/panel/panel_dropdown.dart';
 import 'package:Ok/product/widgets/panel/panel_text_field.dart';
 import 'package:Ok/shared/widgets/app_date_picker_field.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +17,8 @@ class ImportRecordForm extends StatelessWidget {
   const ImportRecordForm({
     required this.titleController,
     required this.supplierNameController,
-    required this.productControllers,
-    required this.onAddProduct,
-    required this.onRemoveProduct,
-    required this.totalAmountController,
+    required this.itemRows,
+    required this.currency,
     required this.logisticsNameController,
     required this.shipmentDate,
     required this.deliveryDate,
@@ -22,17 +26,18 @@ class ImportRecordForm extends StatelessWidget {
     required this.customsCostController,
     required this.insuranceCostController,
     required this.notesController,
+    required this.onCurrencyChanged,
+    required this.onItemsChanged,
     required this.onShipmentDateChanged,
     required this.onDeliveryDateChanged,
+    required this.onTotalsChanged,
     super.key,
   });
 
   final TextEditingController titleController;
   final TextEditingController supplierNameController;
-  final List<TextEditingController> productControllers;
-  final VoidCallback onAddProduct;
-  final ValueChanged<int> onRemoveProduct;
-  final TextEditingController totalAmountController;
+  final List<ExportItemFormRow> itemRows;
+  final PriceOfferCurrencyType currency;
   final TextEditingController logisticsNameController;
   final DateTime? shipmentDate;
   final DateTime? deliveryDate;
@@ -40,57 +45,136 @@ class ImportRecordForm extends StatelessWidget {
   final TextEditingController customsCostController;
   final TextEditingController insuranceCostController;
   final TextEditingController notesController;
+  final ValueChanged<PriceOfferCurrencyType?> onCurrencyChanged;
+  final VoidCallback onItemsChanged;
   final ValueChanged<DateTime?> onShipmentDateChanged;
   final ValueChanged<DateTime?> onDeliveryDateChanged;
+  final VoidCallback onTotalsChanged;
+
+  ExportTotals get _totals {
+    final items = <ExportItemData>[];
+    for (var index = 0; index < itemRows.length; index++) {
+      final item = itemRows[index].toItemData(sortOrder: index);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+
+    return ExportTotals.fromCostTexts(
+      items: items,
+      logisticsCostText: logisticsCostController.text,
+      customsCostText: customsCostController.text,
+      insuranceCostText: insuranceCostController.text,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 800;
+    final totals = _totals;
+    final moneyCurrency = mapExportCurrency(currency);
 
-        final leftColumn = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _ImportFormGroup(
+          title: 'Genel',
+          icon: Icons.info_outline_rounded,
           children: [
-            _ImportFormGroup(
-              title: 'Genel',
-              icon: Icons.info_outline_rounded,
-              children: [
-                PanelTextField(
-                  controller: titleController,
-                  label: 'Başlık',
-                ),
-                PanelTextField(
-                  controller: supplierNameController,
-                  label: 'Tedarikçi',
-                ),
-              ],
+            PanelTextField(
+              controller: titleController,
+              label: 'Başlık',
             ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ImportFormGroup(
-              title: 'Ürün',
-              icon: Icons.inventory_2_outlined,
-              children: [
-                ExportProductsField(
-                  controllers: productControllers,
-                  onAdd: onAddProduct,
-                  onRemove: onRemoveProduct,
-                ),
-              ],
+            PanelTextField(
+              controller: supplierNameController,
+              label: 'Tedarikçi',
             ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ImportFormGroup(
-              title: 'Tutar',
-              icon: Icons.payments_outlined,
-              children: [
-                PanelAmountField(
-                  controller: totalAmountController,
-                  label: 'Toplam tutar',
-                ),
-              ],
+            PanelDropdown<PriceOfferCurrencyType>(
+              label: 'Para birimi',
+              hint: 'Para birimi seçiniz',
+              value: currency,
+              items: PriceOfferCurrencyType.values,
+              itemLabel: (value) => value.label,
+              onChanged: onCurrencyChanged,
             ),
-            const SizedBox(height: AppUiTokens.space24),
-            _ImportFormGroup(
+          ],
+        ),
+        const SizedBox(height: AppUiTokens.space24),
+        _ImportFormGroup(
+          title: 'Ürün ve fiyat',
+          icon: Icons.inventory_2_outlined,
+          children: [
+            ExportItemsEditor(
+              rows: itemRows,
+              currency: currency,
+              onChanged: onItemsChanged,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppUiTokens.space24),
+        _ImportFormGroup(
+          title: 'Tutar özeti',
+          icon: Icons.payments_outlined,
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 800;
+                final fields = [
+                  _ReadOnlyAmountField(
+                    label: 'Gönderilen toplam',
+                    helper: 'Gönderilen ürünlerin toplam tutarı',
+                    value: MoneyUtils.formatAmountMinor(
+                      totals.sentTotalMinor,
+                      moneyCurrency,
+                    ),
+                  ),
+                  _ReadOnlyAmountField(
+                    label: 'Firesiz toplam',
+                    helper: 'Gönderilen − Fire',
+                    value: MoneyUtils.formatAmountMinor(
+                      totals.afterWasteMinor,
+                      moneyCurrency,
+                    ),
+                  ),
+                  _ReadOnlyAmountField(
+                    label: 'Net toplam',
+                    helper: 'Gönderilen − Fire − Lojistik − Gümrük − Sigorta',
+                    value: MoneyUtils.formatAmountMinor(
+                      totals.netTotalMinor,
+                      moneyCurrency,
+                    ),
+                  ),
+                ];
+
+                if (isCompact) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < fields.length; i++) ...[
+                        if (i > 0) const SizedBox(height: AppUiTokens.space16),
+                        fields[i],
+                      ],
+                    ],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var i = 0; i < fields.length; i++) ...[
+                      if (i > 0) const SizedBox(width: AppUiTokens.space16),
+                      Expanded(child: fields[i]),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: AppUiTokens.space24),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 800;
+            final notesGroup = _ImportFormGroup(
               title: 'Notlar',
               icon: Icons.notes_outlined,
               children: [
@@ -101,14 +185,8 @@ class ImportRecordForm extends StatelessWidget {
                   maxLines: 6,
                 ),
               ],
-            ),
-          ],
-        );
-
-        final rightColumn = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _ImportFormGroup(
+            );
+            final logisticsGroup = _ImportFormGroup(
               title: 'Lojistik',
               icon: Icons.local_shipping_outlined,
               children: [
@@ -133,40 +211,43 @@ class ImportRecordForm extends StatelessWidget {
                 PanelAmountField(
                   controller: logisticsCostController,
                   label: 'Lojistik masrafı',
+                  onChanged: (_) => onTotalsChanged(),
                 ),
                 PanelAmountField(
                   controller: customsCostController,
                   label: 'Gümrük masrafı',
+                  onChanged: (_) => onTotalsChanged(),
                 ),
                 PanelAmountField(
                   controller: insuranceCostController,
                   label: 'Sigorta masrafı',
+                  onChanged: (_) => onTotalsChanged(),
                 ),
               ],
-            ),
-          ],
-        );
+            );
 
-        if (isCompact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              leftColumn,
-              const SizedBox(height: AppUiTokens.space16),
-              rightColumn,
-            ],
-          );
-        }
+            if (isCompact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  notesGroup,
+                  const SizedBox(height: AppUiTokens.space16),
+                  logisticsGroup,
+                ],
+              );
+            }
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: leftColumn),
-            const SizedBox(width: AppUiTokens.space24),
-            Expanded(child: rightColumn),
-          ],
-        );
-      },
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: notesGroup),
+                const SizedBox(width: AppUiTokens.space24),
+                Expanded(child: logisticsGroup),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -290,6 +371,55 @@ class ImportRecordFormActions extends StatelessWidget {
             child: const Text(
               'Vazgeç',
               style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReadOnlyAmountField extends StatelessWidget {
+  const _ReadOnlyAmountField({
+    required this.label,
+    required this.value,
+    this.helper,
+  });
+
+  final String label;
+  final String value;
+  final String? helper;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppUiTokens.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        if (helper != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helper!,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppUiTokens.textMuted,
+                ),
+          ),
+        ],
+        const SizedBox(height: AppUiTokens.space8),
+        InputDecorator(
+          decoration: PanelInputDecoration.build(hintText: '0,00'),
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: AppUiTokens.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
